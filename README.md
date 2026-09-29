@@ -15,7 +15,7 @@ This repository contains the OAH Pydantic models and reusable ingestion componen
 From this repository directory:
 
 ```powershell
-python -m pip install -e ./oah-pydantic-models -e ./oah-ingestion
+python -m pip install -r requirements.txt
 python -m unittest discover -s oah-ingestion/tests -v
 python oah-pydantic-models/examples/build_examples.py
 ```

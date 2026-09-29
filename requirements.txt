@@ -1,0 +1,4 @@
+# Install the project packages and their declared dependencies with:
+# python -m pip install -r requirements.txt
+-e ./oah-pydantic-models
+-e ./oah-ingestion
