@@ -26,7 +26,7 @@ from oah_models import (  # noqa: E402
 )
 from oah_models.common import CodeableConcept, Coding, Gps, Identifier, Quantity, Reference
 from oah_models.health_measure import HealthMeasureSite
-from oah_models.indicators import BiologicalIndicators
+from oah_models.indicator import BiologicalIndicators
 from oah_models.sample import SampleSite
 from oah_models.structured_indicator import StructuredIndicatorComponent
 
