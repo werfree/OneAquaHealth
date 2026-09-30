@@ -6,14 +6,14 @@ that IG and what still needs to be built on top of them.
 """
 
 from .dataset import DataSetOah, DataSetRecord
-from .health_indicators import (
+from .health_indicator import (
     CausesOfDeathGroup,
     DiseasePrevalenceGroup,
     HealthIndicatorsOah,
     HospitalizationGroup,
 )
 from .health_measure import HealthMeasureOah, HealthMeasureSite
-from .indicators import (
+from .indicator import (
     BioRiskIndicators,
     BiologicalIndicators,
     HydromorphologicalIndicators,
