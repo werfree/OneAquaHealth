@@ -35,9 +35,9 @@ from ..common import Period as OahPeriod
 from ..common import Quantity as OahQuantity
 from ..common import Reference as OahReference
 from ..dataset import DataSetOah
-from ..health_indicators import HealthIndicatorsOah
+from ..health_indicator import HealthIndicatorsOah
 from ..health_measure import HealthMeasureOah
-from ..indicators import IndicatorsOah
+from ..indicator import IndicatorsOah
 from ..sample import SampleOah
 from ..simple_indicator import SimpleIndicatorOah
 from ..structured_indicator import StructuredIndicatorOah
@@ -63,6 +63,8 @@ from .resources import (
     FHIRQuantity,
     FHIRReference,
     FHIRRelatedArtifact,
+    Group,
+    GroupCharacteristic,
     Library,
     Location,
     Observation,
@@ -167,11 +169,26 @@ def sample_to_fhir(sample: SampleOah) -> Tuple[Location, Specimen]:
         ],
     )
 
+    # `Specimen.collection.collector` is Reference(Practitioner|PractitionerRole)
+    # in FHIR R4, but `Sample.performer` is Reference(PractitionerRole|Organization)
+    # -- so an Organization performer, which the ConceptMap permits, is NOT a
+    # valid collector. Taking `performer[0]` unconditionally produces a bundle a
+    # conforming server rejects (HAPI-0931). Pick the first performer that is
+    # actually allowed here and leave `collector` unset when there is none.
+    collector = next(
+        (
+            _fhir_reference(p)
+            for p in sample.performer
+            if (p.reference or "").split("/")[0] in {"Practitioner", "PractitionerRole"}
+        ),
+        None,
+    )
+
     specimen = Specimen(
         id=f"{location_id}-specimen",
         subject=FHIRReference(reference=f"Location/{location_id}"),
         collection=SpecimenCollection(
-            collector=_fhir_reference(sample.performer[0]) if sample.performer else None,
+            collector=collector,
             collectedDateTime=sample.dateOfSampling.isoformat(),
         ),
     )
@@ -481,3 +498,73 @@ def dataset_to_fhir(dataset: DataSetOah) -> Library:
             FHIRExtension(url=LIBRARY_NUMBER_OF_RECORDS_EXTENSION_URL, valueInteger=dataset.numberOfRecords)
         )
     return library
+
+
+# ---------------------------------------------------------------------------
+# group-oah.fsh: cohort attributes -> GroupOah. Not one of the 7 ConceptMaps --
+# `HealthMeasureOah.cohort` is already a Reference, so the base mapper set
+# assumes the Group exists. This builds it for pipelines that only have the
+# cohort's attributes (the extension point named in README.md).
+# ---------------------------------------------------------------------------
+
+
+def cohort_to_fhir(
+    group_id: str,
+    *,
+    name: Optional[str] = None,
+    age_range: Optional[str] = None,
+    gender: Optional[str] = None,
+    location_reference: Optional[str] = None,
+) -> "Group":
+    """Materialize the `Group` that `HealthMeasure.cohort` points at.
+
+    `age_range` is accepted in the `"18-64"` form used by the OAH demo feeds and
+    emitted as a FHIR `Range` with UCUM years; a value that isn't two integers
+    separated by a dash is kept verbatim as a CodeableConcept instead.
+    """
+
+    characteristics: List[GroupCharacteristic] = []
+
+    if gender:
+        characteristics.append(
+            GroupCharacteristic(
+                code=FHIRCodeableConcept(coding=[FHIRCoding(system=CODE_SYSTEM_URL, code="sex", display="Sex")]),
+                valueCodeableConcept=FHIRCodeableConcept(text=gender),
+            )
+        )
+
+    if age_range:
+        code = FHIRCodeableConcept(
+            coding=[FHIRCoding(system=CODE_SYSTEM_URL, code="ageRange", display="Age range")]
+        )
+        match = re.fullmatch(r"\s*(\d+)\s*-\s*(\d+)\s*", age_range)
+        if match:
+            low, high = int(match.group(1)), int(match.group(2))
+            characteristics.append(
+                GroupCharacteristic(
+                    code=code,
+                    valueRange={
+                        "low": {"value": low, "unit": "a", "system": "http://unitsofmeasure.org", "code": "a"},
+                        "high": {"value": high, "unit": "a", "system": "http://unitsofmeasure.org", "code": "a"},
+                    },
+                )
+            )
+        else:
+            characteristics.append(GroupCharacteristic(code=code, valueCodeableConcept=FHIRCodeableConcept(text=age_range)))
+
+    if location_reference:
+        characteristics.append(
+            GroupCharacteristic(
+                code=FHIRCodeableConcept(
+                    coding=[FHIRCoding(system=CODE_SYSTEM_URL, code="location", display="Location")]
+                ),
+                valueReference=FHIRReference(reference=location_reference),
+            )
+        )
+
+    return Group(
+        id=_slugify(group_id),
+        identifier=[FHIRIdentifier(value=group_id)],
+        name=name or group_id,
+        characteristic=characteristics,
+    )
