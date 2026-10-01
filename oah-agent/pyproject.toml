@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "oah-agent"
+version = "0.1.0"
+description = "Natural-language One Health assistant over the OAH FHIR repository"
+requires-python = ">=3.9"
+dependencies = [
+    "oah-pydantic-models",
+    "oah-ingestion",
+    "openai>=1.40",
+    "python-dotenv>=1,<2",
+]
+
+[project.scripts]
+oah-ask = "oah_agent.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

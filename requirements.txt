@@ -3,3 +3,4 @@
 -e ./oah-pydantic-models
 -e ./oah-ingestion
 -e ./oah-demo-publishers
+-e ./oah-agent
