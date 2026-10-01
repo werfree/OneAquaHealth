@@ -5,9 +5,9 @@ This repository contains the OAH Pydantic models and reusable ingestion componen
 ## Layout
 
 - `oah-pydantic-models/` contains the OAH logical data models based on the OAH FHIR Implementation Guide.
-- `oah-ingestion/` contains health-data and sensor validation, normalization, and RabbitMQ publishing code.
-- `connectors/mqtt_sensor.py` subscribes to the sensor MQTT topic and forwards validated events to RabbitMQ.
-- The local FastAPI/CSV data-entry adapter and mock uploads remain in the parent hackathon workspace; they are not part of this repository.
+- `oah-ingestion/` validates the shared event envelope and all three stream payloads, consuming sensor telemetry from MQTT and citizen surveys from RabbitMQ while accepting public-health events over HTTP.
+- `oah-demo-publishers/` is a separate runnable package that publishes demo samples over each of those channels.
+- `oah-ingestion/src/oah_ingestion/app.py` is the single application entry point. It starts the MQTT sensor listener, RabbitMQ citizen survey consumer, and HTTP ingestion endpoint.
 - `docker-compose.yml` starts the local RabbitMQ broker used by the ingestion components.
 
 ## Install and test
@@ -20,6 +20,23 @@ python -m unittest discover -s oah-ingestion/tests -v
 python oah-pydantic-models/examples/build_examples.py
 ```
 
-Start RabbitMQ with `docker compose up -d rabbitmq`, then start the sensor listener from this directory with `python connectors/mqtt_sensor.py`. It subscribes to `oneaquahealth/sensors/+/+` at `broker.hivemq.com` by default. Configure `MQTT_HOST`, `MQTT_PORT`, `MQTT_TOPIC`, `MQTT_USERNAME`, and `MQTT_PASSWORD` to use another broker. Accepted sensor events are published persistently to `sensor.telemetry`; the MQTT QoS 1 packet is acknowledged only after RabbitMQ confirms the publish.
+Start RabbitMQ, then run the single ingestion application:
 
-The health publisher sends persistent batches to `health.measures`. Both publishers read `RABBITMQ_HOST`, `RABBITMQ_PORT`, `RABBITMQ_VHOST`, `RABBITMQ_USER`, and `RABBITMQ_PASSWORD`; defaults match the compose file. A consumer that writes queued events to the FHIR server remains a separate next stage.
+```powershell
+docker compose up -d rabbitmq
+python -m oah_ingestion.app
+```
+
+Wait for the app log `Connected; subscribed to oneaquahealth/sensors/+/+` and `Consuming citizen surveys from ingestion.citizen_surveys` before starting the publishers.
+
+The app loads environment variables from `.env`; `APP_HOST` defaults to `0.0.0.0` and `APP_PORT` defaults to `8000`. It starts listening for sensor telemetry on `oneaquahealth/sensors/+/+` at `broker.hivemq.com` by default and consumes citizen surveys from the durable RabbitMQ queue `ingestion.citizen_surveys`. Configure `MQTT_HOST`, `MQTT_PORT`, `MQTT_TOPIC`, `MQTT_USERNAME`, and `MQTT_PASSWORD` to use another MQTT broker. Configure `RABBITMQ_HOST`, `RABBITMQ_PORT`, `RABBITMQ_VHOST`, `RABBITMQ_USER`, and `RABBITMQ_PASSWORD` for RabbitMQ.
+
+The HTTP `POST /ingest` endpoint accepts complete envelopes, including `PUBLIC_HEALTH`. The gateway validates the stream-specific payload, generates a fresh `event_id` and `received_at`, and prints the normalized generic envelope as JSON. MQTT sensor events and RabbitMQ citizen survey messages are normalized and printed in the same format. No downstream service is called yet.
+
+Install and run the separate publisher package to send one sample through each input channel:
+
+```powershell
+python -m oah_demo_publishers
+```
+
+The publisher package sends IoT telemetry to MQTT, citizen survey JSON to `ingestion.citizen_surveys`, and public-health JSON to the ingestion API. It uses broker settings from `.env`; the MQTT demo uses public HiveMQ by default, so configure a broker you control for an isolated demo. The normalized JSON printed by the ingestion app is the current downstream handoff output; transformation and FHIR upload are not performed.
