@@ -32,14 +32,19 @@ LIBRARY_SIZE_EXTENSION_URL = f"{OAH_CANONICAL_BASE}/StructureDefinition/library-
 LIBRARY_NUMBER_OF_RECORDS_EXTENSION_URL = f"{OAH_CANONICAL_BASE}/StructureDefinition/library-numberOfRecords"
 
 
-class FHIRMeta(BaseModel):
-    profile: List[str] = Field(default_factory=list)
-
-
 class FHIRCoding(BaseModel):
     system: Optional[str] = None
     code: Optional[str] = None
     display: Optional[str] = None
+
+
+class FHIRMeta(BaseModel):
+    profile: List[str] = Field(default_factory=list)
+    # `meta.tag` scopes a dataset on a shared server. The public HAPI sandbox
+    # already holds OAH-profiled resources from other parties, so searching by
+    # `_profile` alone returns their data mixed with ours; `_tag` makes a query
+    # deterministic. See `oah_models.fhir.bundle.tag_resources`.
+    tag: List["FHIRCoding"] = Field(default_factory=list)
 
 
 class FHIRCodeableConcept(BaseModel):
@@ -157,6 +162,9 @@ class Observation(BaseModel):
     subject: Optional[FHIRReference] = None
     focus: List[FHIRReference] = Field(default_factory=list)
     specimen: Optional[FHIRReference] = None
+    # R4 Reference(Device|DeviceMetric). `performer` does NOT accept a Device,
+    # so sensor provenance belongs here, not there.
+    device: Optional[FHIRReference] = None
     effectiveDateTime: Optional[str] = None
     effectivePeriod: Optional[FHIRPeriod] = None
     performer: List[FHIRReference] = Field(default_factory=list)
@@ -188,3 +196,85 @@ class Library(BaseModel):
     approvalDate: Optional[str] = None
     lastReviewDate: Optional[str] = None
     content: List[FHIRAttachment] = Field(default_factory=list)
+
+
+GROUP_PROFILE = f"{OAH_CANONICAL_BASE}/StructureDefinition/group-oah"
+
+
+class GroupCharacteristic(BaseModel):
+    """Per `group-oah.fsh`'s `characteristic` slices (sex, ageRange, location)."""
+
+    code: FHIRCodeableConcept
+    valueCodeableConcept: Optional[FHIRCodeableConcept] = None
+    valueRange: Optional[dict] = None
+    valueReference: Optional[FHIRReference] = None
+    exclude: bool = False
+
+
+class Group(BaseModel):
+    """Per `group-oah.fsh` -- the demographic cohort an health measure describes.
+
+    Built by `cohort_to_fhir`. The base mapper set deliberately does not
+    construct one (HealthMeasure.cohort is already a Reference); this exists so
+    an ingestion pipeline that only has cohort *attributes* can materialize the
+    Group those references point at.
+    """
+
+    resourceType: Literal["Group"] = "Group"
+    id: Optional[str] = None
+    meta: FHIRMeta = Field(default_factory=lambda: FHIRMeta(profile=[GROUP_PROFILE]))
+    identifier: List[FHIRIdentifier] = Field(default_factory=list)
+    active: bool = True
+    type: Literal["person"] = "person"
+    actual: bool = False
+    name: Optional[str] = None
+    characteristic: List[GroupCharacteristic] = Field(default_factory=list)
+
+
+# --- Provenance resources -------------------------------------------------
+# Observations reference the sensor, volunteer, or agency that produced them.
+# A FHIR server that enforces referential integrity (HAPI does) rejects a
+# bundle whose references dangle, so the pipeline must materialize these
+# alongside the Observations rather than assuming they already exist.
+
+
+class Device(BaseModel):
+    """The IoT sensor behind an `Observation.device` reference."""
+
+    resourceType: Literal["Device"] = "Device"
+    id: Optional[str] = None
+    meta: FHIRMeta = Field(default_factory=FHIRMeta)
+    identifier: List[FHIRIdentifier] = Field(default_factory=list)
+    status: str = "active"
+    deviceName: List[dict] = Field(default_factory=list)
+    type: Optional[FHIRCodeableConcept] = None
+    location: Optional[FHIRReference] = None
+
+
+class HumanName(BaseModel):
+    text: Optional[str] = None
+
+
+class Practitioner(BaseModel):
+    """The citizen-science volunteer behind an `Observation.performer` reference."""
+
+    resourceType: Literal["Practitioner"] = "Practitioner"
+    id: Optional[str] = None
+    meta: FHIRMeta = Field(default_factory=FHIRMeta)
+    identifier: List[FHIRIdentifier] = Field(default_factory=list)
+    active: bool = True
+    name: List[HumanName] = Field(default_factory=list)
+
+
+class Organization(BaseModel):
+    """The agency or institute behind an `Observation.performer` reference."""
+
+    resourceType: Literal["Organization"] = "Organization"
+    id: Optional[str] = None
+    meta: FHIRMeta = Field(default_factory=FHIRMeta)
+    identifier: List[FHIRIdentifier] = Field(default_factory=list)
+    active: bool = True
+    name: Optional[str] = None
+
+
+OAH_DATASET_TAG_SYSTEM = f"{OAH_CANONICAL_BASE}/CodeSystem/dataset-tag"
