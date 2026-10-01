@@ -150,11 +150,3 @@ def envelope_as_message(envelope: IngestionEnvelope) -> dict:
     message["event_id"] = str(uuid4())
     message["received_at"] = datetime.now(timezone.utc).isoformat()
     return message
-
-
-def print_generic_event(event: dict) -> None:
-    """Print the normalized envelope as the current downstream handoff output."""
-    import json
-
-    print("\n--- Normalized ingestion event ---", flush=True)
-    print(json.dumps(event, indent=2, ensure_ascii=False), flush=True)

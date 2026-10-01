@@ -6,7 +6,8 @@ import ssl
 
 import paho.mqtt.client as mqtt
 
-from .envelope import IoTEnvelope, envelope_as_message, print_generic_event
+from .envelope import IoTEnvelope, envelope_as_message
+from .pipeline import process
 from .sensor import SensorIngestionService
 
 logger = logging.getLogger("OAH_MQTT_Consumer")
@@ -57,7 +58,7 @@ def create_mqtt_client() -> mqtt.Client:
             )
             event = envelope_as_message(envelope)
             measurement_count = len(event["payload"]["measurements"])
-            print_generic_event(event)
+            process(envelope, event)
             if message.qos > 0:
                 client.ack(message.mid, message.qos)
             logger.info("Normalized sensor event %s (%d measurements)", event["event_id"], measurement_count)

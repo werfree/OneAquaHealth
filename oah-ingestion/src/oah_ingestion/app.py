@@ -8,7 +8,8 @@ from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 from fastapi import FastAPI
 
-from .envelope import IngestionEnvelope, envelope_as_message, print_generic_event
+from .envelope import IngestionEnvelope, envelope_as_message
+from .pipeline import print_generic_event, process
 from .mqtt_worker import create_mqtt_client, mqtt_broker_address
 from .rabbitmq_worker import consume_citizen_surveys
 
@@ -28,7 +29,7 @@ async def lifespan(app: FastAPI):
     stop_event = threading.Event()
     rabbit_thread = threading.Thread(
         target=consume_citizen_surveys,
-        args=(stop_event, print_generic_event),
+        args=(stop_event, process),
         name="citizen-survey-consumer",
         daemon=True,
     )
@@ -56,12 +57,13 @@ def health_check():
 def ingest_event(envelope: IngestionEnvelope):
     """Validate, normalize and print one event for the downstream handoff."""
     message = envelope_as_message(envelope)
-    print_generic_event(message)
+    result = process(envelope, message)
     logger.info("Normalized API event %s (%s)", message["event_id"], message["source_type"])
     return {
         "status": "ACCEPTED",
         "event_id": str(message["event_id"]),
         "source_type": message["source_type"],
+        **result,
     }
 
 
