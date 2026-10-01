@@ -134,8 +134,17 @@ class Conversation:
                     print(f"  -> {name}({call.function.arguments})")
                 result = _run_tool(name, call.function.arguments)
                 self.tool_results.append(result)
+                # Some tools issue several queries and report `fhir_urls`;
+                # recording only `fhir_url` left the cross-domain join -- the
+                # step that queries most -- looking like it touched nothing.
+                urls = result.get("fhir_urls") or ([result["fhir_url"]] if result.get("fhir_url") else [])
                 trace.append(
-                    {"tool": name, "arguments": call.function.arguments, "fhir_url": result.get("fhir_url")}
+                    {
+                        "tool": name,
+                        "arguments": call.function.arguments,
+                        "fhir_url": result.get("fhir_url"),
+                        "fhir_urls": [u for u in urls if u],
+                    }
                 )
                 self.messages.append(
                     {"role": "tool", "tool_call_id": call.id, "content": json.dumps(result, default=str)[:12000]}

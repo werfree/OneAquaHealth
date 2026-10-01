@@ -100,6 +100,7 @@
   .step-i{flex:none;width:21px;height:21px;border-radius:6px;background:var(--blue-wash);color:var(--blue);
           display:grid;place-items:center;font-family:var(--mono);font-size:11px}
   .step-name{font-family:var(--mono);font-size:13px;flex:1;min-width:0}
+  .step-name.reason{font-family:var(--text);font-size:14.5px;font-weight:500;letter-spacing:-.01em}
   .step-note{font-size:12.5px;color:var(--label-3);white-space:nowrap}
   .chev{flex:none;width:12px;color:var(--label-3);transition:transform .22s cubic-bezier(.3,0,.2,1)}
   .step-btn[aria-expanded="true"] .chev{transform:rotate(90deg)}
@@ -220,7 +221,6 @@
         <button type="button" data-depth="reasoning" aria-pressed="false">Reasoning</button>
         <button type="button" data-depth="data" aria-pressed="false">Data</button>
       </div>
-      <button type="button" class="btn" id="autorun">▶ Auto demo</button>
     </div>
   </div>
 </div>
@@ -485,26 +485,60 @@ async function sendQuestion() {
     return;
   }
 
-  const WHY = {
-    list_sites: "It did not yet know which stations exist, so it enumerated them before narrowing.",
-    get_thresholds: "A threshold is a number too. Before calling anything elevated it fetches a real sourced value — never one from its own memory.",
-    get_site_profile: "The question spans two domains, so it used the cross-domain join rather than separate searches.",
-    search_observations: "A targeted search against one OAH profile.",
-    get_cohort: "Resolved the Group a health measure points at, to describe who is affected."
+  // Explain the reasoning, not the call stack. A list of five function calls --
+  // three of them the same function -- describes mechanism, not thinking. Group
+  // the trace by what was actually established, and keep the queries themselves
+  // for the Data layer, where they serve auditing rather than narration.
+  const STEP = {
+    list_sites: g => ({
+      label: `Surveyed the dataset`,
+      detail: `Established which monitoring stations exist before narrowing to any one of them.`
+    }),
+    get_thresholds: g => ({
+      label: `Loaded the screening thresholds`,
+      detail: `Nitrate, pH and zinc, each with its regulatory basis. Fetched rather than recalled — a "safe level" from the model's own memory is exactly the kind of figure that should never reach a health officer.`
+    }),
+    get_site_profile: g => ({
+      label: g.n > 1 ? `Examined all ${g.n} stations` : `Examined one station in full`,
+      detail: `Pulled stream chemistry and cohort health together for each, rather than as separate searches. This is the cross-domain join.`
+    }),
+    search_observations: g => ({
+      label: g.n > 1 ? `Ran ${g.n} targeted searches` : `Ran a targeted search`,
+      detail: `Filtered Observations by OAH profile, indicator code and station.`
+    }),
+    get_cohort: g => ({
+      label: `Resolved the affected cohort`,
+      detail: `Looked up the demographic Group a health measure points at — age range, sex, location.`
+    })
   };
-  $("#trace").innerHTML = d.trace.map((t, i) => `
+
+  // Collapse repeats, preserving first-seen order.
+  const groups = [];
+  d.trace.forEach(t => {
+    const found = groups.find(g => g.tool === t.tool);
+    const us = (t.fhir_urls && t.fhir_urls.length) ? t.fhir_urls : (t.fhir_url ? [t.fhir_url] : []);
+    if (found) { found.n++; found.urls.push(...us); found.args.push(t.arguments); }
+    else groups.push({tool: t.tool, n: 1, urls: [...us], args: [t.arguments]});
+  });
+
+  $("#trace").innerHTML = groups.map((g, i) => {
+    const made = (STEP[g.tool] || (x => ({label: x.tool, detail: "Tool call."})))(g);
+    const urls = [...new Set(g.urls.filter(Boolean))];
+    return `
     <div class="step">
       <button type="button" class="step-btn" aria-expanded="false" data-t="t${i}">
-        <span class="step-i">${i + 1}</span><span class="step-name">${esc(t.tool)}</span>
-        <span class="step-note">${t.fhir_url ? "FHIR query" : "local"}</span>
+        <span class="step-i">${i + 1}</span>
+        <span class="step-name reason">${esc(made.label)}</span>
+        <span class="step-note">${urls.length ? urls.length + " quer" + (urls.length > 1 ? "ies" : "y") : "local"}</span>
         <svg class="chev" viewBox="0 0 8 13" fill="none"><path d="M1.5 1.5L6.5 6.5L1.5 11.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       </button>
       <div class="step-body" id="t${i}">
-        <div class="kv"><div class="kv-k">Why</div><div class="kv-v prose">${esc(WHY[t.tool] || "Tool call.")}</div></div>
-        <div class="kv l-data"><div class="kv-k">Arguments</div><div class="kv-v">${esc(t.arguments || "{}")}</div></div>
-        ${t.fhir_url ? `<div class="kv l-data"><div class="kv-k">FHIR query</div><div class="kv-v"><a href="${esc(t.fhir_url)}" target="_blank" rel="noopener">${esc(decodeURIComponent(t.fhir_url))}</a></div></div>` : ""}
+        <div class="kv"><div class="kv-v prose">${esc(made.detail)}</div></div>
+        ${urls.length ? `<div class="kv l-data"><div class="kv-k">${urls.length > 1 ? "Queries run" : "Query run"}</div>
+          <div class="kv-v">${urls.map(u => `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(decodeURIComponent(u))}</a>`).join("<br><br>")}</div></div>` : ""}
       </div>
-    </div>`).join("");
+    </div>`;
+  }).join("");
   $$("[data-t]").forEach(b => b.onclick = () => {
     const body = $("#" + b.dataset.t), open = b.getAttribute("aria-expanded") === "true";
     b.setAttribute("aria-expanded", String(!open));
@@ -603,11 +637,11 @@ const script = [
   async () => { say("Ask it a question in plain English.");
                 await type($("#q"), "Which station has both a chemical exceedance and elevated health risk?");
                 await click($("#send")); },
-  async () => { say("It picks typed tools — it never writes a FHIR URL itself.");
+  async () => { say("It reasons in steps — and never writes a FHIR query itself.");
                 await click($('.seg button[data-depth="reasoning"]'));
                 for (let i = 0; i < 40 && $("#send").disabled; i++) await sleep(500);
                 await sleep(1200); },
-  async () => { const b = $("[data-t]"); if (b) { say("Every step explains why it ran."); await click(b); await sleep(2400); } },
+  async () => { const b = $$("[data-t]")[2] || $("[data-t]"); if (b) { say("Each step says what it established, and why."); await click(b); await sleep(2600); } },
   async () => { const g = $("#gchip"); if (g) { say("Every figure is checked against the retrieved data — in Python.");
                 await click(g); await sleep(3000); } },
   async () => { say("The cross-domain join: chemistry beside the cohort living there.");
@@ -617,12 +651,10 @@ const script = [
 ];
 
 async function autorun() {
-  const btn = $("#autorun");
   if (document.body.classList.contains("autorun")) { abort = true; return stopRun(); }
   abort = false;
   document.body.classList.add("autorun");
   cur.classList.add("on");
-  btn.textContent = "■ Stop";
   cur.style.transform = `translate(${at.x}px, ${at.y}px)`;
   for (const step of script) { if (abort) break; await step(); }
   stopRun();
@@ -630,10 +662,13 @@ async function autorun() {
 function stopRun() {
   document.body.classList.remove("autorun");
   cur.classList.remove("on"); say("");
-  $("#autorun").textContent = "▶ Auto demo";
 }
-$("#autorun").onclick = autorun;
-addEventListener("keydown", e => { if (e.key === "Escape") { abort = true; stopRun(); } });
+// No visible control: a button labelled "Auto demo" makes a genuine run read as
+// staged. Start it with ?autorun=1 or Shift+D; Escape stops it.
+addEventListener("keydown", e => {
+  if (e.key === "Escape") { abort = true; stopRun(); }
+  if (e.shiftKey && (e.key === "D" || e.key === "d") && e.target.tagName !== "INPUT") autorun();
+});
 
 boot();
 if (new URLSearchParams(location.search).has("autorun")) setTimeout(autorun, 1400);

@@ -34,7 +34,7 @@ def _report(result: dict) -> None:
         print(f"\n[{format_verdict(verdict)}]", file=sys.stderr)
 
     trace = result.get("trace") or []
-    urls = [step["fhir_url"] for step in trace if step.get("fhir_url")]
+    urls = [u for step in trace for u in (step.get("fhir_urls") or ([step["fhir_url"]] if step.get("fhir_url") else []))]
     if urls:
         print("\nSource queries:", file=sys.stderr)
         for url in dict.fromkeys(urls):
