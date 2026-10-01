@@ -1,7 +1,5 @@
-"""Validation and RabbitMQ transport for MQTT sensor telemetry."""
+"""Validation and normalization helpers for raw MQTT sensor telemetry."""
 
-import json
-import os
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
@@ -10,7 +8,6 @@ from pydantic import BaseModel, Field, field_validator
 
 
 VALID_PILOT_CITIES = {"coimbra", "oslo", "benevento", "ghent", "toulouse"}
-SENSOR_QUEUE = "sensor.telemetry"
 
 
 class QuantitativeMeasurement(BaseModel):
@@ -69,7 +66,7 @@ class SensorIngestionService:
                 raise ValueError("packet contains no measurements within accepted ranges")
             event = {
                 "event_id": str(uuid.uuid4()),
-                "source_type": "MQTT_IOT_TELEMETRY",
+                "source_type": "IOT_TELEMETRY",
                 "topic": topic,
                 "device_id": payload.device_id,
                 "city": payload.city,
@@ -81,44 +78,3 @@ class SensorIngestionService:
             return {"status": "ACCEPTED", "event": event}
         except Exception as exc:
             return {"status": "REJECTED", "reason": str(exc)}
-
-
-def publish_sensor_event(event: Dict[str, Any]) -> None:
-    """Publish one validated telemetry event durably and require broker confirmation."""
-    try:
-        import pika
-    except ImportError as exc:
-        raise RuntimeError("RabbitMQ support requires pika; install the project requirements") from exc
-
-    credentials = pika.PlainCredentials(
-        os.getenv("RABBITMQ_USER", "oah"),
-        os.getenv("RABBITMQ_PASSWORD", "oah-local-dev"),
-    )
-    parameters = pika.ConnectionParameters(
-        host=os.getenv("RABBITMQ_HOST", "localhost"),
-        port=int(os.getenv("RABBITMQ_PORT", "5672")),
-        virtual_host=os.getenv("RABBITMQ_VHOST", "/"),
-        credentials=credentials,
-        heartbeat=30,
-        blocked_connection_timeout=30,
-    )
-    connection = pika.BlockingConnection(parameters)
-    try:
-        channel = connection.channel()
-        channel.queue_declare(queue=SENSOR_QUEUE, durable=True)
-        channel.confirm_delivery()
-        confirmed = channel.basic_publish(
-            exchange="",
-            routing_key=SENSOR_QUEUE,
-            body=json.dumps(event, separators=(",", ":")).encode("utf-8"),
-            properties=pika.BasicProperties(
-                content_type="application/json",
-                delivery_mode=pika.DeliveryMode.Persistent,
-                message_id=event["event_id"],
-            ),
-            mandatory=True,
-        )
-        if not confirmed:
-            raise RuntimeError("RabbitMQ did not confirm the sensor event")
-    finally:
-        connection.close()

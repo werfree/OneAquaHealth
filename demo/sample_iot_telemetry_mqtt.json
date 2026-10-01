@@ -1,0 +1,11 @@
+{
+  "device_id": "ESP32-DEMO-COIMBRA-01",
+  "city": "coimbra",
+  "site_id": "site-c1-mondego",
+  "timestamp": "2026-09-30T10:30:00Z",
+  "measurements": [
+    {"parameter": "ph", "unit": "pH", "value": 7.3},
+    {"parameter": "nitrate", "unit": "mg/L", "value": 12.8},
+    {"parameter": "zinc_dissolved", "unit": "mg/L", "value": 0.04}
+  ]
+}

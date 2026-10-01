@@ -2,3 +2,4 @@
 # python -m pip install -r requirements.txt
 -e ./oah-pydantic-models
 -e ./oah-ingestion
+-e ./oah-demo-publishers
