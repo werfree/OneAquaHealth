@@ -6,7 +6,7 @@ import threading
 from contextlib import asynccontextmanager
 
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 
 from .envelope import IngestionEnvelope, envelope_as_message
 from .pipeline import print_generic_event, process
@@ -48,6 +48,42 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="OneAquaHealth Ingestion", lifespan=lifespan)
 
 
+@app.get("/")
+def index():
+    """What this gateway is and where its data goes.
+
+    Without this, opening the app in a browser answers 404, which reads as a
+    broken service rather than an API with no root resource.
+    """
+    from .fhir_client import base_url, upload_enabled
+    from .mqtt_worker import mqtt_broker_address
+    from .pipeline import dataset_tag
+    from .rabbitmq import CITIZEN_SURVEY_QUEUE
+
+    mqtt_host, mqtt_port = mqtt_broker_address()
+    return {
+        "service": "OneAquaHealth ingestion gateway",
+        "channels": {
+            "mqtt": f"{mqtt_host}:{mqtt_port} -> {os.getenv('MQTT_TOPIC', 'oneaquahealth/sensors/+/+')}",
+            "rabbitmq": f"{os.getenv('RABBITMQ_HOST', 'localhost')} -> {CITIZEN_SURVEY_QUEUE}",
+            "http": "POST /ingest",
+        },
+        "fhir": {
+            "server": base_url(),
+            "upload_enabled": upload_enabled(),
+            "dataset_tag": dataset_tag(),
+        },
+        "endpoints": ["GET /", "GET /health", "POST /ingest", "GET /docs"],
+    }
+
+
+@app.get("/favicon.ico", include_in_schema=False)
+def favicon():
+    # Browsers request this on every visit; answering 404 clutters the log a
+    # demo is being recorded from.
+    return Response(status_code=204)
+
+
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
@@ -71,6 +107,10 @@ def main():
     import uvicorn
 
     logging.basicConfig(level=os.getenv("LOG_LEVEL", "INFO"), format="%(asctime)s [%(levelname)s] %(message)s")
+    # pika logs its whole connection handshake at INFO -- socket, transport,
+    # AMQPConnector, workflow -- which buries the lines that confirm the app is
+    # ready. Raise LOG_LEVEL_PIKA to debug broker problems.
+    logging.getLogger("pika").setLevel(os.getenv("LOG_LEVEL_PIKA", "WARNING").upper())
     uvicorn.run(
         "oah_ingestion.app:app",
         host=os.getenv("APP_HOST", "0.0.0.0"),
