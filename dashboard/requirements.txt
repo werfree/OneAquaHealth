@@ -1,0 +1,2 @@
+# Compatibility entry point. The root pyproject is the canonical dependency source.
+-e ..[dev]

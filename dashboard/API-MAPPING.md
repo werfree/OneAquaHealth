@@ -1,0 +1,37 @@
+# Dashboard API and capability mapping
+
+The browser uses one service layer in `static/js/api.js`. Mock and live adapters return dashboard-facing shapes so views do not import fixtures or fetch scattered endpoints.
+
+## Existing OneAquaHealth routes
+
+| Service method | Existing route | Classification | Error behavior |
+|---|---|---|---|
+| health | `GET /health` | Existing | Network/5xx shown as unavailable |
+| gateway info | `GET /api/info` | Existing | Network/5xx shown as unavailable |
+| overview | `GET /api/overview` | Existing, may require `oah-agent` and FHIR | 501/502/503 shown as unavailable; no mock fallback |
+| run supplied sample | `POST /api/ingest-demo/{key}` | Existing, request-scoped | Validation and FHIR outcomes preserved |
+| public ingress | `POST /ingest` | Existing; not called by this dashboard | A `202 ACCEPTED` is not treated as persisted success |
+| assistant | `POST /api/ask` with `{question}` | Existing optional endpoint | 501/502/503 shown as unavailable; no credentials in browser code |
+
+The dashboard server exposes a narrow same-origin proxy under `/api/live/*`. Set `OAH_LIVE_BASE_URL` and open `/?mode=live`. Only allow-listed routes are proxied.
+
+`GET /api/config` is a public, non-sensitive dashboard configuration route. It exposes only the supported theme catalogue and the validated `DASHBOARD_DEFAULT_THEME`; environment values such as service URLs and credentials are not returned.
+
+## Mock-backed proposed routes
+
+| Method and route | Purpose | Permission |
+|---|---|---|
+| `GET /api/mock/session` | Persona policy and capability flags | Any demo persona |
+| `GET /api/mock/summary` | Scoped measures and station comparison | `dashboard.read` |
+| `GET /api/mock/sites/{id}` | Station observations and findings | `dashboard.read` + site scope |
+| `GET /api/mock/evidence/{id}` | Evidence details | `evidence.read` + site scope |
+| `GET /api/mock/graph?siteId=` | Direct-reference relationship graph | `graph.read` + site scope |
+| `POST /api/mock/assistant` | Deterministic evidence-linked sample answers | `assistant.ask` + site scope |
+| `GET /api/mock/runs[/{id}]` | Stateful run history and stage detail | `ingestion.read` + site scope |
+| `POST /api/mock/runs` | Start repeatable pipeline simulation | `ingestion.create` + site scope |
+| `POST /api/mock/runs/{id}/retry` | Explicit successful retry of a failed demo run | `ingestion.retry` + site scope |
+| `POST /api/mock/reset` | Restore seed runs and reports | `ingestion.create` |
+| `GET/POST /api/mock/reports` | List or request a snapshot briefing | Viewer published scope / `report.create` |
+| `GET /api/mock/reports/{id}/download/{html|json}` | Authorized real file bytes | Published viewer or `report.download` |
+
+These endpoints are functional prototype contracts. Production work still requires durable job/report storage, backend identity and authorization, retained evidence with classification, graph/read APIs, audit events, and protected FHIR service credentials.

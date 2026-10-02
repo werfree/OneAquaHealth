@@ -195,6 +195,27 @@ All optional; every value below is the default.
 | `MQTT_HOST` | `broker.hivemq.com` | **public broker** — use your own for an isolated demo |
 | `RABBITMQ_HOST` | `localhost` | |
 | `APP_HOST` / `APP_PORT` | `0.0.0.0` / `8000` | |
+| `DASHBOARD_PORT` | `8090` | separate evidence dashboard |
+| `OAH_LIVE_BASE_URL` | `http://127.0.0.1:8000` | live-gateway mode for that dashboard |
+| `DASHBOARD_DEFAULT_THEME` | `aqua` | theme selector can override per browser |
+
+---
+
+## Evidence dashboard
+
+The separate evidence dashboard runs alongside the ingestion gateway. Install and start it from
+the repository root:
+
+```bash
+python -m pip install -e ".[dev]"
+oah-dashboard
+```
+
+It opens at <http://localhost:8090> by default and starts in mock mode with sample observations,
+findings, and run/report workflows. Set `OAH_LIVE_BASE_URL` and open
+<http://localhost:8090/?mode=live> to connect it to the live gateway; live mode uses an allow-listed
+same-origin proxy for the existing gateway routes. Durable run history, authorization, evidence
+graph, and report storage remain mock-backed — see `dashboard/API-MAPPING.md` for the boundary.
 
 ---
 
