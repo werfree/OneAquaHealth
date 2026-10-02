@@ -6,12 +6,24 @@ import ssl
 from uuid import uuid4
 
 import paho.mqtt.client as mqtt
+from paho.mqtt.packettypes import PacketTypes
+from paho.mqtt.properties import Properties
 
 from .envelope import IoTEnvelope, envelope_as_message
 from .pipeline import process
 from .sensor import SensorIngestionService
 
 logger = logging.getLogger("OAH_MQTT_Consumer")
+
+
+def mqtt_connect_options() -> dict:
+    """Use a persistent MQTT 5 session so unacknowledged QoS 1 data can return."""
+    properties = Properties(PacketTypes.CONNECT)
+    properties.SessionExpiryInterval = int(os.getenv("MQTT_SESSION_EXPIRY_SECONDS", "86400"))
+    return {
+        "clean_start": False,
+        "properties": properties,
+    }
 
 
 def create_mqtt_client() -> mqtt.Client:
@@ -65,7 +77,14 @@ def create_mqtt_client() -> mqtt.Client:
             )
             event = envelope_as_message(envelope)
             measurement_count = len(event["payload"]["measurements"])
-            process(envelope, event)
+            result = process(envelope, event)
+            if result.get("fhir") in {"UPLOAD_FAILED", "CONVERSION_FAILED"}:
+                logger.error(
+                    "Leaving MQTT event %s unacknowledged because pipeline returned %s",
+                    event["event_id"],
+                    result["fhir"],
+                )
+                return
             if message.qos > 0:
                 client.ack(message.mid, message.qos)
             logger.info("Normalized sensor event %s (%d measurements)", event["event_id"], measurement_count)
