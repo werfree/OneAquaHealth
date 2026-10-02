@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "oneaquahealth-dashboard"
+version = "0.2.0"
+description = "OneAquaHealth evidence dashboard and stateful local mock service"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi>=0.110,<1",
+    "uvicorn>=0.29,<1",
+    "python-dotenv>=1,<2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8,<10",
+    "httpx>=0.27,<1",
+]
+
+[project.scripts]
+oah-dashboard = "dashboard.server:main"
+
+[tool.setuptools.packages.find]
+include = ["dashboard*"]
+
+[tool.setuptools.package-data]
+dashboard = ["data/*.json", "static/*", "static/js/*.js"]
+
+[tool.pytest.ini_options]
+testpaths = ["dashboard/tests"]
+addopts = "-q"
