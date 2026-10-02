@@ -4,6 +4,7 @@ import argparse
 import json
 import os
 from pathlib import Path
+from uuid import uuid4
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
@@ -26,15 +27,16 @@ def publish_sensor_mqtt(sample_dir: Path) -> None:
     host = os.getenv("MQTT_HOST", "broker.hivemq.com")
     port = int(os.getenv("MQTT_PORT", "1883"))
     topic = f"oneaquahealth/sensors/{sample['city']}/{sample['site_id']}"
+    client_id = os.getenv("MQTT_DEMO_CLIENT_ID") or f"OAHDemo-{uuid4().hex[:10]}"
     client = mqtt.Client(
         callback_api_version=mqtt.CallbackAPIVersion.VERSION2,
-        client_id=os.getenv("MQTT_DEMO_CLIENT_ID", "OAH_Demo_Publisher"),
+        client_id=client_id,
         protocol=mqtt.MQTTv5,
     )
 
     def on_connect(client, userdata, flags, reason_code, properties):
         del client, userdata, flags, properties
-        print(f"MQTT: broker connection result: {reason_code}")
+        print(f"MQTT: broker connection result: {reason_code} (client {client_id})")
 
     def on_publish(client, userdata, message_id, reason_code, properties):
         del client, userdata, properties
