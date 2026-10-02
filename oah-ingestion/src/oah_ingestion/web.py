@@ -108,7 +108,7 @@ def ingest_demo(key: str):
 
     observations = [r.model_dump(exclude_none=True) for r in resources if r.resourceType == "Observation"]
     return {
-        "ok": True,
+        "ok": result.get("fhir") not in {"UPLOAD_FAILED", "CONVERSION_FAILED"},
         "sample": {"key": key, "file": filename, "channel": SAMPLES[key][1], "detail": SAMPLES[key][2]},
         "raw": raw,
         "validated": json.loads(envelope.model_dump_json()),

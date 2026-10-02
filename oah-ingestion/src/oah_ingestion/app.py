@@ -6,11 +6,11 @@ import threading
 from contextlib import asynccontextmanager
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, Response
+from fastapi import FastAPI, HTTPException
 
 from .envelope import IngestionEnvelope, envelope_as_message
-from .pipeline import print_generic_event, process
-from .mqtt_worker import create_mqtt_client, mqtt_broker_address
+from .pipeline import process
+from .mqtt_worker import create_mqtt_client, mqtt_broker_address, mqtt_connect_options
 from .rabbitmq_worker import consume_citizen_surveys
 from .officer import router as officer_router
 from .web import router as web_router
@@ -25,7 +25,7 @@ async def lifespan(app: FastAPI):
     client = create_mqtt_client()
     host, port = mqtt_broker_address()
     logger.info("Starting MQTT sensor listener for %s:%d", host, port)
-    client.connect_async(host, port, keepalive=60)
+    client.connect_async(host, port, keepalive=60, **mqtt_connect_options())
     client.loop_start()
     app.state.mqtt_client = client
     stop_event = threading.Event()
@@ -64,6 +64,16 @@ def ingest_event(envelope: IngestionEnvelope):
     """Validate, normalize and print one event for the downstream handoff."""
     message = envelope_as_message(envelope)
     result = process(envelope, message)
+    if result.get("fhir") == "UPLOAD_FAILED":
+        raise HTTPException(
+            status_code=502,
+            detail={"status": "FHIR_UPLOAD_FAILED", "event_id": str(message["event_id"]), **result},
+        )
+    if result.get("fhir") == "CONVERSION_FAILED":
+        raise HTTPException(
+            status_code=500,
+            detail={"status": "FHIR_CONVERSION_FAILED", "event_id": str(message["event_id"]), **result},
+        )
     logger.info("Normalized API event %s (%s)", message["event_id"], message["source_type"])
     return {
         "status": "ACCEPTED",

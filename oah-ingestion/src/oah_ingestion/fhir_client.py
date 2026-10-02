@@ -90,16 +90,19 @@ def upload_bundle(bundle: dict, *, timeout: int = 60) -> Tuple[int, int]:
     url = f"{base_url()}"
     response = _request("POST", url, json.dumps(bundle).encode("utf-8"), timeout=timeout)
 
+    entries = response.get("entry", [])
     succeeded = failed = 0
-    for entry in response.get("entry", []):
+    for entry in entries:
         status = str(entry.get("response", {}).get("status", ""))
         if status.startswith(("200", "201")):
             succeeded += 1
         else:
             failed += 1
             logger.warning("FHIR transaction entry failed: %s", status or entry)
-    if not response.get("entry"):
-        failed = len(bundle.get("entry", []))
+    expected = len(bundle.get("entry", []))
+    if len(entries) != expected:
+        failed += abs(expected - len(entries))
+    if not entries:
         logger.warning("FHIR server returned no transaction entries: %s", str(response)[:400])
     return succeeded, failed
 
