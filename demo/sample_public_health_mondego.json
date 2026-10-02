@@ -1,0 +1,26 @@
+{
+  "event_id": "c1f7b2d8-41a6-4f52-9d33-61b0f2e7a914",
+  "source_type": "PUBLIC_HEALTH",
+  "city": "coimbra",
+  "site_id": "site-c1-mondego",
+  "timestamp": "2026-09-30T00:00:00Z",
+  "received_at": "2026-09-30T08:45:00Z",
+  "payload": {
+    "health_agency": "Coimbra_Public_Health_Observatory",
+    "evaluation_period": "2026-01-01_to_2026-09-27",
+    "cohort": {
+      "group_id": "group-mondego-riverside-residents",
+      "age_range": "18-74",
+      "gender": "all"
+    },
+    "risk_scores": [
+      {"indicator": "fecal_contamination_risk", "score": 0.611, "interpretation": "HIGH"},
+      {"indicator": "pathogen_risk", "score": 0.488, "interpretation": "MODERATE"},
+      {"indicator": "arg_risk", "score": 0.502, "interpretation": "HIGH"},
+      {"indicator": "overall_health_risk_score", "score": 0.534, "interpretation": "HIGH"}
+    ],
+    "chemical_summaries": [
+      {"indicator": "nitrate", "value": 13.8, "unit": "mg NO3-N/L"}
+    ]
+  }
+}

@@ -1,0 +1,677 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mondego Watch — OneAquaHealth</title>
+<style>
+  :root {
+    --bg:#FFFFFF; --bg-2:#F5F5F7; --bg-3:#FAFAFC;
+    --label:#1D1D1F; --label-2:#6E6E73; --label-3:#86868B;
+    --sep:#D2D2D7; --sep-2:#E8E8ED;
+    --blue:#0071E3; --blue-press:#0058B0; --blue-wash:#F0F7FF; --blue-edge:#CCE4FF;
+    --ok:#1D8A4E; --ok-wash:#E8F6ED;
+    --warn:#B25000; --warn-wash:#FFF2E6;
+    --crit:#D70015; --crit-wash:#FFEBEC;
+    --text:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+    --r:12px; --r-lg:18px;
+    --shadow:0 1px 2px rgba(0,0,0,.04),0 6px 20px -8px rgba(0,0,0,.10);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--label);font-family:var(--text);
+       font-size:17px;line-height:1.47;letter-spacing:-.01em;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:980px;margin:0 auto;padding:0 22px 120px}
+
+  /* ───── control bar ───── */
+  .bar{position:sticky;top:0;z-index:60;background:rgba(255,255,255,.82);
+       -webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);
+       border-bottom:1px solid var(--sep-2)}
+  .bar-in{max-width:980px;margin:0 auto;padding:10px 22px;display:flex;align-items:center;
+          gap:14px;justify-content:space-between;flex-wrap:wrap}
+  .brand{font-size:15px;font-weight:600;letter-spacing:-.02em;white-space:nowrap}
+  .brand span{color:var(--label-3);font-weight:400}
+  .bar-r{display:flex;align-items:center;gap:10px}
+  .seg{display:inline-flex;background:var(--bg-2);border-radius:9px;padding:2px}
+  .seg button{appearance:none;border:0;background:transparent;cursor:pointer;font:inherit;
+              font-size:13px;font-weight:500;color:var(--label);padding:5px 13px;border-radius:7px;
+              white-space:nowrap;transition:background .18s,box-shadow .18s}
+  .seg button[aria-pressed="true"]{background:var(--bg);box-shadow:0 1px 3px rgba(0,0,0,.12),0 0 0 .5px rgba(0,0,0,.04)}
+  .btn{appearance:none;border:0;cursor:pointer;font:inherit;font-size:13px;font-weight:500;
+       padding:7px 15px;border-radius:99px;background:var(--blue);color:#fff;white-space:nowrap;
+       transition:background .15s,opacity .15s}
+  .btn:hover{background:var(--blue-press)}
+  .btn[disabled]{opacity:.45;cursor:default}
+  .btn.ghost{background:var(--bg-2);color:var(--label)}
+  .btn.ghost:hover{background:var(--sep-2)}
+  button:focus-visible,input:focus-visible{outline:3px solid var(--blue-edge);outline-offset:1px}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--ok);display:inline-block;margin-right:6px}
+  .dot.off{background:var(--label-3)}
+  .status{font-size:12px;color:var(--label-2);white-space:nowrap}
+  @media(max-width:860px){.status{display:none}}
+
+  /* ───── depth layering ───── */
+  .l-reason,.l-data{display:none}
+  body[data-depth="reasoning"] .l-reason{display:block}
+  body[data-depth="data"] .l-reason,body[data-depth="data"] .l-data{display:block}
+
+  /* ───── hero ───── */
+  header{padding:66px 0 48px}
+  .eyebrow{font-size:13px;font-weight:600;color:var(--blue);margin:0 0 14px}
+  h1{font-size:clamp(38px,6.6vw,60px);line-height:1.05;font-weight:600;letter-spacing:-.028em;
+     margin:0 0 20px;text-wrap:balance}
+  .sub{font-size:clamp(17px,2.1vw,20px);line-height:1.45;color:var(--label-2);max-width:46ch;margin:0}
+  .stats{display:flex;flex-wrap:wrap;gap:34px;margin-top:40px}
+  .stat-n{font-size:32px;font-weight:600;letter-spacing:-.025em;font-variant-numeric:tabular-nums;line-height:1.1}
+  .stat-l{font-size:13px;color:var(--label-2);margin-top:3px}
+
+  section{padding-top:58px}
+  h2{font-size:28px;font-weight:600;letter-spacing:-.024em;margin:0 0 8px;text-wrap:balance}
+  .lede{font-size:16px;color:var(--label-2);max-width:62ch;margin:0 0 24px}
+
+  .card{background:var(--bg);border:1px solid var(--sep-2);border-radius:var(--r-lg);
+        box-shadow:var(--shadow);overflow:hidden}
+  .card+.card{margin-top:16px}
+
+  /* ───── ask ───── */
+  .askbox{display:flex;gap:10px;padding:18px 20px;border-bottom:1px solid var(--sep-2);background:var(--bg-3)}
+  .askbox input{flex:1;min-width:0;appearance:none;border:1px solid var(--sep);border-radius:10px;
+                padding:10px 14px;font:inherit;font-size:16px;background:var(--bg);color:var(--label)}
+  .askbox input::placeholder{color:var(--label-3)}
+  .chips{display:flex;gap:7px;flex-wrap:wrap;padding:12px 20px;border-bottom:1px solid var(--sep-2)}
+  .qchip{appearance:none;border:1px solid var(--sep);background:var(--bg);cursor:pointer;font:inherit;
+         font-size:12.5px;padding:5px 11px;border-radius:99px;color:var(--label-2);transition:all .15s}
+  .qchip:hover{border-color:var(--blue);color:var(--blue)}
+
+  .answer{padding:22px 24px;font-size:17px;min-height:64px}
+  .answer p{margin:0 0 12px}.answer p:last-child{margin:0}
+  .placeholder{color:var(--label-3);font-size:15px}
+  .thinking{display:flex;align-items:center;gap:9px;color:var(--label-2);font-size:15px}
+  .spin{width:14px;height:14px;border:2px solid var(--sep);border-top-color:var(--blue);
+        border-radius:50%;animation:sp .7s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+
+  .steps{border-top:1px solid var(--sep-2)}
+  .step{border-bottom:1px solid var(--sep-2)}.step:last-child{border-bottom:0}
+  .step-btn{width:100%;appearance:none;border:0;background:transparent;cursor:pointer;font:inherit;
+            text-align:left;padding:13px 24px;display:flex;align-items:center;gap:11px;transition:background .15s}
+  .step-btn:hover{background:var(--bg-3)}
+  .step-i{flex:none;width:21px;height:21px;border-radius:6px;background:var(--blue-wash);color:var(--blue);
+          display:grid;place-items:center;font-family:var(--mono);font-size:11px}
+  .step-name{font-family:var(--mono);font-size:13px;flex:1;min-width:0}
+  .step-name.reason{font-family:var(--text);font-size:14.5px;font-weight:500;letter-spacing:-.01em}
+  .step-note{font-size:12.5px;color:var(--label-3);white-space:nowrap}
+  .chev{flex:none;width:12px;color:var(--label-3);transition:transform .22s cubic-bezier(.3,0,.2,1)}
+  .step-btn[aria-expanded="true"] .chev{transform:rotate(90deg)}
+  .step-body{display:none;padding:0 24px 16px 56px}
+  .step-body.open{display:block}
+  .kv{font-size:13px;margin-bottom:10px}.kv:last-child{margin:0}
+  .kv-k{color:var(--label-3);font-size:11px;font-weight:600;letter-spacing:.02em;text-transform:uppercase;margin-bottom:3px}
+  .kv-v{font-family:var(--mono);font-size:11.5px;word-break:break-all;line-height:1.55}
+  .kv-v.prose{font-family:var(--text);font-size:13.5px;word-break:normal}
+  .kv-v a{color:var(--blue);text-decoration:none}.kv-v a:hover{text-decoration:underline}
+
+  .ground{padding:14px 24px;border-top:1px solid var(--sep-2);background:var(--bg-3);
+          display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+  .chip{appearance:none;cursor:pointer;font:inherit;display:inline-flex;align-items:center;gap:7px;
+        font-size:13px;font-weight:500;padding:5px 12px;border-radius:99px;
+        background:var(--ok-wash);color:var(--ok);border:1px solid rgba(29,138,78,.2)}
+  .chip.bad{background:var(--crit-wash);color:var(--crit);border-color:rgba(215,0,21,.2)}
+  .ground-note{font-size:12.5px;color:var(--label-3)}
+
+  /* ───── pipeline ───── */
+  .srcs{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:11px;padding:18px 20px;
+        border-bottom:1px solid var(--sep-2);background:var(--bg-3)}
+  .src{appearance:none;border:1px solid var(--sep);background:var(--bg);cursor:pointer;font:inherit;
+       text-align:left;padding:13px 15px;border-radius:var(--r);transition:all .15s}
+  .src:hover{border-color:var(--blue);box-shadow:0 2px 10px -4px rgba(0,113,227,.35)}
+  .src[data-done="1"]{border-color:var(--ok);background:var(--ok-wash)}
+  .src-c{font-size:11px;font-weight:600;color:var(--blue);text-transform:uppercase;letter-spacing:.03em}
+  .src[data-done="1"] .src-c{color:var(--ok)}
+  .src-t{font-size:14px;font-weight:500;margin-top:3px}
+  .src-d{font-size:12px;color:var(--label-3);margin-top:2px;line-height:1.4}
+
+  .stages{display:grid;grid-template-columns:200px 1fr;min-height:280px}
+  @media(max-width:760px){.stages{grid-template-columns:1fr}}
+  .stage-nav{border-right:1px solid var(--sep-2);padding:10px;background:var(--bg-3)}
+  @media(max-width:760px){.stage-nav{border-right:0;border-bottom:1px solid var(--sep-2);display:flex;overflow-x:auto;gap:6px}}
+  .stage-btn{width:100%;appearance:none;border:0;background:transparent;cursor:pointer;font:inherit;
+             text-align:left;padding:10px 12px;border-radius:10px;display:flex;gap:10px;transition:background .15s}
+  @media(max-width:760px){.stage-btn{width:auto;white-space:nowrap}}
+  .stage-btn:hover{background:rgba(0,0,0,.035)}
+  .stage-btn[aria-selected="true"]{background:var(--blue);color:#fff}
+  .stage-btn[aria-selected="true"] .stage-s{color:rgba(255,255,255,.72)}
+  .stage-n{flex:none;font-family:var(--mono);font-size:11px;opacity:.55;margin-top:2px}
+  .stage-t{font-size:14px;font-weight:500}
+  .stage-s{font-size:11.5px;color:var(--label-3);margin-top:1px}
+  .stage-panel{padding:22px 24px;min-width:0}
+  .stage-panel h4{margin:0 0 6px;font-size:17px;font-weight:600;letter-spacing:-.018em}
+  .stage-panel p{margin:0 0 14px;font-size:14.5px;color:var(--label-2);max-width:58ch}
+  pre{margin:0;background:var(--bg-2);border-radius:var(--r);padding:14px 16px;overflow-x:auto;
+      font-family:var(--mono);font-size:11.5px;line-height:1.6;max-height:330px}
+  .pre-l{font-size:11px;font-weight:600;letter-spacing:.02em;text-transform:uppercase;
+         color:var(--label-3);margin:0 0 6px}
+
+  /* ───── stations / join ───── */
+  .grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+  .st{background:var(--bg);border:1px solid var(--sep-2);border-radius:var(--r);padding:16px 17px}
+  .st-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+  .st-n{font-size:15px;font-weight:500}
+  .st-id{font-family:var(--mono);font-size:11px;color:var(--label-3);margin-top:2px}
+  .st-m{margin-top:10px;font-size:12.5px;color:var(--label-2);display:flex;gap:13px;flex-wrap:wrap;
+        font-variant-numeric:tabular-nums}
+  .tag{font-size:11px;font-weight:600;padding:2px 7px;border-radius:5px;white-space:nowrap}
+  .t-crit{background:var(--crit-wash);color:var(--crit)}
+  .t-warn{background:var(--warn-wash);color:var(--warn)}
+  .t-ok{background:var(--ok-wash);color:var(--ok)}
+  .row{display:flex;align-items:baseline;gap:10px;padding:8px 0;border-top:1px solid var(--sep-2)}
+  .row:first-of-type{border-top:0}
+  .row-n{flex:1;font-size:14px;min-width:0}
+  .row-n code{font-family:var(--mono);font-size:12.5px}
+  .row-v{font-family:var(--mono);font-size:13px;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .join{display:grid;grid-template-columns:1fr 1fr}
+  @media(max-width:760px){.join{grid-template-columns:1fr}}
+  .join-c{padding:20px 24px}
+  .join-c+.join-c{border-left:1px solid var(--sep-2)}
+  @media(max-width:760px){.join-c+.join-c{border-left:0;border-top:1px solid var(--sep-2)}}
+  .join-h{font-size:12px;font-weight:600;color:var(--label-3);margin:0 0 12px}
+  .note{padding:15px 24px;background:var(--bg-2);font-size:13.5px;color:var(--label-2);
+        border-top:1px solid var(--sep-2)}
+  .note b{color:var(--label);font-weight:600}
+
+  footer{margin-top:66px;padding-top:24px;border-top:1px solid var(--sep-2);
+         font-size:12.5px;color:var(--label-3);line-height:1.6;max-width:74ch}
+  footer code{font-family:var(--mono);font-size:11.5px}
+  footer a{color:var(--blue);text-decoration:none}
+
+  /* ───── autorun cursor ───── */
+  #cursor{position:fixed;left:0;top:0;width:22px;height:22px;z-index:9999;pointer-events:none;
+          opacity:0;transition:opacity .3s;will-change:transform}
+  #cursor svg{filter:drop-shadow(0 2px 4px rgba(0,0,0,.3))}
+  #cursor.on{opacity:1}
+  #cursor.click::after{content:"";position:absolute;left:-13px;top:-13px;width:48px;height:48px;
+                       border-radius:50%;background:rgba(0,113,227,.3);animation:rip .45s ease-out}
+  @keyframes rip{from{transform:scale(.2);opacity:1}to{transform:scale(1);opacity:0}}
+  #caption{position:fixed;left:50%;bottom:34px;transform:translateX(-50%);z-index:9998;
+           background:rgba(29,29,31,.92);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+           color:#fff;font-size:15px;font-weight:500;padding:11px 22px;border-radius:99px;
+           opacity:0;transition:opacity .3s;pointer-events:none;max-width:76vw;text-align:center}
+  #caption.on{opacity:1}
+  body.autorun{cursor:none}
+  @media(prefers-reduced-motion:reduce){*{transition-duration:.001ms!important}}
+</style>
+</head>
+<body data-depth="summary">
+
+<div id="cursor" aria-hidden="true">
+  <svg viewBox="0 0 22 22" width="22" height="22">
+    <path d="M3 1l15 8.5-6.6 1.6L8.6 19z" fill="#fff" stroke="#1D1D1F" stroke-width="1.6" stroke-linejoin="round"/>
+  </svg>
+</div>
+<div id="caption" aria-live="polite"></div>
+
+<div class="bar">
+  <div class="bar-in">
+    <div class="brand">Mondego Watch <span>· OneAquaHealth</span></div>
+    <div class="bar-r">
+      <span class="status" id="status"><span class="dot off"></span>connecting…</span>
+      <div class="seg" role="group" aria-label="Detail depth">
+        <button type="button" data-depth="summary" aria-pressed="true">Summary</button>
+        <button type="button" data-depth="reasoning" aria-pressed="false">Reasoning</button>
+        <button type="button" data-depth="data" aria-pressed="false">Data</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow" id="eyebrow">Coimbra, Portugal · live HL7 FHIR</p>
+    <h1>One station carries both.</h1>
+    <p class="sub">Stream chemistry and the health of the people living beside it, in one standards-conformant
+       record. Every figure here is fetched live — and every one can be traced back to the query that produced it.</p>
+    <div class="stats" id="stats">
+      <div><div class="stat-n" id="s-obs">—</div><div class="stat-l">Observations</div></div>
+      <div><div class="stat-n" id="s-site">—</div><div class="stat-l">Stations</div></div>
+      <div><div class="stat-n" id="s-exc">—</div><div class="stat-l">Exceedances</div></div>
+      <div><div class="stat-n" id="s-join">—</div><div class="stat-l">Cross-domain</div></div>
+    </div>
+  </header>
+
+  <!-- ════ PIPELINE ════ -->
+  <section id="sec-pipeline">
+    <h2>Send a reading through</h2>
+    <p class="lede">Pick a source. It runs the real pipeline — validate, screen, map to the OAH model,
+       upload to the FHIR server — and shows you each stage of what actually happened.</p>
+    <div class="card">
+      <div class="srcs" id="srcs"></div>
+      <div class="stages">
+        <div class="stage-nav" role="tablist" aria-label="Pipeline stage">
+          <button type="button" class="stage-btn" role="tab" aria-selected="true" data-stage="g1">
+            <span class="stage-n">1</span><span><span class="stage-t">Received</span><span class="stage-s">Raw payload</span></span></button>
+          <button type="button" class="stage-btn" role="tab" aria-selected="false" data-stage="g2">
+            <span class="stage-n">2</span><span><span class="stage-t">Screened</span><span class="stage-s">Validate + alert</span></span></button>
+          <button type="button" class="stage-btn" role="tab" aria-selected="false" data-stage="g3">
+            <span class="stage-n">3</span><span><span class="stage-t">Mapped</span><span class="stage-s">OAH → FHIR</span></span></button>
+          <button type="button" class="stage-btn" role="tab" aria-selected="false" data-stage="g4">
+            <span class="stage-n">4</span><span><span class="stage-t">Upserted</span><span class="stage-s">Transaction</span></span></button>
+        </div>
+        <div class="stage-panel">
+          <div id="g1"><h4>Raw payload</h4><p class="placeholder">Choose a source above to run the pipeline.</p></div>
+          <div id="g2" hidden></div><div id="g3" hidden></div><div id="g4" hidden></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════ ASK ════ -->
+  <section id="sec-ask">
+    <h2>Ask it anything</h2>
+    <p class="lede">The assistant never writes a FHIR query itself — it picks a typed tool and the code builds
+       the URL. Switch to <b>Reasoning</b> to see which tools ran and why.</p>
+    <div class="card">
+      <div class="askbox">
+        <input id="q" type="text" placeholder="Ask about the stations, readings or cohorts…"
+               autocomplete="off" aria-label="Question">
+        <button type="button" class="btn" id="send">Ask</button>
+      </div>
+      <div class="chips" id="qchips"></div>
+      <div class="steps l-reason" id="trace"></div>
+      <div class="answer" id="answer"><span class="placeholder">No question asked yet.</span></div>
+      <div class="ground" id="ground" hidden></div>
+      <div class="step-body" id="gdetail" style="padding:0 24px 18px"></div>
+    </div>
+  </section>
+
+  <!-- ════ JOIN ════ -->
+  <section id="sec-join">
+    <h2>The cross-domain join</h2>
+    <p class="lede">Computed in Python, not by the model — an LLM asked to find correlations produces
+       confident arithmetic nobody checked.</p>
+    <div class="card" id="joincard"><div class="note">Loading…</div></div>
+  </section>
+
+  <!-- ════ STATIONS ════ -->
+  <section id="sec-stations">
+    <h2>Stations</h2>
+    <p class="lede">Read from each FHIR <code style="font-family:var(--mono);font-size:14px">Location</code> in the tagged dataset.</p>
+    <div class="grid3" id="stations"></div>
+  </section>
+
+  <footer id="footer">
+    Served by the ingestion gateway itself. Screening thresholds are prototype values with their basis stated in
+    <code>oah_ingestion/thresholds.py</code>; they are not regulatory limits. Station coordinates in
+    <code>demo/sites.json</code> are approximate. Health figures are synthetic demonstration data.
+  </footer>
+</div>
+
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+/* ───────── depth ───────── */
+$$(".seg button").forEach(b => b.onclick = () => {
+  document.body.dataset.depth = b.dataset.depth;
+  $$(".seg button").forEach(o => o.setAttribute("aria-pressed", String(o === b)));
+});
+
+/* ───────── pipeline stage tabs ───────── */
+$$("[data-stage]").forEach(b => b.onclick = () => {
+  $$("[data-stage]").forEach(o => {
+    o.setAttribute("aria-selected", String(o === b));
+    $("#" + o.dataset.stage).hidden = o !== b;
+  });
+});
+
+/* ───────── boot ───────── */
+const SUGGESTED = [
+  "Which station has both a chemical exceedance and elevated health risk?",
+  "Is nitrate at the Mondego station above safe levels?",
+  "Who lives near the Mondego station?",
+  "Which stations have no health data at all?"
+];
+
+async function boot() {
+  try {
+    const info = await (await fetch("/api/info")).json();
+    $("#status").innerHTML = '<span class="dot"></span>' + esc(info.fhir.server.replace(/^https?:\/\//, ""));
+    $("#eyebrow").textContent = "Coimbra, Portugal · live on " + info.fhir.server.replace(/^https?:\/\//, "");
+    $("#srcs").innerHTML = info.samples.map(s => `
+      <button type="button" class="src" data-sample="${esc(s.key)}">
+        <div class="src-c">${esc(s.channel)}</div>
+        <div class="src-t">${esc(s.key === "health-mondego" ? "Riverside cohort" : s.channel)}</div>
+        <div class="src-d">${esc(s.detail)}</div>
+      </button>`).join("");
+    $$("[data-sample]").forEach(b => b.onclick = () => runSample(b.dataset.sample));
+  } catch (e) {
+    $("#status").innerHTML = '<span class="dot off"></span>gateway unreachable';
+  }
+  $("#qchips").innerHTML = SUGGESTED.map(q => `<button type="button" class="qchip">${esc(q)}</button>`).join("");
+  $$(".qchip").forEach(b => b.onclick = () => { $("#q").value = b.textContent; sendQuestion(); });
+  loadOverview();
+}
+
+/* ───────── overview ───────── */
+async function loadOverview() {
+  try {
+    const d = await (await fetch("/api/overview")).json();
+    const obs = d.briefings.reduce((n, b) => n + b.environmental_reading_count + b.health_measure_count, 0);
+    $("#s-obs").textContent  = obs;
+    $("#s-site").textContent = d.site_count;
+    $("#s-exc").textContent  = d.briefings.reduce((n, b) => n + b.exceedances.length, 0);
+    $("#s-join").textContent = d.sites_with_co_location.length;
+
+    $("#stations").innerHTML = d.briefings.map(b => {
+      const tag = b.co_location ? '<span class="tag t-crit">co-located</span>'
+                : b.elevated_risks.length ? '<span class="tag t-warn">health only</span>'
+                : '<span class="tag t-ok">survey only</span>';
+      const pos = (b.latitude != null) ? `${b.latitude.toFixed(4)}°N, ${Math.abs(b.longitude).toFixed(4)}°W` : "no position";
+      return `<div class="st"><div class="st-top"><span class="st-n">${esc(b.name)}</span>${tag}</div>
+        <div class="st-id">${esc(b.site_id)}</div>
+        <div class="st-m"><span>${esc(pos)}</span></div>
+        <div class="st-m"><span>${b.environmental_reading_count} environmental</span><span>${b.health_measure_count} health</span></div></div>`;
+    }).join("");
+
+    const j = d.briefings.find(b => b.co_location) || d.briefings[0];
+    if (!j) return;
+    $("#joincard").innerHTML = `
+      <div class="join">
+        <div class="join-c"><p class="join-h">Stream chemistry — ${esc(j.name)}</p>
+          ${j.exceedances.length ? j.exceedances.map(e => `<div class="row">
+            <span class="row-n"><code>${esc(e.indicator)}</code></span>
+            <span class="row-v">${e.value} ${esc(e.unit)}</span>
+            <span class="tag ${e.exceedance_factor >= 2 ? "t-crit" : "t-warn"}">${e.exceedance_factor ? e.exceedance_factor + "×" : "out of band"}</span>
+          </div>`).join("") : '<p class="placeholder">No exceedances at this station.</p>'}
+        </div>
+        <div class="join-c"><p class="join-h">Population health${j.cohorts[0] ? " · ages " + esc(j.cohorts[0].characteristics.ageRange || "—") : ""}</p>
+          ${j.risks.length ? j.risks.map(r => `<div class="row">
+            <span class="row-n"><code>${esc(r.indicator)}</code></span>
+            <span class="row-v">${r.score}</span>
+            <span class="tag ${r.interpretation === "HIGH" ? "t-crit" : r.interpretation === "MODERATE" ? "t-warn" : "t-ok"}">${esc((r.interpretation||"").toLowerCase())}</span>
+          </div>`).join("") : '<p class="placeholder">No health measures at this station.</p>'}
+        </div>
+      </div>
+      <div class="note l-reason"><b>How co-location is decided.</b> A station qualifies when it has at least one
+        environmental exceedance <em>and</em> at least one health measure rated MODERATE or HIGH. Of
+        ${d.site_count} stations, ${d.sites_with_co_location.length} satisfies both.</div>
+      <div class="note"><b>What this does not show.</b> ${esc(j.caveat)}</div>`;
+  } catch (e) {
+    $("#joincard").innerHTML = '<div class="note">Overview needs the oah-agent package and a reachable FHIR server.</div>';
+  }
+}
+
+/* ───────── run a sample through the pipeline ───────── */
+async function runSample(key) {
+  const btn = document.querySelector(`[data-sample="${key}"]`);
+  $("#g1").innerHTML = '<h4>Running…</h4><p class="thinking"><span class="spin"></span>Validating, screening, mapping and uploading.</p>';
+  selectStage("g1");
+  let d;
+  try { d = await (await fetch("/api/ingest-demo/" + key, {method: "POST"})).json(); }
+  catch (e) { $("#g1").innerHTML = "<h4>Could not reach the gateway</h4>"; return; }
+  if (!d.ok) { $("#g1").innerHTML = `<h4>Rejected at validation</h4><pre>${esc(d.error)}</pre>`; return; }
+  if (btn) btn.dataset.done = "1";
+
+  $("#g1").innerHTML = `<h4>Raw payload — ${esc(d.sample.channel)}</h4>
+    <p>${esc(d.sample.detail)}. Nothing is trusted yet.</p>
+    <p class="pre-l">As received · ${esc(d.sample.file)}</p><pre>${esc(JSON.stringify(d.raw, null, 2))}</pre>`;
+
+  const a = d.alert;
+  $("#g2").innerHTML = `<h4>${a ? "Validated — and it crossed a threshold" : "Validated — nothing crossed"}</h4>
+    <p>Strict validation: pilot-city allow-list, mandatory timezone, pH bounded 0–14, metals non-negative, no NaN.
+       Screening runs <em>before</em> FHIR conversion, so an operator learns about an exceedance even if the FHIR
+       server is unreachable.</p>
+    ${a ? `<p class="pre-l">Alert raised</p><pre>[${esc(a.severity)}] ${esc(a.site_id)} (${esc(a.city)}) — ${esc(a.observed_at)}
+${a.exceedances.map(e => `    ENV  ${e.indicator}: ${e.value} ${e.unit}` +
+      (e.exceedance_factor ? `  (${e.exceedance_factor}× threshold ${e.threshold})` : `  (outside ${e.threshold})`)).join("\n")}
+${a.elevated_risks.map(r => `    HLTH ${r.indicator}: ${r.score} [${r.interpretation}]`).join("\n")}</pre>
+    <p class="pre-l l-data" style="margin-top:14px">Caveat carried with every alert</p>
+    <pre class="l-data">${esc(a.caveat)}</pre>`
+    : '<p class="placeholder">Every reading sat inside its screening band, so no alert was raised. Citizen-survey answers are coded rather than numeric and are never screened.</p>'}`;
+
+  const prof = d.profiles.join(", ");
+  $("#g3").innerHTML = `<h4>The data picks its own profile</h4>
+    <p>A reading carrying min/max/avg becomes a <b>StructuredIndicator</b> → <code>observation-with-component-oah</code>;
+       a bare reading becomes a <b>SimpleIndicator</b> → <code>observation-indicators-oah</code>. This event produced:
+       <b>${esc(prof)}</b>.</p>
+    <p class="pre-l">Resulting FHIR Observation</p><pre>${esc(JSON.stringify(d.observations[0], null, 2))}</pre>`;
+
+  const u = d.upload;
+  $("#g4").innerHTML = `<h4>Idempotent upsert</h4>
+    <p>Resource ids are derived from site, indicator and timestamp, so the bundle is a set of conditional-free
+       <code>PUT</code>s. Replaying the same reading updates the same resources instead of duplicating them —
+       which is what makes a live demo re-runnable.</p>
+    <p class="pre-l">Transaction result</p><pre>POST ${esc(d.fhir_server)}
+
+status     ${esc(u.fhir)}
+uploaded   ${u.uploaded} resource(s)
+failed     ${u.failed}
+resources  ${esc(JSON.stringify(u.resources || {}, null, 2))}</pre>`;
+
+  selectStage("g1");
+  loadOverview();
+}
+function selectStage(id) {
+  $$("[data-stage]").forEach(o => {
+    o.setAttribute("aria-selected", String(o.dataset.stage === id));
+    $("#" + o.dataset.stage).hidden = o.dataset.stage !== id;
+  });
+}
+
+/* ───────── ask ───────── */
+async function sendQuestion() {
+  const q = $("#q").value.trim();
+  if (!q) return;
+  $("#send").disabled = true;
+  $("#trace").innerHTML = "";
+  $("#ground").hidden = true;
+  $("#gdetail").classList.remove("open");
+  $("#answer").innerHTML = '<div class="thinking"><span class="spin"></span>Choosing tools and querying FHIR…</div>';
+
+  let d;
+  try {
+    const r = await fetch("/api/ask", {
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({question: q})
+    });
+    d = await r.json();
+    if (!r.ok) throw new Error(d.detail || "request failed");
+  } catch (e) {
+    $("#answer").innerHTML = `<span class="placeholder">${esc(e.message)}</span>`;
+    $("#send").disabled = false;
+    return;
+  }
+
+  // Explain the reasoning, not the call stack. A list of five function calls --
+  // three of them the same function -- describes mechanism, not thinking. Group
+  // the trace by what was actually established, and keep the queries themselves
+  // for the Data layer, where they serve auditing rather than narration.
+  const STEP = {
+    list_sites: g => ({
+      label: `Surveyed the dataset`,
+      detail: `Established which monitoring stations exist before narrowing to any one of them.`
+    }),
+    get_thresholds: g => ({
+      label: `Loaded the screening thresholds`,
+      detail: `Nitrate, pH and zinc, each with its regulatory basis. Fetched rather than recalled — a "safe level" from the model's own memory is exactly the kind of figure that should never reach a health officer.`
+    }),
+    get_site_profile: g => ({
+      label: g.n > 1 ? `Examined all ${g.n} stations` : `Examined one station in full`,
+      detail: `Pulled stream chemistry and cohort health together for each, rather than as separate searches. This is the cross-domain join.`
+    }),
+    search_observations: g => ({
+      label: g.n > 1 ? `Ran ${g.n} targeted searches` : `Ran a targeted search`,
+      detail: `Filtered Observations by OAH profile, indicator code and station.`
+    }),
+    get_cohort: g => ({
+      label: `Resolved the affected cohort`,
+      detail: `Looked up the demographic Group a health measure points at — age range, sex, location.`
+    })
+  };
+
+  // Collapse repeats, preserving first-seen order.
+  const groups = [];
+  d.trace.forEach(t => {
+    const found = groups.find(g => g.tool === t.tool);
+    const us = (t.fhir_urls && t.fhir_urls.length) ? t.fhir_urls : (t.fhir_url ? [t.fhir_url] : []);
+    if (found) { found.n++; found.urls.push(...us); found.args.push(t.arguments); }
+    else groups.push({tool: t.tool, n: 1, urls: [...us], args: [t.arguments]});
+  });
+
+  $("#trace").innerHTML = groups.map((g, i) => {
+    const made = (STEP[g.tool] || (x => ({label: x.tool, detail: "Tool call."})))(g);
+    const urls = [...new Set(g.urls.filter(Boolean))];
+    return `
+    <div class="step">
+      <button type="button" class="step-btn" aria-expanded="false" data-t="t${i}">
+        <span class="step-i">${i + 1}</span>
+        <span class="step-name reason">${esc(made.label)}</span>
+        <span class="step-note">${urls.length ? urls.length + " quer" + (urls.length > 1 ? "ies" : "y") : "local"}</span>
+        <svg class="chev" viewBox="0 0 8 13" fill="none"><path d="M1.5 1.5L6.5 6.5L1.5 11.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <div class="step-body" id="t${i}">
+        <div class="kv"><div class="kv-v prose">${esc(made.detail)}</div></div>
+        ${urls.length ? `<div class="kv l-data"><div class="kv-k">${urls.length > 1 ? "Queries run" : "Query run"}</div>
+          <div class="kv-v">${urls.map(u => `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(decodeURIComponent(u))}</a>`).join("<br><br>")}</div></div>` : ""}
+      </div>
+    </div>`;
+  }).join("");
+  $$("[data-t]").forEach(b => b.onclick = () => {
+    const body = $("#" + b.dataset.t), open = b.getAttribute("aria-expanded") === "true";
+    b.setAttribute("aria-expanded", String(!open));
+    body.classList.toggle("open", !open);
+  });
+
+  $("#answer").innerHTML = d.answer.split(/\n{2,}/).map(p => `<p>${esc(p)}</p>`).join("");
+
+  const g = d.grounding;
+  $("#ground").hidden = false;
+  $("#ground").innerHTML = `
+    <button type="button" class="chip ${g.grounded ? "" : "bad"}" id="gchip">
+      <span>${g.grounded ? "✓" : "⚠"}</span>
+      ${g.grounded ? `Grounded · ${g.figures_checked} of ${g.figures_checked} figures verified`
+                   : `${g.unsupported_figures.length} figure(s) not found in the data`}
+      <svg class="chev" viewBox="0 0 8 13" fill="none"><path d="M1.5 1.5L6.5 6.5L1.5 11.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+    <span class="ground-note l-reason">Checked in Python, not by a second model.</span>`;
+  $("#gdetail").innerHTML = `
+    <div class="kv"><div class="kv-k">How</div><div class="kv-v prose">Every numeric literal in the answer is matched
+      against the ${g.source_figure_count} figures the tools actually returned. Rounding and derived ratios are
+      accepted; an absent number is not.</div></div>
+    <div class="kv"><div class="kv-k">What it does not cover</div><div class="kv-v prose">${esc(g.not_covered)}</div></div>
+    <div class="kv l-data"><div class="kv-k">Verdict</div><div class="kv-v">${esc(JSON.stringify(g))}</div></div>`;
+  $("#gchip").onclick = () => {
+    const open = $("#gdetail").classList.toggle("open");
+    $("#gchip").setAttribute("aria-expanded", String(open));
+  };
+  $("#send").disabled = false;
+}
+$("#send").onclick = sendQuestion;
+$("#q").addEventListener("keydown", e => { if (e.key === "Enter") sendQuestion(); });
+
+/* ═════════ AUTORUN: moves a cursor, types, clicks ═════════ */
+const cur = $("#cursor"), cap = $("#caption");
+let at = {x: innerWidth / 2, y: innerHeight / 3}, abort = false;
+
+function say(t) { cap.textContent = t; cap.classList.toggle("on", !!t); }
+
+function moveTo(x, y, ms = 650) {
+  return new Promise(res => {
+    const from = {...at}, t0 = performance.now();
+    const ease = p => p < .5 ? 4*p*p*p : 1 - Math.pow(-2*p + 2, 3) / 2;  // easeInOutCubic
+    (function step(now) {
+      const p = Math.min(1, (now - t0) / ms), e = ease(p);
+      at = {x: from.x + (x - from.x) * e, y: from.y + (y - from.y) * e};
+      cur.style.transform = `translate(${at.x}px, ${at.y}px)`;
+      p < 1 ? requestAnimationFrame(step) : res();
+    })(performance.now());
+  });
+}
+
+async function moveToEl(el, ms) {
+  if (!el) return;
+  const r = el.getBoundingClientRect();
+  if (r.top < 90 || r.bottom > innerHeight - 90) {
+    el.scrollIntoView({block: "center", behavior: "smooth"});
+    await sleep(700);
+  }
+  const b = el.getBoundingClientRect();
+  await moveTo(b.left + b.width / 2, b.top + b.height / 2, ms);
+}
+
+async function click(el, ms) {
+  await moveToEl(el, ms);
+  cur.classList.add("click");
+  await sleep(150);
+  cur.classList.remove("click");
+  el.click();
+  await sleep(320);
+}
+
+async function type(el, text, speed = 42) {
+  await moveToEl(el);
+  el.focus(); el.value = "";
+  for (const ch of text) { if (abort) return; el.value += ch; await sleep(speed + Math.random() * 28); }
+  await sleep(260);
+}
+
+const script = [
+  async () => { scrollTo({top: 0, behavior: "smooth"}); say("A One Health platform on HL7 FHIR."); await sleep(2200); },
+  async () => { say("Three depths: what it concluded, why, and the evidence.");
+                await click($('.seg button[data-depth="reasoning"]')); await sleep(900);
+                await click($('.seg button[data-depth="data"]')); await sleep(1100);
+                await click($('.seg button[data-depth="summary"]')); await sleep(600); },
+  async () => { say("Send a real IoT reading through the pipeline.");
+                await click($('[data-sample="iot"]')); await sleep(2600); },
+  async () => { say("Validated, then screened — zinc at 6.4× its threshold.");
+                await click($('[data-stage="g2"]')); await sleep(2800); },
+  async () => { say("The data picks its own FHIR profile.");
+                await click($('[data-stage="g3"]')); await sleep(3000); },
+  async () => { say("Uploaded to a public FHIR server as an idempotent transaction.");
+                await click($('[data-stage="g4"]')); await sleep(2800); },
+  async () => { say("Now the public-health feed for the same station.");
+                await click($('[data-sample="health-mondego"]')); await sleep(2600); },
+  async () => { say("Ask it a question in plain English.");
+                await type($("#q"), "Which station has both a chemical exceedance and elevated health risk?");
+                await click($("#send")); },
+  async () => { say("It reasons in steps — and never writes a FHIR query itself.");
+                await click($('.seg button[data-depth="reasoning"]'));
+                for (let i = 0; i < 40 && $("#send").disabled; i++) await sleep(500);
+                await sleep(1200); },
+  async () => { const b = $$("[data-t]")[2] || $("[data-t]"); if (b) { say("Each step says what it established, and why."); await click(b); await sleep(2600); } },
+  async () => { const g = $("#gchip"); if (g) { say("Every figure is checked against the retrieved data — in Python.");
+                await click(g); await sleep(3000); } },
+  async () => { say("The cross-domain join: chemistry beside the cohort living there.");
+                $("#sec-join").scrollIntoView({block: "start", behavior: "smooth"}); await sleep(3400); },
+  async () => { say("Stream health and community health, in one record.");
+                $("#sec-stations").scrollIntoView({block: "start", behavior: "smooth"}); await sleep(3000); say(""); }
+];
+
+async function autorun() {
+  if (document.body.classList.contains("autorun")) { abort = true; return stopRun(); }
+  abort = false;
+  document.body.classList.add("autorun");
+  cur.classList.add("on");
+  cur.style.transform = `translate(${at.x}px, ${at.y}px)`;
+  for (const step of script) { if (abort) break; await step(); }
+  stopRun();
+}
+function stopRun() {
+  document.body.classList.remove("autorun");
+  cur.classList.remove("on"); say("");
+}
+// No visible control: a button labelled "Auto demo" makes a genuine run read as
+// staged. Start it with ?autorun=1 or Shift+D; Escape stops it.
+addEventListener("keydown", e => {
+  if (e.key === "Escape") { abort = true; stopRun(); }
+  if (e.shiftKey && (e.key === "D" || e.key === "d") && e.target.tagName !== "INPUT") autorun();
+});
+
+boot();
+if (new URLSearchParams(location.search).has("autorun")) setTimeout(autorun, 1400);
+</script>
+</body>
+</html>

@@ -45,7 +45,7 @@ def consume_citizen_surveys(stop_event: threading.Event, emit_event) -> None:
                 del properties
                 try:
                     envelope = CitizenSurveyEnvelope.model_validate_json(body)
-                    emit_event(envelope_as_message(envelope))
+                    emit_event(envelope, envelope_as_message(envelope))
                     ch.basic_ack(delivery_tag=method.delivery_tag)
                 except Exception:
                     logger.exception("Rejected invalid citizen survey message")
