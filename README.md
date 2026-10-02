@@ -8,6 +8,7 @@ OneAquaHealth validates environmental, citizen science, and public health data; 
 - `oah-ingestion/` runs the ingestion API, MQTT listener, RabbitMQ consumer, FHIR mapping and upload pipeline, and live dashboard.
 - `oah-demo-publishers/` simulates external publishers for the three input channels.
 - `oah-agent/` provides the assistant and dataset briefing used by the dashboard's query and overview features.
+- `dashboard/` contains the separate evidence dashboard, mock API, live-gateway adapter, themes, and report downloads.
 - `docker-compose.yml` starts the local RabbitMQ broker.
 
 ## Install
@@ -50,6 +51,23 @@ Relevant environment variables:
 - MQTT: `MQTT_HOST`, `MQTT_PORT`, `MQTT_TOPIC`, `MQTT_USERNAME`, `MQTT_PASSWORD`, `MQTT_TLS`, `MQTT_CLIENT_ID`, `MQTT_DEMO_CLIENT_ID`
 - RabbitMQ: `RABBITMQ_HOST`, `RABBITMQ_PORT`, `RABBITMQ_VHOST`, `RABBITMQ_USER`, `RABBITMQ_PASSWORD`
 - FHIR: `FHIR_BASE_URL`, `FHIR_UPLOAD_ENABLED`, `OAH_DATASET_TAG`
+
+## Evidence dashboard
+
+Install and start the separate dashboard from the repository root:
+
+```powershell
+python -m pip install -e ".[dev]"
+oah-dashboard
+```
+
+It reads `DASHBOARD_PORT`, `OAH_LIVE_BASE_URL`, and
+`DASHBOARD_DEFAULT_THEME` from the root `.env`. The browser theme selector can
+override the configured default on that device. Open `http://localhost:8090`
+by default.
+
+The evidence dashboard runs separately from the live dashboard served by the
+ingestion application.
 
 ## Send demo data
 
