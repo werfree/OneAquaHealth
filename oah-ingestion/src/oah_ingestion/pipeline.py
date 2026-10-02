@@ -71,7 +71,21 @@ def process(envelope, message: Optional[dict] = None) -> dict:
         logger.error("FHIR upload failed: %s", exc)
         return {"fhir": "UPLOAD_FAILED", "resources": summary, "uploaded": 0, "failed": len(bundle["entry"]), "alert": alert}
 
-    logger.info(
-        "FHIR upload -> %s: %d resource(s) %s", base_url(), uploaded, summary if failed == 0 else f"{summary} ({failed} failed)"
+    expected = len(bundle["entry"])
+    upload_status = "UPLOADED" if failed == 0 and uploaded == expected else "UPLOAD_FAILED"
+    logger.log(
+        logging.INFO if upload_status == "UPLOADED" else logging.ERROR,
+        "FHIR upload -> %s: %d/%d resource(s) uploaded; %d failed; %s",
+        base_url(),
+        uploaded,
+        expected,
+        failed,
+        summary,
     )
-    return {"fhir": "UPLOADED", "resources": summary, "uploaded": uploaded, "failed": failed, "alert": alert}
+    return {
+        "fhir": upload_status,
+        "resources": summary,
+        "uploaded": uploaded,
+        "failed": max(failed, expected - uploaded),
+        "alert": alert,
+    }
