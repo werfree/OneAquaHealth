@@ -1,0 +1,421 @@
+{
+  "meta": {
+    "datasetTag": "oneaquahealth-demo-2026",
+    "generatedAt": "2026-10-02T10:00:00Z",
+    "coordinateNotice": "Approximate demo coordinates; not surveyed station positions.",
+    "screeningNotice": "Prototype screening rules support triage only and are not universal safety limits."
+  },
+  "personas": {
+    "viewer": {
+      "id": "user-viewer-01",
+      "label": "Viewer",
+      "description": "Published summaries and reports",
+      "permissions": ["dashboard.read", "report.download.published"],
+      "siteIds": ["site-c1-mondego"]
+    },
+    "analyst": {
+      "id": "user-analyst-01",
+      "label": "Analyst",
+      "description": "Findings, evidence and briefings",
+      "permissions": ["dashboard.read", "evidence.read", "graph.read", "assistant.ask", "report.create", "report.download"],
+      "siteIds": ["site-c1-mondego", "site-coimbra-t1"]
+    },
+    "operator": {
+      "id": "user-operator-01",
+      "label": "Data operator",
+      "description": "Assigned source runs and payloads",
+      "permissions": ["dashboard.read", "ingestion.read", "ingestion.create", "ingestion.retry", "raw.read"],
+      "siteIds": ["site-c1-mondego", "site-c6-casa-do-sal", "site-coimbra-t1"]
+    }
+  },
+  "sites": [
+    {
+      "id": "site-c1-mondego",
+      "name": "Mondego river station C1",
+      "shortName": "Mondego C1",
+      "city": "Coimbra",
+      "latitude": 40.2111,
+      "longitude": -8.4291,
+      "status": "attention",
+      "lastObservedAt": "2026-09-30T10:00:00Z",
+      "observationIds": ["obs-mondego-ph", "obs-mondego-nitrate", "obs-mondego-zinc", "obs-mondego-health"],
+      "findingIds": ["finding-nitrate", "finding-zinc", "finding-colocation"]
+    },
+    {
+      "id": "site-c6-casa-do-sal",
+      "name": "Casa do Sal stream reach C6",
+      "shortName": "Casa do Sal C6",
+      "city": "Coimbra",
+      "latitude": 40.2194,
+      "longitude": -8.4377,
+      "status": "observed",
+      "lastObservedAt": "2026-09-30T10:15:00Z",
+      "observationIds": ["obs-casa-vegetation", "obs-casa-flow", "obs-casa-aspect"],
+      "findingIds": []
+    },
+    {
+      "id": "site-coimbra-t1",
+      "name": "Coimbra urban catchment T1",
+      "shortName": "Urban catchment T1",
+      "city": "Coimbra",
+      "latitude": 40.2033,
+      "longitude": -8.4103,
+      "status": "health-watch",
+      "lastObservedAt": "2026-09-30T00:00:00Z",
+      "observationIds": ["obs-t1-health", "obs-t1-nitrate-summary"],
+      "findingIds": ["finding-t1-health"]
+    }
+  ],
+  "observations": [
+    {
+      "id": "obs-mondego-ph",
+      "resourceRef": "Observation/ph-site-c1-mondego-1759226400-0",
+      "siteId": "site-c1-mondego",
+      "kind": "environmental",
+      "indicator": "pH",
+      "value": 7.4,
+      "unit": "pH",
+      "effectiveAt": "2026-09-30T10:00:00Z",
+      "interpretation": "Within prototype screening band 6.5–9.0",
+      "source": "ESP32-SENS-COIMBRA-01",
+      "profile": "observation-environmental-oah"
+    },
+    {
+      "id": "obs-mondego-nitrate",
+      "resourceRef": "Observation/nitrate-site-c1-mondego-1759226400-1",
+      "siteId": "site-c1-mondego",
+      "kind": "environmental",
+      "indicator": "Nitrate as NO3-N",
+      "value": 14.2,
+      "unit": "mg/L",
+      "effectiveAt": "2026-09-30T10:00:00Z",
+      "interpretation": "Above prototype screening value",
+      "screeningReference": "above 11.3 mg/L as NO3-N",
+      "statistics": {"minimum": 11.0, "average": 14.2, "maximum": 16.5},
+      "source": "ESP32-SENS-COIMBRA-01",
+      "profile": "observation-with-component-oah"
+    },
+    {
+      "id": "obs-mondego-zinc",
+      "resourceRef": "Observation/zinc_dissolved-site-c1-mondego-1759226400-2",
+      "siteId": "site-c1-mondego",
+      "kind": "environmental",
+      "indicator": "Dissolved zinc",
+      "value": 0.05,
+      "unit": "mg/L",
+      "effectiveAt": "2026-09-30T10:00:00Z",
+      "interpretation": "Above prototype screening value",
+      "screeningReference": "above 0.0078 mg/L",
+      "source": "ESP32-SENS-COIMBRA-01",
+      "profile": "observation-environmental-oah"
+    },
+    {
+      "id": "obs-mondego-health",
+      "resourceRef": "Observation/overall-health-risk-site-c1-mondego-1759190400-r3",
+      "siteId": "site-c1-mondego",
+      "kind": "health",
+      "indicator": "Overall health risk score",
+      "value": 0.534,
+      "unit": "score",
+      "effectiveAt": "2026-09-30T00:00:00Z",
+      "evaluationPeriod": "2026-01-01 to 2026-09-27",
+      "interpretation": "HIGH (agency classification)",
+      "cohortRef": "Group/group-mondego-riverside-residents",
+      "source": "Coimbra Public Health Observatory",
+      "profile": "observation-health-measure-oah"
+    },
+    {
+      "id": "obs-casa-vegetation",
+      "resourceRef": "Observation/riparian-vegetation-site-c6",
+      "siteId": "site-c6-casa-do-sal",
+      "kind": "survey",
+      "indicator": "Riparian vegetation",
+      "codedValue": "Dense trees and shrubs",
+      "effectiveAt": "2026-09-30T10:15:00Z",
+      "interpretation": "Citizen observation",
+      "source": "StreamKeepers volunteer",
+      "profile": "observation-citizen-science-oah"
+    },
+    {
+      "id": "obs-casa-flow",
+      "resourceRef": "Observation/water-flow-site-c6",
+      "siteId": "site-c6-casa-do-sal",
+      "kind": "survey",
+      "indicator": "Water flow",
+      "codedValue": "Fast",
+      "effectiveAt": "2026-09-30T10:15:00Z",
+      "interpretation": "Citizen observation",
+      "source": "StreamKeepers volunteer",
+      "profile": "observation-citizen-science-oah"
+    },
+    {
+      "id": "obs-casa-aspect",
+      "resourceRef": "Observation/water-aspect-site-c6",
+      "siteId": "site-c6-casa-do-sal",
+      "kind": "survey",
+      "indicator": "Water aspect",
+      "codedValue": "Foamy",
+      "effectiveAt": "2026-09-30T10:15:00Z",
+      "interpretation": "Descriptive observation; no threshold applied",
+      "source": "StreamKeepers volunteer",
+      "profile": "observation-citizen-science-oah"
+    },
+    {
+      "id": "obs-t1-health",
+      "resourceRef": "Observation/overall-health-risk-site-coimbra-t1",
+      "siteId": "site-coimbra-t1",
+      "kind": "health",
+      "indicator": "Overall health risk score",
+      "value": 0.404,
+      "unit": "score",
+      "effectiveAt": "2026-09-30T00:00:00Z",
+      "evaluationPeriod": "2026-01-01 to 2026-09-27",
+      "interpretation": "MODERATE (agency classification)",
+      "cohortRef": "Group/group-coimbra-adults-18-64",
+      "source": "Coimbra Public Health Observatory",
+      "profile": "observation-health-measure-oah"
+    },
+    {
+      "id": "obs-t1-nitrate-summary",
+      "resourceRef": "Observation/nitrate-summary-site-coimbra-t1",
+      "siteId": "site-coimbra-t1",
+      "kind": "health-summary",
+      "indicator": "Nitrate as NO3-N",
+      "value": 1.916,
+      "unit": "mg NO3-N/L",
+      "effectiveAt": "2026-09-30T00:00:00Z",
+      "evaluationPeriod": "2026-01-01 to 2026-09-27",
+      "interpretation": "Public-health aggregate; not screened as a sensor reading",
+      "source": "Coimbra Public Health Observatory",
+      "profile": "observation-health-measure-oah"
+    }
+  ],
+  "findings": [
+    {
+      "id": "finding-nitrate",
+      "siteId": "site-c1-mondego",
+      "type": "threshold",
+      "severity": "high",
+      "title": "Nitrate above prototype screening value",
+      "statement": "14.2 mg/L as NO3-N exceeds the 11.3 mg/L prototype screening reference by 1.26×.",
+      "evidenceIds": ["evidence-nitrate-observation", "evidence-nitrate-rule"]
+    },
+    {
+      "id": "finding-zinc",
+      "siteId": "site-c1-mondego",
+      "type": "threshold",
+      "severity": "high",
+      "title": "Dissolved zinc screening flag",
+      "statement": "0.05 mg/L is above the 0.0078 mg/L prototype screening reference.",
+      "evidenceIds": ["evidence-zinc-observation", "evidence-zinc-rule"]
+    },
+    {
+      "id": "finding-colocation",
+      "siteId": "site-c1-mondego",
+      "type": "co-location",
+      "severity": "attention",
+      "title": "Cross-domain co-location",
+      "statement": "Environmental exceedances and an elevated cohort health-risk score are associated with the same Location.",
+      "caveat": "Association only, not causation. Environmental sampling and the health evaluation period are not contemporaneous.",
+      "evidenceIds": ["evidence-nitrate-observation", "evidence-health-observation", "evidence-health-cohort"]
+    },
+    {
+      "id": "finding-t1-health",
+      "siteId": "site-coimbra-t1",
+      "type": "health",
+      "severity": "moderate",
+      "title": "Moderate agency-classified health risk",
+      "statement": "The public-health aggregate reports an overall score of 0.404 with a MODERATE agency interpretation.",
+      "evidenceIds": ["evidence-t1-health"]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "evidence-nitrate-observation",
+      "siteId": "site-c1-mondego",
+      "type": "FHIR_OBSERVATION",
+      "label": "Nitrate Observation",
+      "resourceRef": "Observation/nitrate-site-c1-mondego-1759226400-1",
+      "display": "14.2 mg/L as NO3-N · 30 Sep 2026 10:00 UTC",
+      "observationId": "obs-mondego-nitrate"
+    },
+    {
+      "id": "evidence-nitrate-rule",
+      "siteId": "site-c1-mondego",
+      "type": "THRESHOLD_RULE",
+      "label": "Nitrate screening rule",
+      "resourceRef": "threshold:nitrate",
+      "display": "Above 11.3 mg/L as NO3-N",
+      "basis": "Prototype screening rule. Chemical basis is preserved; nitrate is not silently equated with nitrate-nitrogen."
+    },
+    {
+      "id": "evidence-zinc-observation",
+      "siteId": "site-c1-mondego",
+      "type": "FHIR_OBSERVATION",
+      "label": "Dissolved zinc Observation",
+      "resourceRef": "Observation/zinc_dissolved-site-c1-mondego-1759226400-2",
+      "display": "0.05 mg/L · 30 Sep 2026 10:00 UTC",
+      "observationId": "obs-mondego-zinc"
+    },
+    {
+      "id": "evidence-zinc-rule",
+      "siteId": "site-c1-mondego",
+      "type": "THRESHOLD_RULE",
+      "label": "Dissolved zinc screening rule",
+      "resourceRef": "threshold:zinc_dissolved",
+      "display": "Above 0.0078 mg/L",
+      "basis": "Prototype screening rule; not a universal safety limit."
+    },
+    {
+      "id": "evidence-health-observation",
+      "siteId": "site-c1-mondego",
+      "type": "FHIR_OBSERVATION",
+      "label": "Health-risk Observation",
+      "resourceRef": "Observation/overall-health-risk-site-c1-mondego-1759190400-r3",
+      "display": "0.534 · HIGH agency interpretation · evaluation through 27 Sep 2026",
+      "observationId": "obs-mondego-health"
+    },
+    {
+      "id": "evidence-health-cohort",
+      "siteId": "site-c1-mondego",
+      "type": "FHIR_GROUP",
+      "label": "Riverside residents cohort",
+      "resourceRef": "Group/group-mondego-riverside-residents",
+      "display": "Ages 18–74 · all genders · Mondego C1 Location"
+    },
+    {
+      "id": "evidence-t1-health",
+      "siteId": "site-coimbra-t1",
+      "type": "FHIR_OBSERVATION",
+      "label": "Urban catchment health-risk Observation",
+      "resourceRef": "Observation/overall-health-risk-site-coimbra-t1",
+      "display": "0.404 · MODERATE agency interpretation",
+      "observationId": "obs-t1-health"
+    }
+  ],
+  "graph": {
+    "nodes": [
+      {"id": "Location/site-c1-mondego", "siteId": "site-c1-mondego", "type": "Location", "label": "Mondego C1", "x": 48, "y": 49},
+      {"id": "Observation/nitrate-site-c1-mondego-1759226400-1", "siteId": "site-c1-mondego", "type": "Observation", "label": "Nitrate 14.2 mg/L", "x": 24, "y": 20},
+      {"id": "Device/ESP32-SENS-COIMBRA-01", "siteId": "site-c1-mondego", "type": "Device", "label": "ESP32 sensor", "x": 8, "y": 50},
+      {"id": "threshold:nitrate", "siteId": "site-c1-mondego", "type": "Rule", "label": "Nitrate rule", "x": 24, "y": 80},
+      {"id": "finding-colocation", "siteId": "site-c1-mondego", "type": "Finding", "label": "Co-location finding", "x": 73, "y": 20},
+      {"id": "Observation/overall-health-risk-site-c1-mondego-1759190400-r3", "siteId": "site-c1-mondego", "type": "Observation", "label": "Health risk 0.534", "x": 75, "y": 50},
+      {"id": "Group/group-mondego-riverside-residents", "siteId": "site-c1-mondego", "type": "Group", "label": "Riverside cohort", "x": 73, "y": 80},
+      {"id": "Organization/coimbra-public-health-observatory", "siteId": "site-c1-mondego", "type": "Organization", "label": "Health observatory", "x": 94, "y": 50},
+      {"id": "Location/site-coimbra-t1", "siteId": "site-coimbra-t1", "type": "Location", "label": "Urban catchment T1", "x": 43, "y": 45},
+      {"id": "Observation/overall-health-risk-site-coimbra-t1", "siteId": "site-coimbra-t1", "type": "Observation", "label": "Health risk 0.404", "x": 72, "y": 45},
+      {"id": "Group/group-coimbra-adults-18-64", "siteId": "site-coimbra-t1", "type": "Group", "label": "Adults 18–64", "x": 72, "y": 76}
+    ],
+    "edges": [
+      {"id": "edge-1", "siteId": "site-c1-mondego", "source": "Observation/nitrate-site-c1-mondego-1759226400-1", "target": "Location/site-c1-mondego", "type": "OBSERVED_AT"},
+      {"id": "edge-2", "siteId": "site-c1-mondego", "source": "Observation/nitrate-site-c1-mondego-1759226400-1", "target": "Device/ESP32-SENS-COIMBRA-01", "type": "MEASURED_BY"},
+      {"id": "edge-3", "siteId": "site-c1-mondego", "source": "Observation/nitrate-site-c1-mondego-1759226400-1", "target": "threshold:nitrate", "type": "SCREENED_BY", "derived": true},
+      {"id": "edge-4", "siteId": "site-c1-mondego", "source": "finding-colocation", "target": "Observation/nitrate-site-c1-mondego-1759226400-1", "type": "SUPPORTED_BY", "derived": true},
+      {"id": "edge-5", "siteId": "site-c1-mondego", "source": "finding-colocation", "target": "Observation/overall-health-risk-site-c1-mondego-1759190400-r3", "type": "SUPPORTED_BY", "derived": true},
+      {"id": "edge-6", "siteId": "site-c1-mondego", "source": "Observation/overall-health-risk-site-c1-mondego-1759190400-r3", "target": "Location/site-c1-mondego", "type": "OBSERVED_AT"},
+      {"id": "edge-7", "siteId": "site-c1-mondego", "source": "Observation/overall-health-risk-site-c1-mondego-1759190400-r3", "target": "Group/group-mondego-riverside-residents", "type": "DESCRIBES"},
+      {"id": "edge-8", "siteId": "site-c1-mondego", "source": "Observation/overall-health-risk-site-c1-mondego-1759190400-r3", "target": "Organization/coimbra-public-health-observatory", "type": "PERFORMED_BY"},
+      {"id": "edge-9", "siteId": "site-coimbra-t1", "source": "Observation/overall-health-risk-site-coimbra-t1", "target": "Location/site-coimbra-t1", "type": "OBSERVED_AT"},
+      {"id": "edge-10", "siteId": "site-coimbra-t1", "source": "Observation/overall-health-risk-site-coimbra-t1", "target": "Group/group-coimbra-adults-18-64", "type": "DESCRIBES"}
+    ]
+  },
+  "samples": [
+    {
+      "key": "iot",
+      "label": "IoT telemetry",
+      "description": "Mondego C1 · pH, nitrate and dissolved zinc",
+      "siteId": "site-c1-mondego",
+      "sourceType": "IOT_TELEMETRY",
+      "scenario": "success",
+      "raw": {
+        "event_id": "8f3b12a4-112e-48a1-901c-7a912eef3110",
+        "source_type": "IOT_TELEMETRY",
+        "city": "coimbra",
+        "site_id": "site-c1-mondego",
+        "timestamp": "2026-09-30T10:00:00Z",
+        "received_at": "2026-09-30T10:00:02Z",
+        "payload": {"device_id": "ESP32-SENS-COIMBRA-01", "measurements": [{"parameter": "ph", "unit": "pH", "value": 7.4}, {"parameter": "nitrate", "unit": "mg/L", "value": 14.2, "min_value": 11.0, "max_value": 16.5, "avg_value": 14.2}, {"parameter": "zinc_dissolved", "unit": "mg/L", "value": 0.05}]}
+      }
+    },
+    {
+      "key": "survey",
+      "label": "Citizen survey",
+      "description": "Casa do Sal C6 · riparian condition and water aspect",
+      "siteId": "site-c6-casa-do-sal",
+      "sourceType": "CITIZEN_SURVEY",
+      "scenario": "warning",
+      "warning": "External photo reference retained; binary content is not imported.",
+      "raw": {
+        "event_id": "9fc92019-1afb-4e63-83d0-7d67c18a0f31",
+        "source_type": "CITIZEN_SURVEY",
+        "city": "coimbra",
+        "site_id": "site-c6-casa-do-sal",
+        "timestamp": "2026-09-30T10:15:00Z",
+        "received_at": "2026-09-30T10:15:03Z",
+        "payload": {"app_id": "StreamKeepers_Mobile_v2", "volunteer_id": "VOL-COIMBRA-88", "coordinates": {"latitude": 40.2194, "longitude": -8.4377}, "observations": [{"indicator": "riparianVegetation", "value_code": "trees_shrubs_dense"}, {"indicator": "waterFlow", "value_code": "fast"}, {"indicator": "waterAspect", "value_code": "foamy"}], "photo_urls": ["external reference redacted in dashboard"]}
+      }
+    },
+    {
+      "key": "health",
+      "label": "Public health",
+      "description": "Urban catchment T1 · agency-classified cohort scores",
+      "siteId": "site-coimbra-t1",
+      "sourceType": "PUBLIC_HEALTH",
+      "scenario": "failure",
+      "raw": {
+        "event_id": "eac53da4-0cfe-4940-9be9-07b0a98be3db",
+        "source_type": "PUBLIC_HEALTH",
+        "city": "coimbra",
+        "site_id": "site-coimbra-t1",
+        "timestamp": "2026-09-30T00:00:00Z",
+        "received_at": "2026-09-30T08:30:00Z",
+        "payload": {"health_agency": "Coimbra_Public_Health_Observatory", "evaluation_period": "2026-01-01_to_2026-09-27", "cohort": {"group_id": "group-coimbra-adults-18-64", "age_range": "18-64", "gender": "all"}, "risk_scores": [{"indicator": "overall_health_risk_score", "score": 0.404, "interpretation": "MODERATE"}]}
+      }
+    },
+    {
+      "key": "health-mondego",
+      "label": "Riverside cohort",
+      "description": "Mondego C1 · health aggregate for the same Location",
+      "siteId": "site-c1-mondego",
+      "sourceType": "PUBLIC_HEALTH",
+      "scenario": "success",
+      "raw": {
+        "event_id": "c1f7b2d8-41a6-4f52-9d33-61b0f2e7a914",
+        "source_type": "PUBLIC_HEALTH",
+        "city": "coimbra",
+        "site_id": "site-c1-mondego",
+        "timestamp": "2026-09-30T00:00:00Z",
+        "received_at": "2026-09-30T08:45:00Z",
+        "payload": {"health_agency": "Coimbra_Public_Health_Observatory", "evaluation_period": "2026-01-01_to_2026-09-27", "cohort": {"group_id": "group-mondego-riverside-residents", "age_range": "18-74", "gender": "all"}, "risk_scores": [{"indicator": "overall_health_risk_score", "score": 0.534, "interpretation": "HIGH"}], "chemical_summaries": [{"indicator": "nitrate", "value": 13.8, "unit": "mg NO3-N/L"}]}
+      }
+    }
+  ],
+  "seedRuns": [
+    {"id": "run-001", "sampleKey": "iot", "siteId": "site-c1-mondego", "sourceType": "IOT_TELEMETRY", "executionStatus": "completed", "fhirOutcome": "UPLOADED", "startedAt": "2026-09-30T10:00:00Z", "completedAt": "2026-09-30T10:00:05Z", "attempt": 1},
+    {"id": "run-002", "sampleKey": "survey", "siteId": "site-c6-casa-do-sal", "sourceType": "CITIZEN_SURVEY", "executionStatus": "completed", "fhirOutcome": "UPLOADED", "startedAt": "2026-09-30T10:15:00Z", "completedAt": "2026-09-30T10:15:05Z", "attempt": 1, "warnings": ["External photo reference retained; binary content is not imported."]},
+    {"id": "run-003", "sampleKey": "health", "siteId": "site-coimbra-t1", "sourceType": "PUBLIC_HEALTH", "executionStatus": "failed", "fhirOutcome": "UPLOAD_FAILED", "startedAt": "2026-09-30T10:20:00Z", "completedAt": "2026-09-30T10:20:05Z", "attempt": 1, "error": "FHIR transaction service unavailable"},
+    {"id": "run-004", "sampleKey": "health", "siteId": "site-coimbra-t1", "sourceType": "PUBLIC_HEALTH", "executionStatus": "completed", "fhirOutcome": "UPLOADED", "startedAt": "2026-09-30T10:23:00Z", "completedAt": "2026-09-30T10:23:03Z", "attempt": 2, "retryOf": "run-003"}
+  ],
+  "reports": [
+    {
+      "id": "report-001",
+      "siteId": "site-c1-mondego",
+      "title": "Mondego C1 · Site One Health Briefing",
+      "status": "generated",
+      "visibility": "published",
+      "ownerId": "user-analyst-01",
+      "requestedAt": "2026-10-02T09:59:55Z",
+      "generatedAt": "2026-10-02T10:00:00Z",
+      "snapshotObservationIds": ["obs-mondego-ph", "obs-mondego-nitrate", "obs-mondego-zinc", "obs-mondego-health"],
+      "snapshotFindingIds": ["finding-nitrate", "finding-zinc", "finding-colocation"]
+    }
+  ],
+  "assistant": {
+    "questions": [
+      "What needs attention at Mondego C1?",
+      "What evidence supports the co-location finding?",
+      "Are the environmental and health observations contemporaneous?"
+    ]
+  }
+}

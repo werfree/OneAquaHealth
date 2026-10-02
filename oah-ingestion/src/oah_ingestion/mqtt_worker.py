@@ -3,6 +3,7 @@
 import logging
 import os
 import ssl
+from uuid import uuid4
 
 import paho.mqtt.client as mqtt
 from paho.mqtt.packettypes import PacketTypes
@@ -27,9 +28,10 @@ def mqtt_connect_options() -> dict:
 
 def create_mqtt_client() -> mqtt.Client:
     """Create a configured client; callers own starting and stopping its loop."""
+    client_id = os.getenv("MQTT_CLIENT_ID") or f"OAHIngest-{uuid4().hex[:10]}"
     client = mqtt.Client(
         callback_api_version=mqtt.CallbackAPIVersion.VERSION2,
-        client_id=os.getenv("MQTT_CLIENT_ID", "OAH_Sensor_Ingestion_Worker"),
+        client_id=client_id,
         protocol=mqtt.MQTTv5,
     )
     client.manual_ack_set(True)
@@ -40,9 +42,14 @@ def create_mqtt_client() -> mqtt.Client:
         if reason_code == 0:
             topic_filter = os.getenv("MQTT_TOPIC", "oneaquahealth/sensors/+/+")
             client.subscribe(topic_filter, qos=1)
-            logger.info("Connected; subscribed to %s", topic_filter)
+            logger.info("Connected as MQTT client %s; subscribed to %s", client_id, topic_filter)
         else:
             logger.error("MQTT connection failed: %s", reason_code)
+
+    def on_disconnect(client, userdata, disconnect_flags, reason_code, properties):
+        del client, userdata, disconnect_flags, properties
+        if reason_code != 0:
+            logger.warning("MQTT client %s disconnected: %s", client_id, reason_code)
 
     def on_message(client, userdata, message):
         del userdata
@@ -85,6 +92,7 @@ def create_mqtt_client() -> mqtt.Client:
             logger.exception("Could not normalize MQTT packet on %s", message.topic)
 
     client.on_connect = on_connect
+    client.on_disconnect = on_disconnect
     client.on_message = on_message
     username, password = os.getenv("MQTT_USERNAME"), os.getenv("MQTT_PASSWORD")
     if username and password:
