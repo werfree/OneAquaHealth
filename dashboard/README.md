@@ -39,8 +39,8 @@ See [API-MAPPING.md](API-MAPPING.md) for request/response ownership and future b
 ## Native Surveillance Studio
 
 Open `http://127.0.0.1:8090/studio` with the gateway running and
-`OPENAI_API_KEY` configured on the gateway. In live dashboard mode, the bot
-button and **Surveillance** navigation item open a full page in the dashboard,
+`OPENAI_API_KEY` configured on the gateway. In live dashboard mode, the
+**Surveillance** navigation item opens a full page in the dashboard,
 just like Overview. Mobile navigation labels it **Studio**.
 Choose **Current station** or **All stations**, ask a question, and inspect
 streaming tool activity, charts, answers and screening references. The page

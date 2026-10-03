@@ -45,8 +45,6 @@
 .studio-head h1 { font-size: 26px; margin: 3px 0 0; letter-spacing: -0.025em; }
 .studio-head p { color: var(--ink-3); font-size: 13px; margin: 6px 0 0; }
 .studio-actions { display: flex; align-items: center; gap: 4px; }
-.studio-bot { color: var(--teal); border: 1px solid var(--line-strong); background: var(--surface); }
-.studio-bot.is-active { background: var(--teal-soft); }
 .studio-scope { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 10px 16px; border-bottom: 1px solid var(--line); font-size: 12px; }
 .studio-scope select { min-width: 130px; max-width: 100%; background: var(--field); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 5px 8px; }
 #studio-station { width: 100%; color: var(--ink-3); overflow-wrap: anywhere; }

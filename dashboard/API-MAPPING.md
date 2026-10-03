@@ -19,7 +19,7 @@ The dashboard server exposes a narrow same-origin proxy under `/api/live/*`. Set
 `GET /api/config` is a public, non-sensitive dashboard configuration route. It exposes the supported theme catalogue, validated `DASHBOARD_DEFAULT_THEME`, and validated `DASHBOARD_DEFAULT_MODE` as `defaultMode`; environment values such as service URLs and credentials are not returned.
 
 `GET /studio` serves the native dashboard with live Studio selected (an explicit
-`?mode=` still wins). The bot and **Surveillance** primary navigation item select
+`?mode=` still wins). The **Surveillance** primary navigation item selects
 the Studio page within the dashboard main content. Hash routes support direct
 links, refresh, and browser Back/Forward. Studio state and DOM are retained
 while other dashboard routes render. The Analyst persona can investigate in live mode;
