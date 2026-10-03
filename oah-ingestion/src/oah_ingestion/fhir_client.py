@@ -107,18 +107,41 @@ def upload_bundle(bundle: dict, *, timeout: int = 60) -> Tuple[int, int]:
     return succeeded, failed
 
 
-def search(resource_type: str, params: Dict[str, str], *, timeout: int = 60) -> List[dict]:
-    """Run a FHIR search and return the matching resources (first page).
+MAX_PAGES = int(os.getenv("FHIR_MAX_PAGES", "6"))
+
+
+def search(resource_type: str, params: Dict[str, str], *, timeout: int = 30, paginate: bool = True) -> List[dict]:
+    """Run a FHIR search and return every matching resource.
 
     `params` are FHIR search parameters, e.g.
     `{"_profile": OBSERVATION_WITH_COMPONENT_PROFILE, "code": "nitrate"}`.
+
+    Servers cap a page regardless of `_count` -- HAPI returns 500 however many
+    you ask for -- so a single-page read silently truncates. That is a bad
+    failure anywhere and a dangerous one here: with an ascending date sort the
+    rows dropped are the most recent, so "the latest reading" came back days
+    stale and every severity derived from it was wrong. Follow `Bundle.link`
+    rel=next until the result set is exhausted.
     """
 
     query = urllib.parse.urlencode({k: v for k, v in params.items() if v is not None})
     url = f"{base_url()}/{resource_type}?{query}"
-    logger.debug("FHIR GET %s", url)
-    bundle = _request("GET", url, timeout=timeout)
-    return [entry["resource"] for entry in bundle.get("entry", []) if "resource" in entry]
+    resources: List[dict] = []
+
+    for page in range(MAX_PAGES):
+        logger.debug("FHIR GET %s", url)
+        bundle = _request("GET", url, timeout=timeout)
+        resources.extend(e["resource"] for e in bundle.get("entry", []) if "resource" in e)
+        if not paginate:
+            break
+        nxt = next((l.get("url") for l in bundle.get("link", []) if l.get("relation") == "next"), None)
+        if not nxt:
+            break
+        url = nxt
+    else:
+        logger.warning("Stopped after %d pages for %s; result may be incomplete", MAX_PAGES, resource_type)
+
+    return resources
 
 
 def search_url(resource_type: str, params: Dict[str, str]) -> str:

@@ -532,7 +532,14 @@ async function typeIn(text,speed=34){
     ta.style.height="auto";ta.style.height=Math.min(120,ta.scrollHeight)+"px";
     await sleep(speed+Math.random()*22);} await sleep(240);}
 
-const waitIdle=async(max=70)=>{for(let i=0;i<max*2&&running;i++)await sleep(500);};
+// Wait for the real run, however long the model takes. Advancing on a timeout
+// desynced the captions from what was actually on screen, which looked like a
+// hang. The cap is only a backstop against a wedged request.
+const waitIdle=async(max=240)=>{
+  for(let i=0;i<max*2&&running;i++) await sleep(500);
+  if(running) say("Still working — the model is taking longer than usual.");
+  await sleep(400);
+};
 
 const DEMO=[
   async()=>{say("A district surveillance officer asks what needs attention.");await sleep(2100);},
