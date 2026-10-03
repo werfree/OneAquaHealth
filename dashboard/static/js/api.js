@@ -2,6 +2,68 @@
 const REQUESTED_MODE = new URLSearchParams(window.location.search).get("mode") || document.documentElement.dataset.defaultMode;
 const MODE = REQUESTED_MODE === "live" ? "live" : "mock";
 
+// Shared demo role policy. Personas demonstrate what each role is *intended* to
+// see, so the policy must travel with the browser session in both mock and live
+// mode — otherwise switching to live silently strips a role's intended views.
+// Mock mode mirrors this policy in `dashboard/data/fixtures.json` and enforces
+// it on the server; live mode is anonymous at the gateway and cannot enforce
+// scope, so these flags express intended demo capability only.
+export const ROLES = {
+  viewer: {
+    id: "user-viewer-01",
+    label: "Viewer",
+    description: "Published summaries and reports",
+    permissions: ["dashboard.read", "report.download.published"],
+    siteIds: ["site-c1-mondego"],
+  },
+  analyst: {
+    id: "user-analyst-01",
+    label: "Analyst",
+    description: "Findings, evidence and briefings",
+    permissions: ["dashboard.read", "evidence.read", "graph.read", "assistant.ask", "report.create", "report.download"],
+    siteIds: ["site-c1-mondego", "site-coimbra-t1"],
+  },
+  operator: {
+    id: "user-operator-01",
+    label: "Data operator",
+    description: "Assigned source runs and payloads",
+    permissions: ["dashboard.read", "ingestion.read", "ingestion.create", "ingestion.retry", "raw.read"],
+    siteIds: ["site-c1-mondego", "site-c6-casa-do-sal", "site-coimbra-t1"],
+  },
+};
+
+// Live mode capability is the role's intended permission AND the gateway's current
+// support. Read-only evidence is implemented by the dashboard for live mode, so
+// Analyst keeps it; graph and proposed briefing features have no live route and
+// therefore stay unavailable in live mode even for roles that may read them in mock.
+const LIVE_CAPABILITY_SUPPORT = {
+  canReadEvidence: true,
+  canLoadGraph: false,
+  canGenerateReports: false,
+  canRetryRuns: false,
+  canTrackRuns: false,
+};
+
+function capabilitySnapshot(persona, { live }) {
+  const permissions = new Set(persona.permissions);
+  const caps = {
+    canQueryAssistant: permissions.has("assistant.ask"),
+    canTrackRuns: permissions.has("ingestion.read"),
+    canStartRuns: permissions.has("ingestion.create"),
+    canRetryRuns: permissions.has("ingestion.retry"),
+    canGenerateReports: permissions.has("report.create"),
+    canLoadGraph: permissions.has("graph.read"),
+    canReadEvidence: permissions.has("evidence.read"),
+    hasServerAuthorization: !live,
+  };
+  if (live) {
+    for (const [key, supported] of Object.entries(LIVE_CAPABILITY_SUPPORT)) {
+      caps[key] = caps[key] && supported;
+    }
+  }
+  return caps;
+}
+
 export class ApiError extends Error {
   constructor(message, status = 0, details = null) {
     super(message);
@@ -50,27 +112,17 @@ const mockAdapter = {
 };
 
 function liveSession(role) {
+  const key = ROLES[role] ? role : "analyst";
+  const profile = ROLES[key];
+  const persona = { ...profile, key };
   return {
-    persona: {
-      key: role,
-      id: "anonymous-live-caller",
-      label: role === "operator" ? "Data operator" : role[0].toUpperCase() + role.slice(1),
-      description: "UI-only demo persona; live backend is anonymous",
-      permissions: ["dashboard.read"],
-      siteIds: [],
-    },
-    capabilities: {
-      canQueryAssistant: true,
-      canTrackRuns: false,
-      canStartRuns: role === "operator",
-      canRetryRuns: false,
-      canGenerateReports: false,
-      canLoadGraph: false,
-      canReadEvidence: false,
-      hasServerAuthorization: false,
-    },
+    persona,
+    capabilities: capabilitySnapshot(persona, { live: true }),
     mode: "live",
-    notices: ["The existing live gateway is anonymous; persona controls do not secure it."],
+    notices: [
+      "Demo personas simulate a proposed policy; the live gateway itself is anonymous, so these controls show intended capability rather than enforcing access.",
+      "Evidence references are read from already-uploaded FHIR data through the gateway's station endpoint.",
+    ],
   };
 }
 
@@ -123,6 +175,15 @@ function liveObservations(source, siteId) {
   return [...environmental, ...health].sort((a, b) => String(b.effectiveAt || "").localeCompare(String(a.effectiveAt || "")));
 }
 
+// Stable, deterministic evidence reference ids so the Findings tab can link to a
+// resolvable Evidence drawer in live mode. One env record (the flagged Observation)
+// plus one rule record (the screening basis) per exceedance; one observation record
+// per elevated risk and per cohort. Ids encode the station so the resolver can
+// re-fetch that station's live payload without holding global state.
+function liveEvidenceId(kind, index, siteId) {
+  return `live-evidence-${kind}-${index}-${siteId}`;
+}
+
 function liveFindings(source, siteId) {
   const caveat = "Prototype screening reference, not a regulatory limit.";
   return [
@@ -131,14 +192,94 @@ function liveFindings(source, siteId) {
       title: `${item.indicator || "Measure"} above prototype screening value`,
       statement: `${item.value} ${item.unit || ""} against ${item.threshold}${item.exceedance_factor ? ` (${item.exceedance_factor}×)` : ""}. Basis: ${item.basis || "prototype rule"}.`,
       caveat,
+      evidenceIds: [liveEvidenceId("exceedance", index, siteId), liveEvidenceId("rule", index, siteId)],
     })),
     ...(source.elevated_risks || []).map((item, index) => ({
       id: `live-risk-${index}`, siteId, type: "health-watch", severity: item.interpretation === "HIGH" ? "high" : "moderate",
       title: `${item.indicator || "Health measure"} classified ${item.interpretation}`,
       statement: `Score ${item.score}${item.cohort ? ` for cohort ${item.cohort}` : ""}, as classified by the reporting agency.`,
+      evidenceIds: [liveEvidenceId("risk", index, siteId), ...(item.cohort ? [liveEvidenceId("cohort", index, siteId)] : [])],
     })),
-    ...(source.co_location ? [{ id: "live-colocation", siteId, type: "co-location", severity: "attention", title: "Cross-domain co-location", statement: "An environmental screening flag and an elevated health classification share this Location.", caveat: source.caveat || "Association only, not causation." }] : []),
+    ...(source.co_location ? [{ id: "live-colocation", siteId, type: "co-location", severity: "attention", title: "Cross-domain co-location", statement: "An environmental screening flag and an elevated health classification share this Location.", caveat: source.caveat || "Association only, not causation.", evidenceIds: [], }] : []),
   ];
+}
+
+// The gateway has no evidence route, so live evidence is *derived* from the same
+// already-uploaded station payload the views render. A tiny cache keyed by station
+// lets the resolver avoid a re-fetch when the station is already in view; it falls
+// back to a live GET when opened cold (e.g. a deep link). Evidence is never invented:
+// every field below comes from the gateway's exceedance / risk / cohort records.
+const liveStationCache = new Map();
+
+async function liveStationSource(siteId) {
+  if (!liveStationCache.has(siteId)) {
+    liveStationCache.set(siteId, request(`/api/live/sites/${encodeURIComponent(siteId)}`));
+  }
+  return liveStationCache.get(siteId);
+}
+
+function liveEvidenceRecord(kind, index, source, siteId) {
+  const fhirUrl = url => (url ? { resourceRef: url } : {});
+  if (kind === "exceedance") {
+    const item = (source.exceedances || [])[index];
+    if (!item) return null;
+    return {
+      id: liveEvidenceId(kind, index, siteId), siteId, type: "FHIR_OBSERVATION",
+      label: `${item.indicator || "Measure"} Observation`,
+      ...fhirUrl(item.fhir_url),
+      observationId: item.observation_id,
+      display: `${item.value} ${item.unit || ""} · prototype screening value ${item.threshold}${item.exceedance_factor ? ` (${item.exceedance_factor}×)` : ""}`,
+      basis: item.basis || null,
+    };
+  }
+  if (kind === "rule") {
+    const item = (source.exceedances || [])[index];
+    if (!item) return null;
+    return {
+      id: liveEvidenceId(kind, index, siteId), siteId, type: "THRESHOLD_RULE",
+      label: `${item.indicator || "Measure"} screening rule`,
+      resourceRef: `threshold:${item.indicator || "measure"}`,
+      display: `Above ${item.threshold} ${item.unit || ""}`.trim(),
+      basis: item.basis || "Prototype screening rule; not a universal safety limit.",
+    };
+  }
+  if (kind === "risk") {
+    const item = (source.elevated_risks || [])[index];
+    if (!item) return null;
+    return {
+      id: liveEvidenceId(kind, index, siteId), siteId, type: "FHIR_OBSERVATION",
+      label: `${item.indicator || "Health measure"} Observation`,
+      ...fhirUrl(item.fhir_url),
+      observationId: item.observation_id,
+      display: `Score ${item.score} · ${item.interpretation} agency classification`,
+      basis: "Agency-reported classification exposed by the gateway, not computed by this dashboard.",
+    };
+  }
+  if (kind === "cohort") {
+    const cohortId = (source.elevated_risks || [])[index]?.cohort;
+    const cohort = (source.cohorts || []).find(item => item.group_id === cohortId);
+    if (!cohort) return null;
+    const characteristics = cohort.characteristics || {};
+    const described = [characteristics.sex, characteristics.ageRange].filter(Boolean).join(" · ");
+    return {
+      id: liveEvidenceId(kind, index, siteId), siteId, type: "FHIR_GROUP",
+      label: cohort.name || cohort.group_id,
+      ...fhirUrl(cohort.fhir_url),
+      display: described ? `${described} · ${cohort.group_id}` : cohort.group_id,
+      basis: "Population group attached to the source health Observation.",
+    };
+  }
+  return null;
+}
+
+async function liveEvidence(_role, evidenceId) {
+  const match = /^live-evidence-(exceedance|rule|risk|cohort)-(\d+)-(.+)$/.exec(evidenceId || "");
+  if (!match) throw new ApiError("Unknown live evidence reference", 404);
+  const [, kind, index, siteId] = match;
+  const source = await liveStationSource(siteId);
+  const record = liveEvidenceRecord(kind, Number(index), source, siteId);
+  if (!record) throw new ApiError("Evidence is outside this station's current live records", 404);
+  return record;
 }
 
 const liveAdapter = {
@@ -163,7 +304,7 @@ const liveAdapter = {
     };
   },
   site: async (_role, siteId) => {
-    const source = await request(`/api/live/sites/${encodeURIComponent(siteId)}`);
+    const source = await liveStationSource(siteId);
     return {
       site: normalizeLiveSite(source),
       observations: liveObservations(source, siteId),
@@ -171,7 +312,7 @@ const liveAdapter = {
       meta: { coordinateNotice: "Coordinates come from the FHIR Location or the demo gazetteer and may be approximate.", screeningNotice: "Prototype screening rules only." },
     };
   },
-  evidence: async () => { throw new ApiError("The live backend has no dashboard evidence endpoint", 501); },
+  evidence: liveEvidence,
   graph: async () => { throw new ApiError("The live backend has no graph endpoint", 501); },
   ask: (_role, siteId, question) => request("/api/live/ask", { method: "POST", body: { question, siteId } }),
   runs: async () => {
