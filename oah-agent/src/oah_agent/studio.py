@@ -273,6 +273,28 @@ def _client():
     return OpenAI()
 
 
+# `window_days` is what `rank_wards` *returns*, so the model reasonably assumed
+# it was also what the show_* tools accept. An argument the model guessed wrong
+# should cost it a retry at worst, never kill the call -- so known aliases are
+# translated and anything the function cannot accept is dropped.
+_ALIASES = {"window_days": "days", "period_days": "days", "site": "site_id", "station": "site_id",
+            "parameter": "indicator", "code": "indicator"}
+
+
+def _clean(fn, args: dict) -> dict:
+    import inspect
+
+    accepted = set(inspect.signature(fn).parameters)
+    out = {}
+    for key, value in (args or {}).items():
+        key = _ALIASES.get(key, key)
+        if key in accepted:
+            out[key] = value
+        else:
+            logger.info("Dropped argument %r the model passed to %s", key, getattr(fn, "__name__", fn))
+    return out
+
+
 def _event(kind: str, **payload) -> str:
     return f"data: {json.dumps({'type': kind, **payload}, default=str)}\n\n"
 
@@ -335,13 +357,29 @@ def run(question: str, *, model: Optional[str] = None) -> Iterator[str]:
                     result = {"error": f"unknown tool {name!r}"}
                 else:
                     try:
-                        result = implementation(**args)
+                        result = implementation(**_clean(implementation, args))
                     except Exception as exc:
                         logger.exception("Tool %s failed", name)
                         result = {"error": f"{type(exc).__name__}: {exc}"}
 
                 render = result.pop("_render", None) if isinstance(result, dict) else None
+
+                # Grounding sources are "what this investigation actually
+                # retrieved or used", which is broader than "what the model was
+                # shown":
+                #  - a chart's data is retrieved and is on the officer's screen,
+                #    but was never sent to the model, so excluding it marked
+                #    every figure read off a chart as unsupported;
+                #  - the arguments a query ran with are facts about the
+                #    investigation ("the past 28 days"), not inventions.
+                # Including arguments is deliberately NOT a licence to present a
+                # filter value as a threshold -- that misuse is semantic, the
+                # prompt forbids it, and the verdict says plainly that a grounded
+                # figure can still sit in a wrong sentence.
                 results.append(result)
+                results.append(args)
+                if render is not None:
+                    results.append(render)
 
                 urls = []
                 if isinstance(result, dict):

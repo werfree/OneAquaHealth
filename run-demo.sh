@@ -8,6 +8,7 @@
 #   ./run-demo.sh ask "…"   put a question to the assistant
 #   ./run-demo.sh brief     generate the One Health risk briefing
 #   ./run-demo.sh seed      generate + ingest the 28-day series (takes a few minutes)
+#   ./run-demo.sh studio    open the surveillance studio with the autodemo running
 #   ./run-demo.sh down      stop RabbitMQ
 set -euo pipefail
 cd "$(dirname "$0")"
@@ -42,6 +43,7 @@ PY
   ask)   shift; exec python3 -m oah_agent.cli "$@" ;;
   brief) shift; exec python3 -m oah_agent.cli --brief "$@" ;;
   chat)  exec python3 -m oah_agent.cli --chat ;;
+  studio) exec open "http://localhost:8000/api/officer/panel?autorun=1" ;;
   down)  docker stop oah-rabbitmq ;;
   *) sed -n '2,12p' "$0"; exit 1 ;;
 esac
