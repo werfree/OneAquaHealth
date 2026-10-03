@@ -227,12 +227,13 @@ Production rules:
 
 | Dashboard proxy | Upstream route | UI use |
 |---|---|---|
+| `GET /api/live/session` | Dashboard-owned contract; no upstream identity route exists | Return anonymous live capabilities with `hasServerAuthorization: false`; disable the demo persona selector. |
 | `GET /api/live/info` | `GET /api/info` | Supplied sample catalogue for request-scoped ingestion. |
 | `GET /api/live/overview` | `GET /api/overview` | Normalize FHIR-derived site briefing into summary and station shapes. |
 | `POST /api/live/ingest-demo/{key}` | Same path | Run a supplied sample and construct a request-scoped six-stage result. |
 | `POST /api/live/ask` | `POST /api/ask` | Ask the existing optional assistant. |
 
-The live service has no session, durable run list/detail, retry, graph, evidence, or report endpoints. The UI must show an explicit unavailable state rather than silently substituting mock data.
+The live service has no authenticated session, durable run list/detail, retry, graph, evidence, or report endpoints. The dashboard-owned live session response truthfully reports the anonymous capability boundary; it is not identity or authorization. The live proxy allow-lists response fields, removes infrastructure origins, and converts FHIR trace URLs to path/query form before they reach the browser. The UI must show an explicit unavailable state rather than silently substituting mock data.
 
 ## 7. Canonical frontend models
 
@@ -434,7 +435,7 @@ The client stores route, role, theme, selected site/tab/run/stage/sample/report,
 | Report request | Select the returned report and poll while requested/generating. |
 | Theme change | Update semantic tokens and persist only the theme ID. Domain state must remain unchanged. |
 
-Avoid stale-response races in a production frontend: attach request IDs or cancellation signals when persona or station changes, and discard responses that no longer match the active scope.
+The implementation attaches request versions to scope-, site-, graph-, run-, report-, evidence-, and assistant-related loads. Responses that no longer match the active persona, station, or route are discarded, and a scope/station change closes any open detail drawer before loading replacement data.
 
 ## 9. Loading, empty, error, and permission states
 

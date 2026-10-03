@@ -10,6 +10,7 @@ import re
 import threading
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
@@ -366,7 +367,7 @@ def get_summary(x_demo_role: str | None = Header(default="analyst")) -> dict[str
         },
         "sites": sites,
         "scopeLabel": f"{len(sites)} site{'s' if len(sites) != 1 else ''} in demo scope",
-        "countNotice": "Counts describe loaded mock records, not global totals.",
+        "countNotice": "Counts describe loaded mock records dated 30 September 2026, not global totals.",
     }
 
 
@@ -617,19 +618,83 @@ def download_report(report_id: str, format_name: str, x_demo_role: str | None = 
 
 
 def proxy_live(path: str, method: str = "GET", payload: dict[str, Any] | None = None) -> JSONResponse:
+    data, status_code = fetch_live_json(path, method=method, payload=payload)
+    return JSONResponse(data, status_code=status_code)
+
+
+def fetch_live_json(path: str, method: str = "GET", payload: dict[str, Any] | None = None) -> tuple[Any, int]:
     body = json.dumps(payload).encode("utf-8") if payload is not None else None
     request = urllib.request.Request(f"{LIVE_BASE_URL}{path}", data=body, method=method, headers={"Content-Type": "application/json"})
     try:
         with urllib.request.urlopen(request, timeout=8) as result:
-            return JSONResponse(json.loads(result.read().decode("utf-8")), status_code=result.status)
+            return json.loads(result.read().decode("utf-8")), result.status
     except urllib.error.HTTPError as exc:
         try:
             detail = json.loads(exc.read().decode("utf-8"))
         except (ValueError, UnicodeDecodeError):
             detail = {"detail": str(exc)}
-        return JSONResponse(detail, status_code=exc.code)
+        return detail, exc.code
     except (urllib.error.URLError, TimeoutError) as exc:
         raise HTTPException(status_code=502, detail=f"Live OneAquaHealth service unavailable: {exc.reason if hasattr(exc, 'reason') else exc}")
+
+
+def strip_infrastructure_fields(value: Any) -> Any:
+    """Remove upstream connection details that the browser never needs."""
+
+    if isinstance(value, list):
+        return [strip_infrastructure_fields(item) for item in value]
+    if not isinstance(value, dict):
+        return value
+    blocked = {"channels", "fhir_server", "fhir_url", "fhir_urls", "server"}
+    return {key: strip_infrastructure_fields(item) for key, item in value.items() if key not in blocked}
+
+
+def sanitize_assistant_payload(value: Any) -> Any:
+    """Keep observable FHIR queries while removing their configured origin."""
+
+    data = copy.deepcopy(value)
+    if not isinstance(data, dict):
+        return data
+    for step in data.get("trace", []):
+        if not isinstance(step, dict):
+            continue
+        for key in ("fhir_url", "fhir_urls"):
+            urls = step.get(key)
+            if urls is None:
+                continue
+            values = urls if isinstance(urls, list) else [urls]
+            public_queries = []
+            for url in values:
+                parsed = urllib.parse.urlsplit(str(url))
+                public_queries.append(parsed.path + (f"?{parsed.query}" if parsed.query else ""))
+            step[key] = public_queries if isinstance(urls, list) else public_queries[0]
+    return data
+
+
+@app.get("/api/live/session")
+def live_session() -> dict[str, Any]:
+    return {
+        "persona": {
+            "key": "anonymous",
+            "id": "anonymous-live-caller",
+            "label": "Anonymous live caller",
+            "description": "The current gateway has no authenticated user or site-scoped authorization.",
+            "permissions": ["dashboard.read", "assistant.ask", "ingestion.create"],
+            "siteIds": [],
+        },
+        "capabilities": {
+            "canQueryAssistant": True,
+            "canTrackRuns": False,
+            "canStartRuns": True,
+            "canRetryRuns": False,
+            "canGenerateReports": False,
+            "canLoadGraph": False,
+            "canReadEvidence": False,
+            "hasServerAuthorization": False,
+        },
+        "mode": "live",
+        "notices": ["The live gateway is anonymous. Demo persona controls are disabled and do not secure backend access."],
+    }
 
 
 @app.get("/api/live/health")
@@ -639,24 +704,30 @@ def live_health() -> JSONResponse:
 
 @app.get("/api/live/info")
 def live_info() -> JSONResponse:
-    return proxy_live("/api/info")
+    data, status_code = fetch_live_json("/api/info")
+    if status_code >= 400:
+        return JSONResponse(data, status_code=status_code)
+    return JSONResponse({"samples": data.get("samples", [])}, status_code=status_code)
 
 
 @app.get("/api/live/overview")
 def live_overview() -> JSONResponse:
-    return proxy_live("/api/overview")
+    data, status_code = fetch_live_json("/api/overview")
+    return JSONResponse(strip_infrastructure_fields(data), status_code=status_code)
 
 
 @app.post("/api/live/ingest-demo/{key}")
 def live_ingest_demo(key: str) -> JSONResponse:
     if key not in {"iot", "survey", "health", "health-mondego"}:
         raise HTTPException(status_code=404, detail="Unknown live sample")
-    return proxy_live(f"/api/ingest-demo/{key}", method="POST")
+    data, status_code = fetch_live_json(f"/api/ingest-demo/{key}", method="POST")
+    return JSONResponse(strip_infrastructure_fields(data), status_code=status_code)
 
 
 @app.post("/api/live/ask")
 def live_ask(payload: dict[str, Any] = Body(...)) -> JSONResponse:
-    return proxy_live("/api/ask", method="POST", payload={"question": str(payload.get("question", ""))})
+    data, status_code = fetch_live_json("/api/ask", method="POST", payload={"question": str(payload.get("question", ""))})
+    return JSONResponse(sanitize_assistant_payload(data), status_code=status_code)
 
 
 @app.get("/", include_in_schema=False)

@@ -41,7 +41,18 @@ export function emptyState(title, text, action = "") {
 
 export function errorState(error, context = "This view") {
   const message = error?.message || "An unexpected error occurred.";
-  return `<div class="notice error"><strong>${escapeHtml(context)} is unavailable.</strong> ${escapeHtml(message)}</div>`;
+  const guidance = {
+    400: "The request was not valid.",
+    401: "The session is no longer authorized.",
+    403: "This capability is restricted.",
+    404: "The requested record is unavailable in the current scope.",
+    409: "The requested action conflicts with the current state.",
+    422: "The submitted value did not pass validation.",
+    501: "The backend does not implement this capability.",
+    502: "The connected service is unavailable.",
+    503: "The capability is temporarily unavailable.",
+  }[error?.status] || (error?.status === 0 ? "The network request did not complete." : "");
+  return `<div class="notice error"><strong>${escapeHtml(context)} is unavailable.</strong> ${escapeHtml(guidance)} ${escapeHtml(message)}</div>`;
 }
 
 export function jsonBlock(value) {

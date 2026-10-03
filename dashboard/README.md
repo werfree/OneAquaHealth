@@ -36,6 +36,8 @@ http://127.0.0.1:8090/?mode=live
 
 Live mode connects only the verified existing routes through the same-origin proxy. Overview, supplied-sample execution, and the optional assistant are connected. Durable run history, retry, authorization, evidence, graph, and reports remain visibly unavailable because the existing backend does not implement them. It never treats `202 ACCEPTED` as proof of persistence; full upload success requires `fhir == "UPLOADED"` and zero failed entries.
 
+The live session is reported as an anonymous, server-derived capability state; the demo persona selector is disabled in this mode. Proxy responses expose only dashboard-required data: broker/FHIR origins are removed, while assistant FHIR traces retain origin-free path/query evidence. Live overview counts describe the current tagged response and may be incomplete because the existing FHIR client reads only its first page.
+
 See [API-MAPPING.md](API-MAPPING.md) for request/response ownership and future backend work.
 
 ## Suggested 4-minute demo

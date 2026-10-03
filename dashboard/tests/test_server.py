@@ -14,10 +14,13 @@ from dashboard.server import (
     get_site,
     get_summary,
     index,
+    live_session,
     list_reports,
     resolve_default_theme,
     retry_run,
+    sanitize_assistant_payload,
     start_run,
+    strip_infrastructure_fields,
 )
 
 
@@ -120,3 +123,26 @@ def test_graph_is_scoped_and_direct_unauthorized_requests_fail():
     with pytest.raises(HTTPException) as viewer_graph:
         get_graph("site-c1-mondego", "viewer")
     assert viewer_graph.value.status_code == 403
+
+
+def test_live_session_is_server_derived_and_does_not_claim_authorization():
+    session = live_session()
+    assert session["persona"]["key"] == "anonymous"
+    assert session["capabilities"]["canStartRuns"] is True
+    assert session["capabilities"]["canTrackRuns"] is False
+    assert session["capabilities"]["hasServerAuthorization"] is False
+
+
+def test_live_payload_sanitizers_remove_infrastructure_origins():
+    overview = strip_infrastructure_fields({
+        "fhir_server": "https://fhir.example.test/baseR4",
+        "briefings": [{"site_id": "site-1", "fhir_urls": ["https://fhir.example.test/baseR4/Observation?_count=200"]}],
+    })
+    assert overview == {"briefings": [{"site_id": "site-1"}]}
+
+    assistant = sanitize_assistant_payload({
+        "trace": [{"tool": "search", "fhir_urls": ["https://fhir.example.test/baseR4/Observation?subject=Location%2Fsite-1"]}],
+    })
+    query = assistant["trace"][0]["fhir_urls"][0]
+    assert query == "/baseR4/Observation?subject=Location%2Fsite-1"
+    assert "fhir.example.test" not in query

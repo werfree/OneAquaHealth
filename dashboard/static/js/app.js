@@ -13,6 +13,13 @@ const themeSelector = document.querySelector("#theme-selector");
 const browserThemeColor = document.querySelector("#browser-theme-color");
 const embeddedThemeConfig = JSON.parse(document.querySelector("#theme-config").textContent);
 let pollTimer = null;
+let scopeRequestVersion = 0;
+let siteRequestVersion = 0;
+let graphRequestVersion = 0;
+let routeRequestVersion = 0;
+let runsRequestVersion = 0;
+let reportsRequestVersion = 0;
+let assistantRequestVersion = 0;
 
 function clearPoll() {
   if (pollTimer) window.clearTimeout(pollTimer);
@@ -40,12 +47,22 @@ function applyTheme(themeId, { persist = false } = {}) {
 }
 
 function syncChrome() {
-  personaSelector.value = state.role;
+  if (apiMode === "live") {
+    personaSelector.innerHTML = `<option value="anonymous">Anonymous live caller</option>`;
+    personaSelector.value = "anonymous";
+    personaSelector.disabled = true;
+  } else {
+    personaSelector.value = state.role;
+    personaSelector.disabled = false;
+  }
   if (state.themeConfig) {
     themeSelector.innerHTML = state.themeConfig.themes.map(theme => `<option value="${escapeHtml(theme.id)}">${escapeHtml(theme.label)}${theme.id === state.themeConfig.defaultTheme ? " · Default" : ""}</option>`).join("");
     themeSelector.value = state.theme;
   }
-  modeIndicator.innerHTML = `<span></span>${apiMode === "mock" ? "Mock dataset" : "Live adapter"}`;
+  const modeLabel = apiMode === "mock"
+    ? "Mock dataset"
+    : state.session?.capabilities.hasServerAuthorization === false ? "Live adapter · anonymous" : "Live adapter";
+  modeIndicator.innerHTML = `<span></span>${modeLabel}`;
   document.querySelectorAll("[data-route]").forEach(button => {
     const active = button.dataset.route === state.route;
     button.classList.toggle("is-active", active);
@@ -61,49 +78,73 @@ function syncChrome() {
 }
 
 async function bootstrap() {
+  const requestVersion = ++scopeRequestVersion;
+  const role = state.role;
+  siteRequestVersion += 1;
+  graphRequestVersion += 1;
+  runsRequestVersion += 1;
+  reportsRequestVersion += 1;
+  assistantRequestVersion += 1;
   clearPoll();
+  closeDrawer();
   setState({ loading: true, error: null });
   render();
   try {
-    const [session, summary] = await Promise.all([api.session(state.role), api.summary(state.role)]);
+    const [session, summary] = await Promise.all([api.session(role), api.summary(role)]);
+    if (requestVersion !== scopeRequestVersion || role !== state.role) return;
     const selectedSiteId = summary.sites.some(site => site.id === state.selectedSiteId)
       ? state.selectedSiteId
       : summary.sites[0]?.id || null;
     setState({ session, summary, selectedSiteId, loading: false });
-    if (selectedSiteId) await loadSite(selectedSiteId, false);
+    if (selectedSiteId) await loadSite(selectedSiteId, false, requestVersion);
+    if (requestVersion !== scopeRequestVersion || role !== state.role) return;
     if (state.route === "ingestion") await loadRuns();
     if (state.route === "reports") await loadReports();
   } catch (error) {
+    if (requestVersion !== scopeRequestVersion || role !== state.role) return;
     setState({ loading: false, error });
   }
   render();
 }
 
-async function loadSite(siteId, shouldRender = true) {
-  setState({ selectedSiteId: siteId, site: null, graph: null, assistant: null, error: null });
+async function loadSite(siteId, shouldRender = true, expectedScopeVersion = scopeRequestVersion) {
+  const requestVersion = ++siteRequestVersion;
+  const role = state.role;
+  graphRequestVersion += 1;
+  assistantRequestVersion += 1;
+  closeDrawer();
+  setState({ selectedSiteId: siteId, site: null, siteError: null, graph: null, assistant: null, error: null });
   if (shouldRender) render();
   try {
-    const site = await api.site(state.role, siteId);
+    const site = await api.site(role, siteId);
+    if (requestVersion !== siteRequestVersion || expectedScopeVersion !== scopeRequestVersion || role !== state.role || siteId !== state.selectedSiteId) return;
     setState({ site });
     if (state.selectedTab === "relationships" && state.session?.capabilities.canLoadGraph) await loadGraph(false);
   } catch (error) {
-    setState({ error });
+    if (requestVersion !== siteRequestVersion || expectedScopeVersion !== scopeRequestVersion || role !== state.role || siteId !== state.selectedSiteId) return;
+    setState({ siteError: error });
   }
   if (shouldRender) render();
 }
 
 async function loadGraph(shouldRender = true) {
   if (!state.session?.capabilities.canLoadGraph || !state.selectedSiteId) return;
+  const requestVersion = ++graphRequestVersion;
+  const role = state.role;
+  const siteId = state.selectedSiteId;
   try {
-    const graph = await api.graph(state.role, state.selectedSiteId);
+    const graph = await api.graph(role, siteId);
+    if (requestVersion !== graphRequestVersion || role !== state.role || siteId !== state.selectedSiteId) return;
     setState({ graph });
   } catch (error) {
+    if (requestVersion !== graphRequestVersion || role !== state.role || siteId !== state.selectedSiteId) return;
     setState({ graph: { error } });
   }
   if (shouldRender) render();
 }
 
 async function navigate(route) {
+  routeRequestVersion += 1;
   clearPoll();
   setState({ route, error: null });
   if (route === "ingestion" && !state.runs) await loadRuns();
@@ -159,7 +200,7 @@ function renderOverview() {
         </table></div></div>
       </section>
       <section class="panel" id="site-workspace">
-        ${current ? renderSiteWorkspace(current) : `<div class="loading"><span class="sr-only">Loading selected station</span></div>`}
+        ${current ? renderSiteWorkspace(current) : state.siteError ? errorState(state.siteError, "Selected station") : summary.sites.length ? `<div class="loading"><span class="sr-only">Loading selected station</span></div>` : emptyState("No stations in scope", "The current response contains no stations to inspect.")}
       </section>
     </div>
     ${renderAssistant()}`;
@@ -234,7 +275,7 @@ function renderGraphTab() {
 }
 
 function renderAssistant() {
-  const canAsk = state.session?.capabilities.canQueryAssistant;
+  const canAsk = state.session?.capabilities.canQueryAssistant && state.selectedSiteId;
   return `<section class="panel assistant-panel">
     <div class="panel-head"><div><span class="eyebrow">Observable assistance</span><h2>Ask about this site</h2><p>Answers cite returned records and expose tool/evidence steps—not hidden reasoning.</p></div>${canAsk ? statusPill("observed", apiMode === "mock" ? "Deterministic demo" : "Existing API") : statusPill("unavailable")}</div>
     ${canAsk ? `<div class="assistant-layout"><div class="assistant-main"><form id="assistant-form"><input id="assistant-question" name="question" maxlength="500" required aria-label="Question about selected site" placeholder="Ask about findings, evidence, or source timing"><button class="button primary" type="submit">Ask</button></form><div class="question-chips"><button class="question-chip" type="button" data-question="What needs attention at Mondego C1?">What needs attention?</button><button class="question-chip" type="button" data-question="What evidence supports the co-location finding?">Show supporting evidence</button><button class="question-chip" type="button" data-question="Are the environmental and health observations contemporaneous?">Are the source periods aligned?</button></div>${state.assistant ? `<div class="assistant-answer"><span class="eyebrow">Grounded response</span><p>${escapeHtml(state.assistant.answer)}</p></div>` : ""}</div><div class="trace-list"><span class="eyebrow">Execution trace</span>${state.assistant ? `<ol>${(state.assistant.trace || []).map(step => `<li><strong>${escapeHtml(step.label || step.tool || step.kind)}</strong><br>${escapeHtml(step.kind || "TOOL")} · ${escapeHtml(step.status || "completed")}</li>`).join("")}</ol><p class="station-meta">${escapeHtml(state.assistant.grounding?.notCovered || state.assistant.grounding?.not_covered || "Grounding checks are limited.")}</p>` : `<p style="margin-top:10px;color:var(--ink-3)">Run a suggested question to see evidence retrieval and grounding steps.</p>`}</div></div>` : emptyState("Assistant unavailable", "This persona cannot query scoped evidence, or the optional live assistant endpoint is unavailable.")}
@@ -242,14 +283,20 @@ function renderAssistant() {
 }
 
 async function loadRuns() {
+  const requestVersion = ++runsRequestVersion;
+  const expectedScopeVersion = scopeRequestVersion;
+  const expectedRouteVersion = routeRequestVersion;
+  const role = state.role;
   clearPoll();
   try {
-    const runs = await api.runs(state.role);
+    const runs = await api.runs(role);
+    if (requestVersion !== runsRequestVersion || expectedScopeVersion !== scopeRequestVersion || expectedRouteVersion !== routeRequestVersion || role !== state.role) return;
     const selectedRunId = runs.runs.some(run => run.id === state.selectedRunId) ? state.selectedRunId : runs.runs[0]?.id || null;
     setState({ runs, selectedRunId, error: null });
     if (!state.selectedSampleKey || !runs.samples.some(sample => sample.key === state.selectedSampleKey)) setState({ selectedSampleKey: runs.samples[0]?.key || null });
     if (runs.runs.some(run => run.executionStatus === "running") && state.route === "ingestion") schedulePoll(loadRuns);
   } catch (error) {
+    if (requestVersion !== runsRequestVersion || expectedScopeVersion !== scopeRequestVersion || expectedRouteVersion !== routeRequestVersion || role !== state.role) return;
     setState({ runs: { error }, error: null });
   }
   render();
@@ -295,8 +342,11 @@ function renderPipeline(run) {
 
 async function startRun() {
   if (!state.selectedSampleKey) return;
+  const expectedScopeVersion = scopeRequestVersion;
+  const role = state.role;
   try {
-    const run = await api.startRun(state.role, state.selectedSampleKey);
+    const run = await api.startRun(role, state.selectedSampleKey);
+    if (expectedScopeVersion !== scopeRequestVersion || role !== state.role) return;
     if (apiMode === "live") {
       const existing = state.runs || { runs: [], samples: [], stateNotice: "Live request-scoped result" };
       existing.runs = [run, ...existing.runs];
@@ -311,8 +361,11 @@ async function startRun() {
 }
 
 async function retryRun(runId) {
+  const expectedScopeVersion = scopeRequestVersion;
+  const role = state.role;
   try {
-    const run = await api.retryRun(state.role, runId);
+    const run = await api.retryRun(role, runId);
+    if (expectedScopeVersion !== scopeRequestVersion || role !== state.role) return;
     setState({ selectedRunId: run.id, selectedStageId: "received" });
     await loadRuns();
     toast(`Retry ${run.id} started`);
@@ -320,14 +373,20 @@ async function retryRun(runId) {
 }
 
 async function loadReports() {
+  const requestVersion = ++reportsRequestVersion;
+  const expectedScopeVersion = scopeRequestVersion;
+  const expectedRouteVersion = routeRequestVersion;
+  const role = state.role;
   clearPoll();
   try {
-    const reports = await api.reports(state.role);
+    const reports = await api.reports(role);
+    if (requestVersion !== reportsRequestVersion || expectedScopeVersion !== scopeRequestVersion || expectedRouteVersion !== routeRequestVersion || role !== state.role) return;
     const selectedReportId = reports.reports.some(report => report.id === state.selectedReportId) ? state.selectedReportId : reports.reports[0]?.id || null;
     const report = reports.reports.find(item => item.id === selectedReportId) || null;
     setState({ reports, selectedReportId, report, error: null });
     if (reports.reports.some(item => ["requested", "generating"].includes(item.status)) && state.route === "reports") schedulePoll(loadReports, 800);
   } catch (error) {
+    if (requestVersion !== reportsRequestVersion || expectedScopeVersion !== scopeRequestVersion || expectedRouteVersion !== routeRequestVersion || role !== state.role) return;
     setState({ reports: { error }, report: null, error: null });
   }
   render();
@@ -354,8 +413,12 @@ function renderReportPreview(report) {
 }
 
 async function generateReport() {
+  const expectedScopeVersion = scopeRequestVersion;
+  const role = state.role;
+  const siteId = state.selectedSiteId;
   try {
-    const report = await api.createReport(state.role, state.selectedSiteId);
+    const report = await api.createReport(role, siteId);
+    if (expectedScopeVersion !== scopeRequestVersion || role !== state.role || siteId !== state.selectedSiteId) return;
     setState({ selectedReportId: report.id, report });
     toast("Briefing requested");
     await loadReports();
@@ -363,8 +426,11 @@ async function generateReport() {
 }
 
 async function selectReport(reportId) {
+  const expectedScopeVersion = scopeRequestVersion;
+  const role = state.role;
   try {
-    const report = await api.report(state.role, reportId);
+    const report = await api.report(role, reportId);
+    if (expectedScopeVersion !== scopeRequestVersion || role !== state.role) return;
     setState({ selectedReportId: reportId, report });
     render();
   } catch (error) { toast(error.message, "error"); }
@@ -391,11 +457,17 @@ async function fetchReportFile(format, openForPrint = false) {
 }
 
 async function showEvidence(evidenceId) {
+  const expectedScopeVersion = scopeRequestVersion;
+  const expectedSiteVersion = siteRequestVersion;
+  const role = state.role;
+  const siteId = state.selectedSiteId;
   openDrawer(`<div class="loading"><span class="sr-only">Loading evidence</span></div>`, "Evidence record", "Resolving scoped reference");
   try {
-    const evidence = await api.evidence(state.role, evidenceId);
+    const evidence = await api.evidence(role, evidenceId);
+    if (expectedScopeVersion !== scopeRequestVersion || expectedSiteVersion !== siteRequestVersion || role !== state.role || siteId !== state.selectedSiteId) return;
     openDrawer(`<dl class="detail-grid">${Object.entries(evidence).map(([key, value]) => `<dt>${escapeHtml(key)}</dt><dd>${typeof value === "object" ? `<code>${escapeHtml(JSON.stringify(value))}</code>` : escapeHtml(value)}</dd>`).join("")}</dl>${evidence.basis ? `<div class="notice" style="margin-top:18px">${escapeHtml(evidence.basis)}</div>` : ""}`, evidence.label, evidence.type);
   } catch (error) {
+    if (expectedScopeVersion !== scopeRequestVersion || expectedSiteVersion !== siteRequestVersion || role !== state.role || siteId !== state.selectedSiteId) return;
     openDrawer(errorState(error, "Evidence"), "Evidence unavailable", "Scope and permission check");
   }
 }
@@ -491,12 +563,21 @@ document.addEventListener("submit", async event => {
   const input = event.target.elements.question;
   const question = input.value.trim();
   if (!question) return;
+  const requestVersion = ++assistantRequestVersion;
+  const expectedScopeVersion = scopeRequestVersion;
+  const role = state.role;
+  const siteId = state.selectedSiteId;
   input.disabled = true;
   try {
-    const assistant = await api.ask(state.role, state.selectedSiteId, question);
+    const assistant = await api.ask(role, siteId, question);
+    if (requestVersion !== assistantRequestVersion || expectedScopeVersion !== scopeRequestVersion || role !== state.role || siteId !== state.selectedSiteId) return;
     setState({ assistant });
     render();
-  } catch (error) { toast(error.message, "error"); input.disabled = false; }
+  } catch (error) {
+    if (requestVersion !== assistantRequestVersion || expectedScopeVersion !== scopeRequestVersion || role !== state.role || siteId !== state.selectedSiteId) return;
+    toast(error.message, "error");
+    input.disabled = false;
+  }
 });
 
 document.addEventListener("keydown", event => {
