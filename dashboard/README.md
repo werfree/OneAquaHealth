@@ -32,9 +32,37 @@ Start the existing OneAquaHealth gateway separately, set `OAH_LIVE_BASE_URL` in 
 http://127.0.0.1:8090/?mode=live
 ```
 
-Live mode connects only the verified existing routes through the same-origin proxy. Overview, supplied-sample execution, and the optional assistant are connected. Durable run history, retry, authorization, evidence, graph, and reports remain visibly unavailable because the existing backend does not implement them. It never treats `202 ACCEPTED` as proof of persistence; full upload success requires `fhir == "UPLOADED"` and zero failed entries.
+Live mode connects only the verified existing routes through the same-origin proxy. Overview, supplied-sample execution, and the optional assistant are connected. Durable run history, retry, authorization, graph, and the mock report lifecycle remain visibly unavailable because the existing backend does not implement them. It never treats `202 ACCEPTED` as proof of persistence; full upload success requires `fhir == "UPLOADED"` and zero failed entries.
 
 See [API-MAPPING.md](API-MAPPING.md) for request/response ownership and future backend work.
+
+## Native Surveillance Studio
+
+Open `http://127.0.0.1:8090/studio` with the gateway running and
+`OPENAI_API_KEY` configured on the gateway. In live dashboard mode, the bot
+button and **Surveillance** navigation item open a full page in the dashboard,
+just like Overview. Mobile navigation labels it **Studio**.
+Choose **Current station** or **All stations**, ask a question, and inspect
+streaming tool activity, charts, answers and screening references. The page
+follows the selected theme and preserves results when navigating away and back.
+**Stop** interrupts the request; **New** clears displayed results. Each question
+starts a separate investigation; there is no model conversation memory.
+
+Completed investigations expose transcripts, environmental/health CSV exports,
+and a FHIR Bundle for station-scoped investigations. Executive reports download
+as HTML with that investigation's SVG charts; open the file and print to PDF.
+The Analyst demo persona can use Studio. Mock mode links to the live workspace.
+Both Python services remain necessary; browser requests and downloads use the
+dashboard origin. Standalone Studio remains at the gateway's `/api/officer/panel`.
+
+Check the dashboard adapter and streaming parser with:
+
+```bash
+node dashboard/tests/test_api.mjs
+node dashboard/tests/test_studio_stream.mjs
+node dashboard/tests/test_routes.mjs
+```
+
 
 ## Suggested 4-minute demo
 

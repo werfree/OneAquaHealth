@@ -134,8 +134,19 @@ To connect it to the live ingestion gateway, set `OAH_LIVE_BASE_URL` in `.env` a
 
 The gateway also serves the District Surveillance Officer Studio at
 `http://localhost:8001/api/officer/panel` (use your configured `APP_PORT`).
-The live evidence dashboard links to it through **Open Surveillance Studio**;
-its existing station, ingestion, and mock workflows remain available.
+The evidence dashboard also integrates Studio natively at
+`http://localhost:8090/studio`. Choose **Surveillance** in the primary navigation
+(**Studio** on mobile), or use the bot button to open the same dashboard page. Choose the current station or all stations, enter a question,
+and watch tool activity, charts, and the answer arrive. Navigating away and returning keeps the current results; **Stop** interrupts the browser request,
+and **New** clears the visible investigations. Each question starts a fresh
+investigation rather than a conversation with model memory.
+
+The Studio page follows all four dashboard themes and uses the dashboard's
+origin for streaming and downloads. Executive reports download as HTML; open
+the file and print to save as PDF. Figures are limited to the selected
+investigation. Studio is available to the Analyst demo persona in live mode;
+mock mode offers a link to the live workspace. Both the dashboard and gateway
+must be running. The standalone gateway Studio remains available.
 
 The Studio streams an investigation using server-sent events. The analyst can
 choose data tools and charts: severity matrices, rankings, trends, scatter
@@ -198,6 +209,8 @@ python -m unittest discover -s oah-pydantic-models/tests -v
 python -m unittest discover -s oah-agent/tests -v
 python -m pytest
 node dashboard/tests/test_api.mjs
+node dashboard/tests/test_studio_stream.mjs
+node dashboard/tests/test_routes.mjs
 python oah-pydantic-models/examples/build_examples.py
 ```
 

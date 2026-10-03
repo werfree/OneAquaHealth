@@ -18,7 +18,40 @@ The dashboard server exposes a narrow same-origin proxy under `/api/live/*`. Set
 
 `GET /api/config` is a public, non-sensitive dashboard configuration route. It exposes the supported theme catalogue, validated `DASHBOARD_DEFAULT_THEME`, and validated `DASHBOARD_DEFAULT_MODE` as `defaultMode`; environment values such as service URLs and credentials are not returned.
 
-The live assistant panel also links to `GET /studio`, which redirects to the configured gateway's `/api/officer/panel`. The Studio runs its own streaming investigations, charts, and exports on the gateway. Its live executive reports and transcripts do not replace this dashboard's mock run/report lifecycle. New gateway sample keys, including `health-kanpur` and the preserved European examples, are allow-listed by the ingestion proxy.
+`GET /studio` serves the native dashboard with live Studio selected (an explicit
+`?mode=` still wins). The bot and **Surveillance** primary navigation item select
+the Studio page within the dashboard main content. Hash routes support direct
+links, refresh, and browser Back/Forward. Studio state and DOM are retained
+while other dashboard routes render. The Analyst persona can investigate in live mode;
+these persona controls demonstrate intended capability, not production identity.
+
+| Dashboard route | Gateway route | Response |
+|---|---|---|
+| `POST /api/live/studio/run` | `POST /api/officer/studio/run` | SSE bytes forwarded as available, with cleanup on completion/disconnect |
+| `GET /api/live/studio/transcript/{session}` | `GET /api/officer/studio/report/{session}` | HTML transcript |
+| `POST /api/live/studio/executive` | `POST /api/officer/studio/executive` | HTML executive report |
+| `GET /api/live/studio/export/readings` | `GET /api/officer/export/readings.csv` | CSV |
+| `GET /api/live/studio/export/surveillance` | `GET /api/officer/export/surveillance.csv` | CSV |
+| `GET /api/live/studio/export/fhir` | `GET /api/officer/export/bundle.json` | FHIR collection Bundle |
+
+Investigations accept `{question, siteId?}`. A validated station ID is appended
+as context to the gateway question; omitting it requests a district-wide
+investigation. Each question starts a fresh model run. Browser results survive
+dashboard navigation, but not refresh. Gateway sessions expire
+on restart. Stop aborts the browser request; upstream model work already in
+progress may finish before the connection closes.
+
+Exports accept validated `days` (1–365) and optional `site_id`; FHIR export
+requires a station. Content types, bytes and attachment filenames are preserved.
+Executive figures come from the chosen investigation, with SVG colors resolved
+for standalone viewing. Only these fixed upstream paths are reachable through
+this proxy. Upstream HTTP errors retain their status; connection failures return
+502, and interruptions after streaming begins produce an SSE error event.
+
+The chart module is shared with the standalone gateway Studio. Live Studio
+reports and transcripts remain separate from the dashboard's mock report
+lifecycle. The supplied-sample ingestion proxy still supports the India and
+European sample keys.
 
 ## Mock-backed proposed routes
 

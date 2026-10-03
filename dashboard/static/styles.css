@@ -258,6 +258,7 @@ h1, h2, h3, h4, p { margin-top: 0; }
 .brand-mark i:nth-child(3) { width: 9px; height: 4px; left: 15px; top: 19px; border-radius: 10px; }
 
 .primary-nav { display: grid; gap: 5px; }
+.nav-label-small { display: none; }
 .nav-item {
   width: 100%;
   display: flex;
@@ -585,7 +586,9 @@ pre { max-height: 285px; margin: 0; padding: 13px 14px; border: 1px solid var(--
   .app-shell { display: block; padding-bottom: 60px; }
   .sidebar { inset: auto 0 0 0; width: auto; height: 60px; display: grid; grid-template-columns: minmax(0, 1fr) 92px; padding: 6px 10px; border-top: 1px solid var(--nav-border); }
   .sidebar > .brand, .sidebar-foot { display: none; }
-  .primary-nav { grid-template-columns: repeat(3, 1fr); gap: 4px; }
+  .primary-nav { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; }
+  .nav-label-wide { display: none; }
+  .nav-label-small { display: block; }
   .theme-control { margin: 0; padding: 0 0 0 6px; border: 0; align-self: stretch; }
   .theme-control .eyebrow { display: none; }
   .theme-control select { height: 48px; min-height: 48px; padding: 4px 6px; font-size: 10px; }

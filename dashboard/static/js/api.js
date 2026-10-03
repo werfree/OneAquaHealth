@@ -1,5 +1,5 @@
 // An explicit ?mode= wins; otherwise the server's DASHBOARD_DEFAULT_MODE.
-const REQUESTED_MODE = new URLSearchParams(window.location.search).get("mode") || document.documentElement.dataset.defaultMode;
+const REQUESTED_MODE = new URLSearchParams(window.location.search).get("mode") || (window.location.pathname === "/studio" ? "live" : document.documentElement.dataset.defaultMode);
 const MODE = REQUESTED_MODE === "live" ? "live" : "mock";
 
 // Shared demo role policy. Personas demonstrate what each role is *intended* to

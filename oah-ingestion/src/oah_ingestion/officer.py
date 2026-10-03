@@ -509,6 +509,14 @@ def panel():
 # ─────────────────────────── studio: agent-orchestrated ───────────────────────────
 
 
+@router.get("/assets/studio-charts.js", include_in_schema=False)
+def studio_charts():
+    """Share chart renderers with the native dashboard."""
+    from importlib.resources import files
+
+    return FileResponse(str(files("dashboard").joinpath("static/js/studio-charts.js")), media_type="text/javascript")
+
+
 @router.post("/studio/run")
 def studio_run(body: dict):
     """Stream an investigation as it happens.
