@@ -5,7 +5,7 @@
 
 ## Executive summary
 
-The dashboard now offers four appearance presets in the sidebar: **Aqua**, **Aqua dark**, **White**, and **Dark**. The server selects the featured default through `DASHBOARD_DEFAULT_THEME`; Aqua is the safe fallback. A valid user selection is retained in the browser and takes precedence over the server default on later visits.
+The dashboard now offers five appearance presets in the sidebar: **OneAquaHealth**, **Aqua**, **Aqua dark**, **White**, and **Dark**. Complete token maps live in `dashboard/data/themes.json`; the server validates them and selects the featured default through `DASHBOARD_DEFAULT_THEME`. Aqua is the safe fallback. A valid user selection is retained in the browser and takes precedence over the server default on later visits.
 
 Dashboard packaging and runtime configuration are now available from the repository root. The dashboard can be installed and started without changing into `dashboard/`, while the existing `dashboard/run.sh` and dashboard-local compatibility files continue to work.
 
@@ -14,7 +14,7 @@ Dashboard packaging and runtime configuration are now available from the reposit
 ### Theme selector
 
 - Added an **Appearance** selector to the desktop sidebar and mobile bottom navigation.
-- Added semantic color tokens for four complete themes, including surfaces, fields, graphs, notices, code blocks, navigation, and report views.
+- Added JSON-backed semantic color tokens for five complete themes, including surfaces, fields, graphs, notices, code blocks, navigation, and report views.
 - Added `GET /api/config`, which returns only the public theme catalogue and selected default.
 - Injected the validated default theme into the initial HTML so the server preset is present before the application bootstraps.
 - Added browser persistence under the non-sensitive `oah-theme` preference key.
@@ -24,6 +24,7 @@ Supported configuration values:
 
 | Value | Label | Color mode |
 |---|---|---|
+| `oneaquahealth` | OneAquaHealth | Light |
 | `aqua` | Aqua | Light |
 | `aqua-dark` | Aqua dark | Dark |
 | `white` | White | Light |
@@ -94,7 +95,7 @@ dashboard.server validates DASHBOARD_DEFAULT_THEME
 | Initial document | Server injects the default theme identifier | Correct server preset is available before application bootstrap | Replacement is limited to a fixed placeholder and a validated identifier |
 | Client bootstrap | Configuration joins session and summary loading | Theme state is initialized with existing session data | Domain API payloads and role capability logic are unchanged |
 | Client state | Added `theme` and `themeConfig` | Appearance is tracked separately from domain data | Only a theme identifier is stored; no health or user data enters browser storage |
-| CSS | Replaced fixed presentation colors with semantic tokens | All existing views can render in four palettes | Visual checks covered overview, relationship graph, reports, desktop, and mobile |
+| CSS | Replaced fixed presentation colors with semantic tokens | All existing views render from five complete JSON palettes | The server rejects incomplete token maps; White uses only achromatic color values |
 | Mobile navigation | Added the theme control to the compact sidebar grid | Theme switching remains reachable at phone width | Verified at 390×844 with no horizontal overflow |
 | Packaging | Added root `pyproject.toml` and package data | Installation and launch no longer depend on the dashboard directory | Dashboard-local requirements and launcher now delegate to the root configuration |
 | Existing workflows | Preserved `dashboard/run.sh` and dashboard-local setup references | Existing developer commands remain usable | Compatibility files contain no second dependency list to drift |
@@ -117,7 +118,7 @@ This means changing the server default affects new users and users who have not 
 
 - Root operations: `pyproject.toml`, `.env.example`, `.env`, `README.md`
 - Server/package: `dashboard/__init__.py`, `dashboard/server.py`, `dashboard/run.sh`, `dashboard/requirements.txt`, `dashboard/.env.example`
-- UI: `dashboard/static/index.html`, `dashboard/static/styles.css`, `dashboard/static/js/api.js`, `dashboard/static/js/app.js`, `dashboard/static/js/state.js`
+- UI: `dashboard/data/themes.json`, `dashboard/static/index.html`, `dashboard/static/styles.css`, `dashboard/static/js/api.js`, `dashboard/static/js/app.js`, `dashboard/static/js/state.js`
 - Documentation/tests: `dashboard/README.md`, `dashboard/API-MAPPING.md`, `dashboard/tests/test_server.py`
 
 No ingestion, FHIR-model, agent, publisher, or infrastructure implementation was changed for these two features.
@@ -133,7 +134,7 @@ No ingestion, FHIR-model, agent, publisher, or infrastructure implementation was
 | Root `python3 -m dashboard.server` launch | Passed on an isolated verification port |
 | Server default: valid value | `white` resolved to `white` |
 | Server default: invalid value | Fell back to `aqua` |
-| Four theme options | Present and selectable |
+| Five theme options | Present and selectable |
 | Theme persistence | `dark` remained selected after reload |
 | Role/theme independence | `dark` remained selected after switching from Analyst to Viewer |
 | Relationship graph regression | Visible with 8 graph nodes |
