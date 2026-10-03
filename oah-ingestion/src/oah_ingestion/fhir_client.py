@@ -20,8 +20,9 @@ import gzip
 import json
 import logging
 import os
+import time
 import urllib.parse
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
@@ -43,22 +44,38 @@ def upload_enabled() -> bool:
     return os.getenv("FHIR_UPLOAD_ENABLED", "true").strip().lower() not in {"false", "0", "no"}
 
 
+# A shared public sandbox intermittently stalls under a long ingest run. A
+# transient read timeout is not a reason to lose a reading, so transport-level
+# failures are retried with backoff; an HTTP error (a rejected resource) is not
+# retried, because sending it again will fail the same way.
+RETRIES = int(os.getenv("FHIR_RETRIES", "3"))
+
+
 def _request(method: str, url: str, body: Optional[bytes] = None, timeout: int = 60) -> dict:
     headers = {"Accept": FHIR_JSON, "Accept-Encoding": "gzip"}
     if body is not None:
         headers["Content-Type"] = FHIR_JSON
-    request = Request(url, data=body, headers=headers, method=method)
-    try:
-        with urlopen(request, timeout=timeout) as response:
-            raw = response.read()
-            if response.headers.get("Content-Encoding") == "gzip":
-                raw = gzip.decompress(raw)
-            return json.loads(raw.decode("utf-8")) if raw else {}
-    except HTTPError as exc:
-        detail = exc.read().decode("utf-8", errors="replace")[:1000]
-        raise FhirError(f"{method} {url} -> HTTP {exc.code}: {detail}") from exc
-    except URLError as exc:
-        raise FhirError(f"Cannot reach FHIR server at {url}: {exc.reason}") from exc
+
+    last: Optional[Exception] = None
+    for attempt in range(RETRIES):
+        request = Request(url, data=body, headers=headers, method=method)
+        try:
+            with urlopen(request, timeout=timeout) as response:
+                raw = response.read()
+                if response.headers.get("Content-Encoding") == "gzip":
+                    raw = gzip.decompress(raw)
+                return json.loads(raw.decode("utf-8")) if raw else {}
+        except HTTPError as exc:
+            detail = exc.read().decode("utf-8", errors="replace")[:1000]
+            raise FhirError(f"{method} {url} -> HTTP {exc.code}: {detail}") from exc
+        except (URLError, TimeoutError, OSError) as exc:
+            last = exc
+            if attempt + 1 < RETRIES:
+                wait = 2 ** attempt
+                logger.warning("FHIR %s failed (%s); retrying in %ds", method, exc, wait)
+                time.sleep(wait)
+
+    raise FhirError(f"Cannot reach FHIR server at {url} after {RETRIES} attempts: {last}")
 
 
 def upload_bundle(bundle: dict, *, timeout: int = 60) -> Tuple[int, int]:
@@ -90,6 +107,9 @@ def upload_bundle(bundle: dict, *, timeout: int = 60) -> Tuple[int, int]:
     return succeeded, failed
 
 
+MAX_PAGES = int(os.getenv("FHIR_MAX_PAGES", "100"))
+
+
 def max_search_results() -> int:
     """Upper bound on resources one `search()` collects across all pages."""
     return int(os.getenv("FHIR_MAX_SEARCH_RESULTS", "5000"))
@@ -103,7 +123,7 @@ def _next_link(bundle: dict) -> Optional[str]:
 
 
 def search(
-    resource_type: str, params: Dict[str, str], *, timeout: int = 60, max_results: Optional[int] = None
+    resource_type: str, params: Dict[str, Union[str, List[str]]], *, timeout: int = 60, max_results: Optional[int] = None, paginate: bool = True
 ) -> List[dict]:
     """Run a FHIR search and return the matching resources from every page.
 
@@ -112,28 +132,35 @@ def search(
     Reading only the first searchset page silently truncated sites with more
     readings than `_count`. Follow `next` until it ends or `max_results`
     (default `FHIR_MAX_SEARCH_RESULTS`) is reached; stop repeated page URLs.
+    `FHIR_MAX_PAGES` bounds round trips; `paginate=False` reads only one page.
     """
 
     limit = max_search_results() if max_results is None else max_results
-    query = urllib.parse.urlencode({k: v for k, v in params.items() if v is not None})
+    query = urllib.parse.urlencode({k: v for k, v in params.items() if v is not None}, doseq=True)
     url: Optional[str] = f"{base_url()}/{resource_type}?{query}"
     resources: List[dict] = []
     seen_urls = set()
-    while url and url not in seen_urls and len(resources) < limit:
+    pages = 0
+    while url and url not in seen_urls and len(resources) < limit and pages < MAX_PAGES:
         seen_urls.add(url)
+        pages += 1
         logger.debug("FHIR GET %s", url)
         bundle = _request("GET", url, timeout=timeout)
         resources.extend(entry["resource"] for entry in bundle.get("entry", []) if "resource" in entry)
-        url = _next_link(bundle)
+        url = _next_link(bundle) if paginate else None
     if url and len(resources) >= limit:
         logger.warning("FHIR search for %s stopped at %d resources (FHIR_MAX_SEARCH_RESULTS)", resource_type, limit)
+    if url and url in seen_urls:
+        logger.warning("Repeated FHIR page URL for %s; result may be incomplete", resource_type)
+    elif url and pages >= MAX_PAGES:
+        logger.warning("Stopped after %d pages for %s; result may be incomplete", MAX_PAGES, resource_type)
     return resources[:limit]
 
 
-def search_url(resource_type: str, params: Dict[str, str]) -> str:
+def search_url(resource_type: str, params: Dict[str, Union[str, List[str]]]) -> str:
     """The URL `search()` would call -- shown to users so a query is auditable."""
 
-    query = urllib.parse.urlencode({k: v for k, v in params.items() if v is not None})
+    query = urllib.parse.urlencode({k: v for k, v in params.items() if v is not None}, doseq=True)
     return f"{base_url()}/{resource_type}?{query}"
 
 

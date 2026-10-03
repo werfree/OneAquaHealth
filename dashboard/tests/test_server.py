@@ -1,4 +1,5 @@
 import json
+import copy
 from unittest import mock
 
 import pytest
@@ -21,6 +22,27 @@ from dashboard.server import (
     retry_run,
     start_run,
 )
+
+
+@pytest.fixture(autouse=True)
+def isolated_runtime():
+    """Run/report checks should work even when the user clears demo history."""
+    previous = copy.deepcopy(server.runtime)
+    server.runtime["runs"] = [{
+        "id": "run-003", "sampleKey": "health", "siteId": "site-coimbra-t1",
+        "sourceType": "PUBLIC_HEALTH", "executionStatus": "failed", "fhirOutcome": "UPLOAD_FAILED",
+        "startedAt": "2026-09-30T10:20:00Z", "attempt": 1, "error": "FHIR transaction service unavailable",
+    }]
+    server.runtime["reports"] = [{
+        "id": "report-001", "siteId": "site-c1-mondego", "title": "Mondego C1 briefing",
+        "status": "generated", "visibility": "published", "ownerId": "user-analyst-01",
+        "requestedAt": "2026-10-02T09:59:55Z", "generatedAt": "2026-10-02T10:00:00Z",
+        "snapshotObservationIds": [item["id"] for item in FIXTURE["observations"] if item["siteId"] == "site-c1-mondego"],
+        "snapshotFindingIds": [item["id"] for item in FIXTURE["findings"] if item["siteId"] == "site-c1-mondego"],
+    }]
+    yield
+    server.runtime.clear()
+    server.runtime.update(previous)
 
 
 def test_fixture_references_resolve():
@@ -149,3 +171,18 @@ def test_live_overview_forwards_refresh():
     with mock.patch.object(server, "proxy_live") as proxy:
         server.live_overview(refresh=True)
         proxy.assert_called_once_with("/api/overview?refresh=true")
+
+
+def test_studio_opens_configured_gateway():
+    with mock.patch.object(server, "LIVE_BASE_URL", "http://127.0.0.1:18001"):
+        response = server.studio()
+    assert response.headers["location"] == "http://127.0.0.1:18001/api/officer/panel"
+
+
+def test_all_gateway_samples_can_be_proxied():
+    from oah_ingestion.web import SAMPLES
+
+    with mock.patch.object(server, "proxy_live") as proxy:
+        for key in SAMPLES:
+            server.live_ingest_demo(key)
+            proxy.assert_called_with(f"/api/ingest-demo/{key}", method="POST")

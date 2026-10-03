@@ -18,6 +18,8 @@ The dashboard server exposes a narrow same-origin proxy under `/api/live/*`. Set
 
 `GET /api/config` is a public, non-sensitive dashboard configuration route. It exposes the supported theme catalogue, validated `DASHBOARD_DEFAULT_THEME`, and validated `DASHBOARD_DEFAULT_MODE` as `defaultMode`; environment values such as service URLs and credentials are not returned.
 
+The live assistant panel also links to `GET /studio`, which redirects to the configured gateway's `/api/officer/panel`. The Studio runs its own streaming investigations, charts, and exports on the gateway. Its live executive reports and transcripts do not replace this dashboard's mock run/report lifecycle. New gateway sample keys, including `health-kanpur` and the preserved European examples, are allow-listed by the ingestion proxy.
+
 ## Mock-backed proposed routes
 
 | Method and route | Purpose | Permission |

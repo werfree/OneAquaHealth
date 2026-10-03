@@ -1,0 +1,22 @@
+{
+  "event_id": "eac53da4-0cfe-4940-9be9-07b0a98be3db",
+  "source_type": "PUBLIC_HEALTH",
+  "city": "coimbra",
+  "site_id": "site-coimbra-t1",
+  "timestamp": "2026-09-30T00:00:00Z",
+  "received_at": "2026-09-30T08:30:00Z",
+  "payload": {
+    "health_agency": "Coimbra_Public_Health_Observatory",
+    "evaluation_period": "2026-01-01_to_2026-09-27",
+    "cohort": {"group_id": "group-coimbra-adults-18-64", "age_range": "18-64", "gender": "all"},
+    "risk_scores": [
+      {"indicator": "fecal_contamination_risk", "score": 0.532, "interpretation": "HIGH"},
+      {"indicator": "pathogen_risk", "score": 0.401, "interpretation": "MODERATE"},
+      {"indicator": "arg_risk", "score": 0.279, "interpretation": "MODERATE"},
+      {"indicator": "overall_health_risk_score", "score": 0.404, "interpretation": "MODERATE"}
+    ],
+    "chemical_summaries": [
+      {"indicator": "nitrate", "value": 1.916, "unit": "mg NO3-N/L"}
+    ]
+  }
+}

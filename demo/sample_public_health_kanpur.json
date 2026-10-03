@@ -1,0 +1,20 @@
+{
+  "event_id": "c1f7b2d8-41a6-4f52-9d33-61b0f2e7a914",
+  "source_type": "PUBLIC_HEALTH",
+  "city": "kanpur",
+  "site_id": "gan-jajmau",
+  "timestamp": "2026-10-02T17:00:00Z",
+  "received_at": "2026-10-02T17:20:00Z",
+  "payload": {
+    "health_agency": "IDSP_District_Surveillance_Unit",
+    "evaluation_period": "week ending 2026-10-02",
+    "cohort": {"group_id": "ward-kanpur-jajmau", "age_range": "0-99", "gender": "all"},
+    "disease_surveillance": [
+      {"condition": "acute_diarrhoeal_disease", "cases": 58, "population_at_risk": 198000, "baseline_rate_per_100k": 25.41},
+      {"condition": "enteric_fever", "cases": 13, "population_at_risk": 198000, "baseline_rate_per_100k": 6.88}
+    ],
+    "chemical_summaries": [
+      {"indicator": "chromium_total", "value": 0.11, "unit": "mg/L"}
+    ]
+  }
+}

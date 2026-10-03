@@ -36,12 +36,12 @@ from oah_ingestion.thresholds import THRESHOLDS, evaluate_many  # noqa: E402
 RISK_ORDER = {"LOW": 0, "MODERATE": 1, "HIGH": 2}
 
 
-def _exceedances(environmental: List[dict]) -> List[dict]:
+def _exceedances(environmental: List[dict], *, city: Optional[str] = None) -> List[dict]:
     """Screen observations, carrying each source Observation id into the finding."""
 
     findings = []
     for observation in environmental:
-        for finding in evaluate_many([observation]):
+        for finding in evaluate_many([observation], city=city):
             finding["observation_id"] = observation.get("id")
             findings.append(finding)
     return findings
@@ -74,7 +74,8 @@ def site_briefing(site_id: str, dataset_tag: str = "oah-demo", *, include_observ
     environmental = profile["environmental_observations"]
     health = profile["health_observations"]
 
-    exceedances = _exceedances(environmental)
+    site = lookup(site_id)
+    exceedances = _exceedances(environmental, city=site.city)
     risks = [
         {
             "indicator": observation.get("indicator"),
@@ -88,7 +89,6 @@ def site_briefing(site_id: str, dataset_tag: str = "oah-demo", *, include_observ
     elevated = [r for r in risks if RISK_ORDER.get(r["interpretation"] or "", 0) >= 1]
 
     cohorts = [get_cohort(group_id, dataset_tag=dataset_tag) for group_id in profile["cohorts"]]
-    site = lookup(site_id)
 
     briefing = {
         "site_id": site_id,

@@ -132,10 +132,14 @@ def search_observations(
     site_id: Optional[str] = None,
     min_value: Optional[float] = None,
     max_value: Optional[float] = None,
+    since: Optional[str] = None,
+    until: Optional[str] = None,
     limit: int = 50,
     dataset_tag: str = "oah-demo",
 ) -> dict:
     """Search Observations by OAH profile, indicator code, site, and value range.
+
+    `since`/`until` are ISO dates (YYYY-MM-DD) bounding `Observation.effective[x]`.
 
     `kind` selects the OAH profile: `environmental_simple`
     (observation-indicators-oah -- single readings and citizen survey answers),
@@ -153,6 +157,16 @@ def search_observations(
         params["code"] = indicator
     if site_id:
         params["subject"] = f"Location/{site_id}"
+    # Repeated date parameters form an intersection; comma-separated bounds
+    # are OR alternatives and would match readings outside the requested window.
+    bounds = []
+    if since:
+        bounds.append(f"ge{since}")
+    if until:
+        bounds.append(f"le{until}")
+    if bounds:
+        params["date"] = bounds
+    params["_sort"] = "-date"
 
     url = search_url("Observation", params)
     try:
@@ -228,7 +242,7 @@ def get_cohort(group_id: str, dataset_tag: str = "oah-demo") -> dict:
     return {"group_id": group.get("id"), "name": group.get("name"), "characteristics": characteristics, "fhir_url": url}
 
 
-def get_thresholds() -> dict:
+def get_thresholds(city: Optional[str] = None) -> dict:
     """The screening thresholds this project evaluates exceedances against.
 
     Exposed as a tool so the assistant quotes a real, sourced value instead of
@@ -240,7 +254,7 @@ def get_thresholds() -> dict:
 
     from oah_ingestion.thresholds import as_reference
 
-    return as_reference()
+    return as_reference(city)
 
 
 # ---------------------------------------------------------------------------
@@ -263,9 +277,10 @@ TOOL_SCHEMAS = [
             "description": (
                 "Get the screening thresholds used to judge whether an environmental reading is elevated, with the "
                 "regulatory basis for each. You MUST call this before describing any value as safe, unsafe, high, or "
-                "exceeding a limit. Never state a threshold from your own knowledge."
+                "exceeding a limit. Pass the station's city to select its deployment criteria. "
+                "Never state a threshold from your own knowledge."
             ),
-            "parameters": {"type": "object", "properties": {}, "required": [], "additionalProperties": False},
+            "parameters": {"type": "object", "properties": {"city": {"type": "string", "description": "Station city, e.g. delhi or coimbra"}}, "required": [], "additionalProperties": False},
         },
     },
     {
@@ -284,9 +299,10 @@ TOOL_SCHEMAS = [
                 "Search OAH Observations on the FHIR server. Use kind='environmental_simple' for single sensor "
                 "readings and citizen-survey answers, kind='environmental_component' for readings that carry "
                 "average/minimum/maximum statistics, and kind='health' for population health and risk measures. "
-                "Indicator codes seen in this dataset include: ph, nitrate, zinc_dissolved (environmental); "
-                "riparianVegetation, waterFlow, waterAspect (citizen survey); fecal_contamination_risk, "
-                "pathogen_risk, arg_risk, overall_health_risk_score (health)."
+                "Use since/until to ask whether something CHANGED rather than what it is now. "
+                "Indicator codes in this dataset: faecal_coliform, bod, dissolved_oxygen, ph, "
+                "ammoniacal_nitrogen, chromium_total (water, CPCB parameters); "
+                "acute_diarrhoeal_disease, enteric_fever, viral_hepatitis_a_e, cholera (IDSP syndromic, health)."
             ),
             "parameters": {
                 "type": "object",
@@ -300,6 +316,8 @@ TOOL_SCHEMAS = [
                     "site_id": {"type": "string", "description": "Restrict to one site, e.g. 'site-c1-mondego'."},
                     "min_value": {"type": "number", "description": "Only return readings at or above this value."},
                     "max_value": {"type": "number", "description": "Only return readings at or below this value."},
+                    "since": {"type": "string", "description": "Only readings on or after this ISO date, e.g. '2026-09-20'."},
+                    "until": {"type": "string", "description": "Only readings on or before this ISO date."},
                     "limit": {"type": "integer", "description": "Maximum results (default 50)."},
                 },
                 "required": ["kind"],

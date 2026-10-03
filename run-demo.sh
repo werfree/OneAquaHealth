@@ -7,6 +7,8 @@
 #   ./run-demo.sh verify    read the resources back off the FHIR server
 #   ./run-demo.sh ask "…"   put a question to the assistant
 #   ./run-demo.sh brief     generate the One Health risk briefing
+#   ./run-demo.sh seed      generate + ingest the 28-day series (takes a few minutes)
+#   ./run-demo.sh studio    open the surveillance studio with the autodemo running
 #   ./run-demo.sh down      stop RabbitMQ
 set -euo pipefail
 cd "$(dirname "$0")"
@@ -23,6 +25,7 @@ case "${1:-}" in
     echo ' ready'
     ;;
   app)     exec python3 -m oah_ingestion.app ;;
+  seed)    exec python3 demo/generate_timeseries.py --days 28 --ingest ;;
   publish) exec python3 -m oah_demo_publishers ;;
   verify)  exec python3 - <<'PY'
 from oah_agent.tools import search_observations, list_sites
@@ -40,6 +43,7 @@ PY
   ask)   shift; exec python3 -m oah_agent.cli "$@" ;;
   brief) shift; exec python3 -m oah_agent.cli --brief "$@" ;;
   chat)  exec python3 -m oah_agent.cli --chat ;;
+  studio) exec python3 -c 'import os, webbrowser; from dotenv import load_dotenv; load_dotenv(); webbrowser.open("http://localhost:" + os.getenv("APP_PORT", "8000") + "/api/officer/panel?autorun=1")' ;;
   down)  docker stop oah-rabbitmq ;;
   *) sed -n '2,12p' "$0"; exit 1 ;;
 esac

@@ -17,7 +17,7 @@ from typing import Any
 
 from fastapi import Body, FastAPI, Header, HTTPException, Query, Response
 from fastapi import Path as PathParam
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 
@@ -643,7 +643,7 @@ def live_site(site_id: str = PathParam(pattern=SITE_ID_PATTERN)) -> JSONResponse
 
 @app.post("/api/live/ingest-demo/{key}")
 def live_ingest_demo(key: str) -> JSONResponse:
-    if key not in {"iot", "survey", "health", "health-mondego"}:
+    if key not in {"iot", "iot-oslo", "iot-benevento", "iot-coimbra", "survey", "survey-ghent", "survey-toulouse", "survey-coimbra", "health", "health-coimbra", "health-mondego", "health-kanpur"}:
         raise HTTPException(status_code=404, detail="Unknown live sample")
     return proxy_live(f"/api/ingest-demo/{key}", method="POST")
 
@@ -661,6 +661,12 @@ def live_ask(payload: dict[str, Any] = Body(...)) -> JSONResponse:
 def index() -> HTMLResponse:
     page = (STATIC_ROOT / "index.html").read_text(encoding="utf-8")
     return HTMLResponse(page.replace("__DEFAULT_THEME__", DEFAULT_THEME).replace("__DEFAULT_MODE__", DEFAULT_MODE))
+
+
+@app.get("/studio", include_in_schema=False)
+def studio() -> RedirectResponse:
+    """Open the gateway's Studio, where its streaming and export routes live."""
+    return RedirectResponse(f"{LIVE_BASE_URL}/api/officer/panel")
 
 
 app.mount("/static", StaticFiles(directory=STATIC_ROOT), name="static")

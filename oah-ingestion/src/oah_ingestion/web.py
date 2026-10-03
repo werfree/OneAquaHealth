@@ -49,13 +49,17 @@ DEMO = Path(__file__).resolve().parents[3] / "demo"
 ENVELOPE = TypeAdapter(IngestionEnvelope)
 
 SAMPLES = {
-    "iot": ("sample_iot_telemetry.json", "IoT telemetry", "Mondego C1 sensor: pH, nitrate with statistics, zinc"),
+    "iot": ("sample_iot_telemetry.json", "CPCB telemetry", "Yamuna at ITO Bridge: coliform with statistics, BOD, dissolved oxygen"),
     "iot-oslo": ("sample_iot_telemetry_oslo.json", "IoT telemetry", "Oslo Akerselva sensor readings"),
     "iot-benevento": ("sample_iot_telemetry_benevento.json", "IoT telemetry", "Benevento Calore sensor readings"),
-    "survey": ("sample_citizen_survey.json", "Citizen survey", "StreamKeepers volunteer at Casa do Sal C6"),
+    "survey": ("sample_citizen_survey.json", "Citizen survey", "Ganga Prahari volunteer at Assi Ghat, Varanasi"),
     "survey-ghent": ("sample_citizen_survey_ghent.json", "Citizen survey", "StreamKeepers volunteer at the Leie in Ghent"),
     "survey-toulouse": ("sample_citizen_survey_toulouse.json", "Citizen survey", "StreamKeepers volunteer at the Garonne in Toulouse"),
-    "health": ("sample_public_health.json", "Public health", "Coimbra observatory, urban catchment T1"),
+    "health": ("sample_public_health.json", "IDSP return", "Central Delhi riverside ward: IDSP disease surveillance"),
+    "health-kanpur": ("sample_public_health_kanpur.json", "IDSP return", "Jajmau ward, Kanpur Nagar"),
+    "iot-coimbra": ("sample_iot_telemetry_coimbra.json", "IoT telemetry", "Mondego C1 sensor: pH, nitrate, zinc"),
+    "survey-coimbra": ("sample_citizen_survey_coimbra.json", "Citizen survey", "Casa do Sal C6 survey"),
+    "health-coimbra": ("sample_public_health_coimbra.json", "Public health", "Coimbra urban catchment T1"),
     "health-mondego": ("sample_public_health_mondego.json", "Public health", "Riverside residents at Mondego C1"),
 }
 
