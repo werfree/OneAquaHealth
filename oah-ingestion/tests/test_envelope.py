@@ -23,7 +23,7 @@ class IngestionEnvelopeTests(unittest.TestCase):
                 raw = json.loads((SAMPLES / filename).read_text(encoding="utf-8"))
                 envelope = ENVELOPE_ADAPTER.validate_python(raw)
                 self.assertEqual(envelope.source_type, source_type)
-                self.assertEqual(envelope.city, "coimbra")
+                self.assertIn(envelope.city, {"delhi", "varanasi", "kanpur"})
 
     def test_gateway_generates_event_id_and_received_at(self):
         raw = json.loads((SAMPLES / "sample_citizen_survey.json").read_text(encoding="utf-8"))
@@ -33,14 +33,20 @@ class IngestionEnvelopeTests(unittest.TestCase):
         self.assertNotEqual(message["received_at"], raw["received_at"])
         self.assertEqual(message["source_type"], "CITIZEN_SURVEY")
 
-    def test_rejects_unknown_stream_type_and_invalid_risk_score(self):
+    def test_rejects_unknown_stream_type_and_negative_case_count(self):
         raw = json.loads((SAMPLES / "sample_public_health.json").read_text(encoding="utf-8"))
-        raw["payload"]["risk_scores"][0]["score"] = 1.5
+        raw["payload"]["disease_surveillance"][0]["cases"] = -4
         with self.assertRaises(ValidationError):
             ENVELOPE_ADAPTER.validate_python(raw)
         raw["source_type"] = "OTHER"
         with self.assertRaises(ValidationError):
             ENVELOPE_ADAPTER.validate_python(raw)
+
+    def test_surveillance_rate_is_derived_from_cases_and_denominator(self):
+        raw = json.loads((SAMPLES / "sample_public_health.json").read_text(encoding="utf-8"))
+        envelope = ENVELOPE_ADAPTER.validate_python(raw)
+        add = envelope.payload.disease_surveillance[0]
+        self.assertAlmostEqual(add.rate_per_100k, add.cases / add.population_at_risk * 100_000, places=1)
 
 
 if __name__ == "__main__":

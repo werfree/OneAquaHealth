@@ -10,8 +10,8 @@ SAMPLE_DATA = Path(__file__).parent
 def packet(**overrides):
     value = {
         "device_id": "sensor-001",
-        "city": "Coimbra",
-        "site_id": "site-test-1",
+        "city": "Delhi",
+        "site_id": "yam-ito",
         "timestamp": "2026-09-26T12:00:00Z",
         "measurements": [{"parameter": "ph", "unit": "pH", "value": 7.2}],
     }
@@ -22,13 +22,13 @@ def packet(**overrides):
 class SensorIngestionTests(unittest.TestCase):
     def setUp(self):
         self.service = SensorIngestionService()
-        self.topic = "oneaquahealth/sensors/coimbra/site-test-1"
+        self.topic = "oneaquahealth/sensors/delhi/yam-ito"
 
     def test_valid_packet_builds_normalized_event(self):
-        sample = (SAMPLE_DATA / "sample_sensor_coimbra.json").read_text(encoding="utf-8")
+        sample = (SAMPLE_DATA / "sample_sensor_delhi.json").read_text(encoding="utf-8")
         result = self.service.process_packet(self.topic, sample)
         self.assertEqual(result["status"], "ACCEPTED")
-        self.assertEqual(result["event"]["city"], "coimbra")
+        self.assertEqual(result["event"]["city"], "delhi")
         self.assertEqual(len(result["event"]["measurements"]), 3)
         self.assertEqual(result["event"]["measurements"][0]["value"], 7.2)
 
@@ -38,7 +38,7 @@ class SensorIngestionTests(unittest.TestCase):
             packet(
                 measurements=[
                     {"parameter": "ph", "unit": "pH", "value": 7.2},
-                    {"parameter": "nitrate", "unit": "mg/L", "value": -1},
+                    {"parameter": "faecal_coliform", "unit": "MPN/100mL", "value": -1},
                 ]
             ),
         )
@@ -46,7 +46,7 @@ class SensorIngestionTests(unittest.TestCase):
         self.assertEqual([m["parameter"] for m in result["event"]["measurements"]], ["ph"])
 
     def test_rejects_mismatched_topic_and_payload(self):
-        result = self.service.process_packet("oneaquahealth/sensors/oslo/site-test-1", packet())
+        result = self.service.process_packet("oneaquahealth/sensors/mumbai/yam-ito", packet())
         self.assertEqual(result["status"], "REJECTED")
 
     def test_rejects_invalid_ph(self):
@@ -68,7 +68,7 @@ class SensorIngestionTests(unittest.TestCase):
         self.assertEqual(result["status"], "REJECTED")
 
     def test_rejects_wrong_topic_shape(self):
-        result = self.service.process_packet("oneaquahealth/sensors/coimbra", packet())
+        result = self.service.process_packet("oneaquahealth/sensors/delhi", packet())
         self.assertEqual(result["status"], "REJECTED")
 
 

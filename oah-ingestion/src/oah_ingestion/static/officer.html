@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>District Surveillance — OneAquaHealth</title>
+<style>
+  :root {
+    --bg:#FFFFFF; --bg-2:#F5F5F7; --bg-3:#FAFAFC;
+    --label:#1D1D1F; --label-2:#6E6E73; --label-3:#86868B;
+    --sep:#D2D2D7; --sep-2:#E8E8ED;
+    --blue:#0071E3; --blue-press:#0058B0; --blue-wash:#F0F7FF; --blue-edge:#CCE4FF;
+    /* validated: node validate_palette.js "#2a78d6,#eb6834" --surface #FFFFFF
+       CVD ΔE 24.7, normal ΔE 33.6 — both clear their floors */
+    --series-water:#2a78d6; --series-health:#eb6834;
+    --good:#0ca30c; --warning:#fab219; --serious:#ec835a; --critical:#d03b3b;
+    --crit-wash:#FFEBEC; --warn-wash:#FFF6E5; --ok-wash:#E9F7E9;
+    --text:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+    --r:12px; --r-lg:18px;
+    --shadow:0 1px 2px rgba(0,0,0,.04),0 6px 20px -8px rgba(0,0,0,.10);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg-2);color:var(--label);font-family:var(--text);
+       font-size:16px;line-height:1.47;letter-spacing:-.01em;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 20px 90px}
+
+  /* ── bar ── */
+  .bar{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.86);
+       -webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);
+       border-bottom:1px solid var(--sep-2)}
+  .bar-in{max-width:1180px;margin:0 auto;padding:10px 20px;display:flex;align-items:center;
+          gap:14px;justify-content:space-between;flex-wrap:wrap}
+  .brand{font-size:15px;font-weight:600;white-space:nowrap}
+  .brand span{color:var(--label-3);font-weight:400}
+  .bar-r{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+  .seg{display:inline-flex;background:var(--bg-2);border-radius:9px;padding:2px}
+  .seg button{appearance:none;border:0;background:transparent;cursor:pointer;font:inherit;font-size:13px;
+              font-weight:500;color:var(--label);padding:5px 12px;border-radius:7px;white-space:nowrap;
+              transition:background .18s,box-shadow .18s}
+  .seg button[aria-pressed="true"]{background:var(--bg);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+  select{appearance:none;border:1px solid var(--sep);border-radius:8px;background:var(--bg);
+         font:inherit;font-size:13px;padding:6px 28px 6px 11px;color:var(--label);cursor:pointer;
+         background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' stroke='%2386868B' stroke-width='1.5' fill='none' stroke-linecap='round'/></svg>");
+         background-repeat:no-repeat;background-position:right 9px center;background-size:10px}
+  .btn{appearance:none;border:0;cursor:pointer;font:inherit;font-size:13px;font-weight:500;
+       padding:7px 14px;border-radius:99px;background:var(--blue);color:#fff;white-space:nowrap}
+  .btn:hover{background:var(--blue-press)}
+  .btn[disabled]{opacity:.45;cursor:default}
+  .btn.ghost{background:var(--bg-2);color:var(--label);border:1px solid var(--sep)}
+  .btn.ghost:hover{background:var(--sep-2)}
+  button:focus-visible,select:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid var(--blue-edge);outline-offset:1px}
+  .live{font-size:12px;color:var(--label-2);display:flex;align-items:center;gap:6px}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--good)}
+  .dot.off{background:var(--label-3)}
+
+  /* ── layout ── */
+  h1{font-size:26px;font-weight:600;letter-spacing:-.022em;margin:30px 0 4px}
+  .sub{color:var(--label-2);font-size:14.5px;margin:0 0 22px;max-width:76ch}
+  h2{font-size:19px;font-weight:600;letter-spacing:-.018em;margin:0 0 3px}
+  .h2sub{font-size:13.5px;color:var(--label-2);margin:0 0 14px}
+  section{margin-bottom:26px}
+  .card{background:var(--bg);border:1px solid var(--sep-2);border-radius:var(--r-lg);box-shadow:var(--shadow);overflow:hidden}
+  .card-h{padding:15px 20px;border-bottom:1px solid var(--sep-2);display:flex;justify-content:space-between;
+          align-items:center;gap:12px;flex-wrap:wrap}
+  .card-t{font-size:15px;font-weight:600}
+  .card-b{padding:18px 20px}
+
+  /* ── triage ── */
+  .ward{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;
+        padding:14px 20px;border-bottom:1px solid var(--sep-2);cursor:pointer;transition:background .15s}
+  .ward:last-child{border-bottom:0}
+  .ward:hover{background:var(--bg-3)}
+  .ward[aria-selected="true"]{background:var(--blue-wash)}
+  .sev{width:4px;align-self:stretch;border-radius:2px;background:var(--sep)}
+  .sev.HIGH{background:var(--critical)} .sev.MODERATE{background:var(--warning)} .sev.LOW{background:var(--good)}
+  .ward-n{font-size:15px;font-weight:500}
+  .ward-d{font-size:12.5px;color:var(--label-3);margin-top:1px}
+  .ward-m{display:flex;gap:7px;flex-wrap:wrap;margin-top:7px}
+  .pill{font-size:11px;font-weight:600;padding:2px 8px;border-radius:5px;white-space:nowrap}
+  .p-crit{background:var(--crit-wash);color:var(--critical)}
+  .p-warn{background:var(--warn-wash);color:#8a5a00}
+  .p-ok{background:var(--ok-wash);color:#0a7a0a}
+  .p-info{background:var(--bg-2);color:var(--label-2)}
+  .ward-r{text-align:right;white-space:nowrap}
+  .ward-rv{font-size:19px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+  .ward-rl{font-size:11px;color:var(--label-3)}
+  .up{color:var(--critical)} .down{color:var(--good)}
+
+  /* ── chart ── */
+  .chart-wrap{padding:6px 10px 14px}
+  svg.chart{display:block;width:100%;height:auto;overflow:visible}
+  .gridline{stroke:var(--sep-2);stroke-width:1}
+  .axis-t{font-family:var(--text);font-size:10.5px;fill:var(--label-3)}
+  .panel-t{font-family:var(--text);font-size:12px;font-weight:600;fill:var(--label)}
+  .panel-u{font-family:var(--text);font-size:10.5px;fill:var(--label-3)}
+  .thr{stroke-dasharray:4 3;stroke-width:1.5;fill:none}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;padding:0 20px 14px;font-size:12.5px;color:var(--label-2)}
+  .lg{display:flex;align-items:center;gap:7px}
+  .sw{width:14px;height:3px;border-radius:2px}
+  .sw.dash{height:0;border-top:2px dashed currentColor;width:16px}
+  #tip{position:fixed;z-index:200;background:rgba(29,29,31,.95);color:#fff;font-size:12px;
+       padding:8px 11px;border-radius:9px;pointer-events:none;opacity:0;transition:opacity .12s;
+       -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);white-space:nowrap;line-height:1.5}
+  #tip.on{opacity:1}
+  #tip b{font-variant-numeric:tabular-nums}
+
+  /* ── report ── */
+  .report{padding:20px 22px;font-size:15.5px;line-height:1.6;max-width:74ch}
+  .report h3{font-size:15px;font-weight:600;margin:18px 0 6px}
+  .report h3:first-child{margin-top:0}
+  .report ul{margin:6px 0 12px;padding-left:20px}
+  .report li{margin-bottom:5px}
+  .report p{margin:0 0 11px}
+  .muted{color:var(--label-3);font-size:14px}
+  .spin{width:14px;height:14px;border:2px solid var(--sep);border-top-color:var(--blue);
+        border-radius:50%;animation:sp .7s linear infinite;display:inline-block;vertical-align:-2px}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .thinking{display:flex;align-items:center;gap:9px;color:var(--label-2);font-size:14.5px}
+  .chip{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:500;
+        padding:4px 11px;border-radius:99px;background:var(--ok-wash);color:#0a7a0a;border:1px solid rgba(12,163,12,.2)}
+  .chip.bad{background:var(--crit-wash);color:var(--critical);border-color:rgba(208,59,59,.25)}
+
+  /* ── downloads ── */
+  .dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:11px}
+  .dl a{display:block;text-decoration:none;color:inherit;border:1px solid var(--sep);
+        border-radius:var(--r);padding:14px 15px;transition:all .15s;background:var(--bg)}
+  .dl a:hover{border-color:var(--blue);box-shadow:0 2px 10px -4px rgba(0,113,227,.35)}
+  .dl-t{font-size:14px;font-weight:500;display:flex;align-items:center;gap:7px}
+  .dl-d{font-size:12px;color:var(--label-3);margin-top:3px;line-height:1.45}
+
+  /* ── ask ── */
+  .askrow{display:flex;gap:9px;padding:16px 20px;border-bottom:1px solid var(--sep-2);background:var(--bg-3)}
+  .askrow input{flex:1;min-width:0;border:1px solid var(--sep);border-radius:10px;padding:9px 13px;
+                font:inherit;font-size:15px;background:var(--bg)}
+  .qsug{display:flex;gap:7px;flex-wrap:wrap;padding:11px 20px;border-bottom:1px solid var(--sep-2)}
+  .qsug button{appearance:none;border:1px solid var(--sep);background:var(--bg);cursor:pointer;font:inherit;
+               font-size:12.5px;padding:5px 11px;border-radius:99px;color:var(--label-2)}
+  .qsug button:hover{border-color:var(--blue);color:var(--blue)}
+  .steps{border-top:1px solid var(--sep-2)}
+  .step{border-bottom:1px solid var(--sep-2)}.step:last-child{border-bottom:0}
+  .step-btn{width:100%;appearance:none;border:0;background:transparent;cursor:pointer;font:inherit;
+            text-align:left;padding:12px 20px;display:flex;align-items:center;gap:11px}
+  .step-btn:hover{background:var(--bg-3)}
+  .step-i{flex:none;width:21px;height:21px;border-radius:6px;background:var(--blue-wash);color:var(--blue);
+          display:grid;place-items:center;font-family:var(--mono);font-size:11px}
+  .step-n{flex:1;font-size:14px;font-weight:500}
+  .step-x{font-size:12px;color:var(--label-3)}
+  .chev{width:12px;color:var(--label-3);transition:transform .2s}
+  .step-btn[aria-expanded="true"] .chev{transform:rotate(90deg)}
+  .step-b{display:none;padding:0 20px 14px 52px;font-size:13.5px;color:var(--label-2)}
+  .step-b.open{display:block}
+  .step-b a{color:var(--blue);font-family:var(--mono);font-size:11.5px;word-break:break-all;display:block;margin-top:6px}
+
+  .note{padding:14px 20px;background:var(--bg-2);font-size:13px;color:var(--label-2);border-top:1px solid var(--sep-2)}
+  .note b{color:var(--label)}
+  footer{margin-top:30px;font-size:12.5px;color:var(--label-3);line-height:1.6;max-width:84ch}
+  footer code{font-family:var(--mono);font-size:11.5px}
+  @media(prefers-reduced-motion:reduce){*{transition-duration:.001ms!important}}
+</style>
+</head>
+<body>
+<div id="tip"></div>
+
+<div class="bar"><div class="bar-in">
+  <div class="brand">District Surveillance <span>· OneAquaHealth</span></div>
+  <div class="bar-r">
+    <span class="live" id="live"><span class="dot off"></span>connecting…</span>
+    <select id="window" aria-label="Time window">
+      <option value="14">Last 14 days</option>
+      <option value="28" selected>Last 28 days</option>
+      <option value="60">Last 60 days</option>
+    </select>
+    <button type="button" class="btn ghost" id="refresh">Refresh</button>
+  </div>
+</div></div>
+
+<div class="wrap">
+  <h1>District surveillance — water-associated disease</h1>
+  <p class="sub">Wards ranked by the combination of a water-quality exceedance and a rise in notified cases.
+     Screening is against CPCB bathing-water criteria and IS 10500:2012 reference values. All figures are read
+     live from the FHIR repository at request time.</p>
+
+  <!-- ══ TRIAGE ══ -->
+  <section>
+    <h2>Priority wards</h2>
+    <p class="h2sub">Ordered as you would work them: co-located signal first, then severity, then size of rise.</p>
+    <div class="card"><div id="wards"><div class="card-b muted">Loading…</div></div></div>
+  </section>
+
+  <!-- ══ INVESTIGATION ══ -->
+  <section>
+    <h2>Investigate a ward</h2>
+    <p class="h2sub">Water quality and notified cases on a shared timeline. A lag between the two is the signal
+       worth escalating — read it as the horizontal gap between the peaks.</p>
+    <div class="card">
+      <div class="card-h">
+        <div class="card-t" id="inv-title">Select a ward above</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <select id="indicator" aria-label="Water indicator">
+            <option value="faecal_coliform">Faecal coliform</option>
+            <option value="bod">BOD</option>
+            <option value="dissolved_oxygen">Dissolved oxygen</option>
+            <option value="ammoniacal_nitrogen">Ammoniacal nitrogen</option>
+            <option value="ph">pH</option>
+            <option value="chromium_total">Chromium (total)</option>
+          </select>
+        </div>
+      </div>
+      <div class="chart-wrap"><svg class="chart" id="chart" viewBox="0 0 1000 420" role="img"
+        aria-label="Two aligned panels sharing a time axis: water quality above, notified case rate below."></svg></div>
+      <div class="legend" id="legend"></div>
+      <div class="note" id="chart-note" hidden></div>
+    </div>
+  </section>
+
+  <!-- ══ REPORT ══ -->
+  <section>
+    <h2>Executive situation report</h2>
+    <p class="h2sub">Figures are derived in Python; the model writes prose over facts it cannot alter, and the
+       result is checked back against them.</p>
+    <div class="card">
+      <div class="card-h">
+        <div class="card-t">Situation report</div>
+        <div style="display:flex;gap:8px">
+          <button type="button" class="btn ghost" id="facts-btn">View facts (no model)</button>
+          <button type="button" class="btn" id="report-btn">Generate report</button>
+        </div>
+      </div>
+      <div class="report" id="report"><span class="muted">Not generated yet. The report runs a real model call
+        over facts computed from the FHIR repository.</span></div>
+      <div id="report-ground"></div>
+    </div>
+  </section>
+
+  <!-- ══ ASK ══ -->
+  <section>
+    <h2>Ask the repository</h2>
+    <p class="h2sub">Plain English. The assistant selects typed tools; the code builds every FHIR query.</p>
+    <div class="card">
+      <div class="askrow">
+        <input id="q" type="text" placeholder="e.g. has faecal coliform changed at the ITO reach this month?" autocomplete="off">
+        <button type="button" class="btn" id="ask-btn">Ask</button>
+      </div>
+      <div class="qsug" id="qsug"></div>
+      <div class="steps" id="trace"></div>
+      <div class="report" id="answer"><span class="muted">No question asked yet.</span></div>
+      <div id="answer-ground"></div>
+    </div>
+  </section>
+
+  <!-- ══ DOWNLOADS ══ -->
+  <section>
+    <h2>Downloads</h2>
+    <p class="h2sub">For the incident record. The FHIR bundle attaches natively to an ABDM-aligned system.</p>
+    <div class="card"><div class="card-b"><div class="dl" id="dl"></div></div></div>
+  </section>
+
+  <footer>
+    Readings are screened against CPCB Primary Water Quality Criteria for Bathing Waters and IS 10500:2012
+    reference values; these are screening thresholds for a prototype, not statutory enforcement limits, and the
+    Designated Best Use class for a reach is set by the State Pollution Control Board.
+    <b>The readings in this deployment are synthetic demonstration data</b> shaped to be realistic — they are not
+    observed measurements. Station coordinates in <code>demo/sites.json</code> are approximate.
+    Co-location of a water exceedance and a rise in notifications is an association to investigate; nothing here
+    establishes causation.
+  </footer>
+</div>
+
+<script>
+"use strict";
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt=n=>n==null?"—":(Math.abs(n)>=10000?Math.round(n).toLocaleString():Math.abs(n)>=100?Math.round(n):+n.toFixed(2));
+let WIN=28, WARDS=[], SEL=null;
+
+const LABEL={faecal_coliform:"Faecal coliform",bod:"BOD",dissolved_oxygen:"Dissolved oxygen",
+             ammoniacal_nitrogen:"Ammoniacal nitrogen",ph:"pH",chromium_total:"Chromium (total)",
+             acute_diarrhoeal_disease:"Acute diarrhoeal disease"};
+
+/* ───── triage ───── */
+async function loadWards(){
+  $("#wards").innerHTML='<div class="card-b muted">Loading…</div>';
+  let d; try{ d=await (await fetch(`/api/officer/wards?days=${WIN}`)).json(); }
+  catch(e){ $("#wards").innerHTML='<div class="card-b muted">Could not reach the gateway.</div>'; return; }
+  WARDS=d.wards;
+  $("#live").innerHTML='<span class="dot"></span>'+esc(d.fhir_server.replace(/^https?:\/\//,""));
+
+  $("#wards").innerHTML=d.wards.map(w=>{
+    const exc=w.exceedances.slice(0,3).map(e=>{
+      const f=e.exceedance_factor;
+      const cls=f&&f>=3?"p-crit":"p-warn";
+      return `<span class="pill ${cls}">${esc(LABEL[e.indicator]||e.indicator)} ${f?f+"×":"out of band"}</span>`;
+    }).join("");
+    const co=w.co_located?'<span class="pill p-crit">water + cases</span>':"";
+    const none=!w.exceedances.length?'<span class="pill p-ok">within criteria</span>':"";
+    const ch=w.add_change_pct;
+    return `<div class="ward" role="button" tabindex="0" data-site="${esc(w.site_id)}" aria-selected="false">
+      <div class="sev ${esc(w.severity)}"></div>
+      <div>
+        <div class="ward-n">${esc(w.name)}</div>
+        <div class="ward-d">${esc(w.district||"")} · ${esc(w.reach||"")}</div>
+        <div class="ward-m">${co}${exc}${none}</div>
+      </div>
+      <div class="ward-r">
+        <div class="ward-rv ${ch>0?"up":ch<0?"down":""}">${ch==null?"—":(ch>0?"+":"")+ch+"%"}</div>
+        <div class="ward-rl">ADD vs prior week</div>
+        <div class="ward-rl" style="margin-top:3px">${w.add_cases!=null?w.add_cases+" cases":"no returns"}</div>
+      </div>
+    </div>`;
+  }).join("");
+
+  $$(".ward").forEach(el=>{
+    const go=()=>select(el.dataset.site);
+    el.onclick=go;
+    el.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go();}};
+  });
+  if(d.wards.length) select(d.priority[0]||d.wards[0].site_id);
+}
+
+function select(siteId){
+  SEL=siteId;
+  $$(".ward").forEach(el=>el.setAttribute("aria-selected",String(el.dataset.site===siteId)));
+  const w=WARDS.find(x=>x.site_id===siteId);
+  $("#inv-title").textContent=w?w.name:siteId;
+  loadChart();
+  buildDownloads();
+}
+
+/* ───── chart: two aligned panels, one shared time axis ─────
+   Never a dual axis. Coliform is in tens of thousands and case rate in tens;
+   on one scale the smaller series flattens to the baseline and the comparison
+   becomes a lie. Stacked panels keep both readable and make the lag legible as
+   a horizontal offset between peaks. */
+async function loadChart(){
+  if(!SEL) return;
+  const ind=$("#indicator").value;
+  const [water,health]=await Promise.all([
+    fetch(`/api/officer/trend?site_id=${SEL}&indicator=${ind}&days=${WIN}`).then(r=>r.json()),
+    fetch(`/api/officer/trend?site_id=${SEL}&indicator=acute_diarrhoeal_disease&days=${WIN}`).then(r=>r.json())
+  ]);
+  draw(water,health);
+}
+
+function draw(water,health){
+  const W=1000,H=420,L=64,R=18,T=26,GAP=46;
+  const PH=(H-T-GAP-34)/2;                      // panel height
+  const top={y:T,h:PH}, bot={y:T+PH+GAP,h:PH};
+  const svg=$("#chart");
+  const wS=water.series||[], hS=health.series||[];
+  if(!wS.length){ svg.innerHTML=`<text x="${W/2}" y="${H/2}" text-anchor="middle" class="axis-t">No readings in this window.</text>`;
+                  $("#legend").innerHTML=""; return; }
+
+  const dates=[...new Set([...wS.map(p=>p.date),...hS.map(p=>p.date)])].sort();
+  const x=d=>L+(dates.indexOf(d)/Math.max(1,dates.length-1))*(W-L-R);
+
+  const scale=(pts,panel,thr)=>{
+    const vals=pts.map(p=>p.value).filter(v=>v!=null);
+    if(thr!=null && typeof thr==="number") vals.push(thr);
+    let lo=Math.min(...vals), hi=Math.max(...vals);
+    if(lo===hi){lo=lo*0.9;hi=hi*1.1||1;}
+    const pad=(hi-lo)*0.14; lo=Math.max(0,lo-pad); hi=hi+pad;
+    return {lo,hi,y:v=>panel.y+panel.h-((v-lo)/(hi-lo))*panel.h};
+  };
+  const wT=typeof water.threshold==="number"?water.threshold:null;
+  const ws=scale(wS,top,wT), hs=scale(hS,bot,null);
+  const base=hS.find(p=>p.baseline!=null)?.baseline ?? null;
+
+  const path=(pts,sc)=>pts.filter(p=>p.value!=null)
+    .map((p,i)=>`${i?"L":"M"}${x(p.date).toFixed(1)},${sc.y(p.value).toFixed(1)}`).join(" ");
+
+  const ticks=(sc,n=3)=>Array.from({length:n},(_,i)=>sc.lo+(sc.hi-sc.lo)*i/(n-1));
+  const step=Math.max(1,Math.ceil(dates.length/7));
+  const dayLabels=dates.filter((_,i)=>i%step===0||i===dates.length-1);
+
+  svg.innerHTML=`
+    ${[top,bot].map((pn,k)=>{
+      const sc=k?hs:ws;
+      return ticks(sc).map(v=>`
+        <line class="gridline" x1="${L}" y1="${sc.y(v).toFixed(1)}" x2="${W-R}" y2="${sc.y(v).toFixed(1)}"/>
+        <text class="axis-t" x="${L-9}" y="${(sc.y(v)+3.5).toFixed(1)}" text-anchor="end">${fmt(v)}</text>`).join("");
+    }).join("")}
+
+    <text class="panel-t" x="${L}" y="${top.y-9}">${esc(LABEL[water.indicator]||water.indicator)}</text>
+    <text class="panel-u" x="${L+(LABEL[water.indicator]||"").length*6.6+14}" y="${top.y-9}">${esc(water.unit||"")}</text>
+    <text class="panel-t" x="${L}" y="${bot.y-9}">Acute diarrhoeal disease</text>
+    <text class="panel-u" x="${L+158}" y="${bot.y-9}">cases per 100,000 · weekly IDSP return</text>
+
+    ${wT!=null?`<line class="thr" stroke="var(--critical)" x1="${L}" y1="${ws.y(wT).toFixed(1)}" x2="${W-R}" y2="${ws.y(wT).toFixed(1)}"/>
+      <text class="axis-t" fill="var(--critical)" x="${W-R}" y="${(ws.y(wT)-6).toFixed(1)}" text-anchor="end">CPCB criterion ${fmt(wT)}</text>`:""}
+    ${base!=null?`<line class="thr" stroke="var(--label-3)" x1="${L}" y1="${hs.y(base).toFixed(1)}" x2="${W-R}" y2="${hs.y(base).toFixed(1)}"/>
+      <text class="axis-t" x="${W-R}" y="${(hs.y(base)-6).toFixed(1)}" text-anchor="end">baseline ${fmt(base)}</text>`:""}
+
+    <path d="${path(wS,ws)}" fill="none" stroke="var(--series-water)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="${path(hS,hs)}" fill="none" stroke="var(--series-health)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    ${hS.filter(p=>p.value!=null).map(p=>`<circle cx="${x(p.date).toFixed(1)}" cy="${hs.y(p.value).toFixed(1)}" r="4.5"
+       fill="var(--series-health)" stroke="var(--bg)" stroke-width="2"/>`).join("")}
+
+    ${dayLabels.map(d=>`<text class="axis-t" x="${x(d).toFixed(1)}" y="${H-12}" text-anchor="middle">${d.slice(5)}</text>`).join("")}
+    <line class="gridline" x1="${L}" y1="${(top.y+top.h).toFixed(1)}" x2="${W-R}" y2="${(top.y+top.h).toFixed(1)}"/>
+    <line class="gridline" x1="${L}" y1="${(bot.y+bot.h).toFixed(1)}" x2="${W-R}" y2="${(bot.y+bot.h).toFixed(1)}"/>
+    <line id="cross" x1="0" y1="${T}" x2="0" y2="${bot.y+bot.h}" stroke="var(--label-3)" stroke-width="1" opacity="0"/>
+    <rect id="hit" x="${L}" y="${T}" width="${W-L-R}" height="${bot.y+bot.h-T}" fill="transparent"/>`;
+
+  $("#legend").innerHTML=`
+    <span class="lg"><span class="sw" style="background:var(--series-water)"></span>${esc(LABEL[water.indicator]||water.indicator)} — daily</span>
+    <span class="lg"><span class="sw" style="background:var(--series-health)"></span>Acute diarrhoeal disease — weekly</span>
+    ${wT!=null?'<span class="lg" style="color:var(--critical)"><span class="sw dash"></span>CPCB criterion</span>':""}
+    ${base!=null?'<span class="lg"><span class="sw dash" style="color:var(--label-3)"></span>Expected baseline</span>':""}`;
+
+  // change summary + the basis, so the criterion is never an unsourced number
+  const c=water.change, hc=health.change;
+  const bits=[];
+  if(c&&c.pct!=null) bits.push(`<b>${esc(LABEL[water.indicator]||water.indicator)}</b> ${c.direction==="up"?"rose":"fell"} ${Math.abs(c.pct)}% against the prior week (${fmt(c.prior_mean)} → ${fmt(c.recent_mean)} ${esc(water.unit||"")}).`);
+  if(hc&&hc.pct!=null) bits.push(`<b>Notified ADD</b> ${hc.direction==="up"?"rose":"fell"} ${Math.abs(hc.pct)}% (${fmt(hc.prior_mean)} → ${fmt(hc.recent_mean)} per 100,000).`);
+  if(water.threshold_basis) bits.push(`Criterion: ${esc(water.threshold_basis)}.`);
+  $("#chart-note").hidden=!bits.length;
+  $("#chart-note").innerHTML=bits.join(" ");
+
+  // hover crosshair
+  const hit=$("#hit"), cross=$("#cross"), tip=$("#tip");
+  const byDate=d=>({w:wS.find(p=>p.date===d), h:hS.find(p=>p.date===d)});
+  hit.onmousemove=e=>{
+    const r=svg.getBoundingClientRect();
+    const px=(e.clientX-r.left)/r.width*W;
+    const i=Math.round((px-L)/(W-L-R)*(dates.length-1));
+    const d=dates[Math.max(0,Math.min(dates.length-1,i))]; if(!d) return;
+    cross.setAttribute("x1",x(d)); cross.setAttribute("x2",x(d)); cross.setAttribute("opacity","0.35");
+    const v=byDate(d);
+    tip.innerHTML=`<div style="opacity:.7;margin-bottom:3px">${esc(d)}</div>`+
+      (v.w?`<div>${esc(LABEL[water.indicator]||water.indicator)} <b>${fmt(v.w.value)}</b> ${esc(water.unit||"")}</div>`:"")+
+      (v.h?`<div>ADD <b>${fmt(v.h.value)}</b>/100k${v.h.cases?` · ${v.h.cases} cases`:""}</div>`:"");
+    tip.style.left=Math.min(innerWidth-190,e.clientX+14)+"px"; tip.style.top=(e.clientY-10)+"px";
+    tip.classList.add("on");
+  };
+  hit.onmouseleave=()=>{cross.setAttribute("opacity","0");tip.classList.remove("on");};
+}
+
+/* ───── downloads ───── */
+function buildDownloads(){
+  const s=SEL||"";
+  $("#dl").innerHTML=`
+    <a href="/api/officer/export/readings.csv?days=${WIN}${s?`&site_id=${s}`:""}" download>
+      <div class="dl-t">Water readings · CSV</div>
+      <div class="dl-d">${WIN} days${s?" for this ward":" , all wards"}, with criterion and exceedance factor on every row.</div></a>
+    <a href="/api/officer/export/surveillance.csv?days=90" download>
+      <div class="dl-t">IDSP returns · CSV</div>
+      <div class="dl-d">90 days of syndromic returns with case counts and denominators intact.</div></a>
+    <a href="/api/officer/export/bundle.json?site_id=${s}&days=${WIN}" download>
+      <div class="dl-t">Evidence bundle · FHIR R4</div>
+      <div class="dl-d">Every Observation behind this ward, as a FHIR Bundle. Attaches to an ABDM-aligned record without retyping.</div></a>
+    <a href="/api/officer/report/facts?days=${WIN}" target="_blank" rel="noopener">
+      <div class="dl-t">Derived facts · JSON</div>
+      <div class="dl-d">Exactly what the report asserts, computed in Python with no model involved.</div></a>`;
+}
+
+/* ───── report ───── */
+function renderMd(t){
+  return esc(t)
+    .replace(/^\*\*(.+?)\*\*$/gm,"<h3>$1</h3>")
+    .replace(/\*\*(.+?)\*\*/g,"<b>$1</b>")
+    .replace(/^[-*]\s+(.+)$/gm,"<li>$1</li>")
+    .replace(/(<li>[\s\S]*?<\/li>)(?!\s*<li>)/g,"<ul>$1</ul>")
+    .split(/\n{2,}/).map(b=>b.startsWith("<")?b:`<p>${b}</p>`).join("");
+}
+function groundChip(g){
+  if(!g) return "";
+  return `<div class="note"><span class="chip ${g.grounded?"":"bad"}">${g.grounded?"✓":"⚠"}
+    ${g.grounded?`Grounded · ${g.figures_checked} figure(s) verified against ${g.source_figure_count} retrieved`
+                :`${g.unsupported_figures.length} figure(s) not found in the data`}</span>
+    <span style="margin-left:9px">${esc(g.not_covered)}</span></div>`;
+}
+$("#report-btn").onclick=async()=>{
+  $("#report-btn").disabled=true;
+  $("#report").innerHTML='<div class="thinking"><span class="spin"></span>Deriving facts, then drafting…</div>';
+  $("#report-ground").innerHTML="";
+  try{
+    const r=await fetch(`/api/officer/report?days=${WIN}`);
+    const d=await r.json();
+    if(!r.ok) throw new Error(d.detail||"failed");
+    $("#report").innerHTML=renderMd(d.narrative);
+    $("#report-ground").innerHTML=groundChip(d.grounding);
+  }catch(e){ $("#report").innerHTML=`<span class="muted">${esc(e.message)}</span>`; }
+  $("#report-btn").disabled=false;
+};
+$("#facts-btn").onclick=()=>window.open(`/api/officer/report/facts?days=${WIN}`,"_blank");
+
+/* ───── ask ───── */
+const SUG=["Has faecal coliform changed at the ITO reach this month?",
+           "Which ward has both a water exceedance and rising notifications?",
+           "What is the dissolved oxygen trend at Okhla?",
+           "How many people are in the Dharavi catchment cohort?"];
+$("#qsug").innerHTML=SUG.map(q=>`<button type="button">${esc(q)}</button>`).join("");
+$$("#qsug button").forEach(b=>b.onclick=()=>{$("#q").value=b.textContent;ask();});
+
+const WHY={list_sites:"Established which stations exist before narrowing.",
+  get_thresholds:"Fetched the CPCB and IS 10500 criteria rather than recalling a number — a 'safe level' from memory is exactly what must not reach an officer.",
+  get_site_profile:"Pulled water chemistry and cohort health together — the cross-domain join.",
+  search_observations:"Filtered Observations by profile, indicator, station and date.",
+  get_cohort:"Resolved the ward cohort a health measure points at."};
+
+async function ask(){
+  const q=$("#q").value.trim(); if(!q) return;
+  $("#ask-btn").disabled=true; $("#trace").innerHTML=""; $("#answer-ground").innerHTML="";
+  $("#answer").innerHTML='<div class="thinking"><span class="spin"></span>Choosing tools and querying FHIR…</div>';
+  let d;
+  try{
+    const r=await fetch("/api/ask",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({question:q})});
+    d=await r.json(); if(!r.ok) throw new Error(d.detail||"failed");
+  }catch(e){ $("#answer").innerHTML=`<span class="muted">${esc(e.message)}</span>`; $("#ask-btn").disabled=false; return; }
+
+  const groups=[];
+  d.trace.forEach(t=>{
+    const us=(t.fhir_urls&&t.fhir_urls.length)?t.fhir_urls:(t.fhir_url?[t.fhir_url]:[]);
+    const g=groups.find(g=>g.tool===t.tool);
+    if(g){g.n++;g.urls.push(...us);} else groups.push({tool:t.tool,n:1,urls:[...us]});
+  });
+  const NAME={list_sites:"Surveyed the stations",get_thresholds:"Loaded the screening criteria",
+    get_site_profile:g=>g.n>1?`Examined ${g.n} stations`:"Examined one station in full",
+    search_observations:g=>g.n>1?`Ran ${g.n} targeted searches`:"Ran a targeted search",
+    get_cohort:"Resolved the ward cohort"};
+  $("#trace").innerHTML=groups.map((g,i)=>{
+    const nm=NAME[g.tool]; const label=typeof nm==="function"?nm(g):(nm||g.tool);
+    const urls=[...new Set(g.urls.filter(Boolean))];
+    return `<div class="step">
+      <button type="button" class="step-btn" aria-expanded="false" data-t="t${i}">
+        <span class="step-i">${i+1}</span><span class="step-n">${esc(label)}</span>
+        <span class="step-x">${urls.length?urls.length+" quer"+(urls.length>1?"ies":"y"):"local"}</span>
+        <svg class="chev" viewBox="0 0 8 13" fill="none"><path d="M1.5 1.5L6.5 6.5L1.5 11.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <div class="step-b" id="t${i}">${esc(WHY[g.tool]||"Tool call.")}
+        ${urls.slice(0,4).map(u=>`<a href="${esc(u)}" target="_blank" rel="noopener">${esc(decodeURIComponent(u))}</a>`).join("")}</div>
+    </div>`;
+  }).join("");
+  $$("[data-t]").forEach(b=>b.onclick=()=>{
+    const body=$("#"+b.dataset.t), open=b.getAttribute("aria-expanded")==="true";
+    b.setAttribute("aria-expanded",String(!open)); body.classList.toggle("open",!open);
+  });
+  $("#answer").innerHTML=renderMd(d.answer);
+  $("#answer-ground").innerHTML=groundChip(d.grounding);
+  $("#ask-btn").disabled=false;
+}
+$("#ask-btn").onclick=ask;
+$("#q").addEventListener("keydown",e=>{if(e.key==="Enter")ask();});
+
+/* ───── boot ───── */
+$("#window").onchange=e=>{WIN=+e.target.value;loadWards();};
+$("#indicator").onchange=loadChart;
+$("#refresh").onclick=loadWards;
+loadWards(); buildDownloads();
+</script>
+</body>
+</html>

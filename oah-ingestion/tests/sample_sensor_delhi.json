@@ -1,0 +1,11 @@
+{
+  "device_id": "CPCB-DL-ITO-01",
+  "city": "Delhi",
+  "site_id": "yam-ito",
+  "timestamp": "2026-09-26T12:00:00Z",
+  "measurements": [
+    {"parameter": "ph", "unit": "pH", "value": 7.2},
+    {"parameter": "bod", "unit": "mg/L", "value": 11.5},
+    {"parameter": "faecal_coliform", "unit": "MPN/100mL", "value": 21400}
+  ]
+}
