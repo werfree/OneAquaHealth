@@ -136,6 +136,21 @@
   .tool-l{font-size:10.5px;color:var(--label-3);margin-right:2px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
   .hint{font-size:11px;color:var(--label-3);margin-top:7px}
 
+  /* autodemo chrome. No visible control: a button labelled "demo" makes a real
+     run look staged, which is the opposite of the point. ?autorun=1 or Shift+D. */
+  #cursor{position:fixed;left:0;top:0;width:22px;height:22px;z-index:9999;pointer-events:none;opacity:0;
+          transition:opacity .3s;will-change:transform}
+  #cursor svg{filter:drop-shadow(0 2px 4px rgba(0,0,0,.3))}
+  #cursor.on{opacity:1}
+  #cursor.click::after{content:"";position:absolute;left:-13px;top:-13px;width:48px;height:48px;border-radius:50%;
+                       background:rgba(0,113,227,.3);animation:rip .45s ease-out}
+  @keyframes rip{from{transform:scale(.2);opacity:1}to{transform:scale(1);opacity:0}}
+  #caption{position:fixed;left:50%;bottom:118px;transform:translateX(-50%);z-index:9998;
+           background:rgba(29,29,31,.92);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+           color:#fff;font-size:14.5px;font-weight:500;padding:10px 20px;border-radius:99px;opacity:0;
+           transition:opacity .3s;pointer-events:none;max-width:74vw;text-align:center}
+  #caption.on{opacity:1}
+  body.autorun{cursor:none}
   #tip{position:fixed;z-index:300;background:rgba(29,29,31,.95);color:#fff;font-size:11.5px;padding:7px 10px;
        border-radius:8px;pointer-events:none;opacity:0;transition:opacity .1s;white-space:nowrap;line-height:1.5}
   #tip.on{opacity:1}
@@ -144,6 +159,11 @@
 </head>
 <body>
 <div id="tip"></div>
+<div id="cursor" aria-hidden="true">
+  <svg viewBox="0 0 22 22" width="22" height="22">
+    <path d="M3 1l15 8.5-6.6 1.6L8.6 19z" fill="#fff" stroke="#1D1D1F" stroke-width="1.6" stroke-linejoin="round"/>
+  </svg></div>
+<div id="caption" aria-live="polite"></div>
 <div class="app">
   <div class="top">
     <div class="logo">Surveillance Studio <span>· OneAquaHealth</span></div>
@@ -480,10 +500,82 @@ function drawScatter(s){
   el.querySelectorAll("g[data-t]").forEach(g=>hover(g,g.dataset.t));
 }
 
+/* ══════════ autodemo ══════════
+   Drives the real studio: it types into the real composer and waits on the real
+   agent, so every chart it shows is one the analyst actually chose. Nothing is
+   faked or pre-recorded, which also means the pacing follows the model. */
+const cur=$("#cursor"),cap=$("#caption");
+let at={x:innerWidth/2,y:innerHeight/2},abort=false;
+const say=t=>{cap.textContent=t;cap.classList.toggle("on",!!t);};
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+
+function moveTo(x,y,ms=620){return new Promise(res=>{
+  const from={...at},t0=performance.now();
+  const ease=p=>p<.5?4*p*p*p:1-Math.pow(-2*p+2,3)/2;
+  (function step(now){const p=Math.min(1,(now-t0)/ms),e=ease(p);
+    at={x:from.x+(x-from.x)*e,y:from.y+(y-from.y)*e};
+    cur.style.transform=`translate(${at.x}px,${at.y}px)`;
+    p<1?requestAnimationFrame(step):res();})(performance.now());});}
+
+async function moveToEl(el,ms){ if(!el)return;
+  const r=el.getBoundingClientRect();
+  if(r.top<70||r.bottom>innerHeight-70){el.scrollIntoView({block:"center",behavior:"smooth"});await sleep(650);}
+  const b=el.getBoundingClientRect(); await moveTo(b.left+b.width/2,b.top+b.height/2,ms);}
+
+async function click(el,ms){ if(!el)return;
+  await moveToEl(el,ms); cur.classList.add("click"); await sleep(140);
+  cur.classList.remove("click"); el.click(); await sleep(260);}
+
+async function typeIn(text,speed=34){
+  await moveToEl(ta); ta.focus(); ta.value="";
+  for(const ch of text){ if(abort)return; ta.value+=ch;
+    ta.style.height="auto";ta.style.height=Math.min(120,ta.scrollHeight)+"px";
+    await sleep(speed+Math.random()*22);} await sleep(240);}
+
+const waitIdle=async(max=70)=>{for(let i=0;i<max*2&&running;i++)await sleep(500);};
+
+const DEMO=[
+  async()=>{say("A district surveillance officer asks what needs attention.");await sleep(2100);},
+  async()=>{await typeIn("Anything I should be worried about this week?");
+            await click($("#send")); say("The analyst plans, then chooses its own tools."); await sleep(2600);},
+  async()=>{await waitIdle(); say("It picked the view it judged best for the question."); await sleep(2800);},
+  async()=>{const h=$$(".act-h").slice(-1)[0];
+            if(h){say("Every action opens to show why it ran, and the FHIR queries behind it.");
+                  await click(h); await sleep(3000);}},
+  async()=>{say("Now a question that calls for a different view.");await sleep(1500);
+            await typeIn("Is there any ward where water quality and notified cases both moved? Show me the timeline.");
+            await click($("#send")); await sleep(2200);},
+  async()=>{await waitIdle(); say("A timeline this time — the lag between water and cases is the finding.");
+            await sleep(3400);},
+  async()=>{const c=$$(".viz svg .hit").slice(-1)[0];
+            if(c){const r=c.getBoundingClientRect();
+              await moveTo(r.left+r.width*.68,r.top+r.height*.4,700); await sleep(900);
+              await moveTo(r.left+r.width*.82,r.top+r.height*.4,1100); await sleep(1400);}},
+  async()=>{const g=$$(".answer .ground").slice(-1)[0];
+            if(g){await moveToEl(g); say("Every figure is checked against the retrieved data — in Python."); await sleep(3000);}},
+  async()=>{const d=$$(".finish a").slice(-3)[0];
+            if(d){await moveToEl(d); say("The whole investigation downloads as an auditable report."); await sleep(3200);}},
+  async()=>{say("Request in, worked investigation out.");await sleep(2600);say("");}
+];
+
+async function autorun(){
+  if(document.body.classList.contains("autorun")){abort=true;return stopDemo();}
+  abort=false; document.body.classList.add("autorun"); cur.classList.add("on");
+  cur.style.transform=`translate(${at.x}px,${at.y}px)`;
+  for(const step of DEMO){ if(abort)break; await step(); }
+  stopDemo();
+}
+function stopDemo(){document.body.classList.remove("autorun");cur.classList.remove("on");say("");tip.classList.remove("on");}
+addEventListener("keydown",e=>{
+  if(e.key==="Escape"){abort=true;stopDemo();}
+  if(e.shiftKey&&(e.key==="D"||e.key==="d")&&e.target.tagName!=="TEXTAREA"&&e.target.tagName!=="INPUT")autorun();
+});
+
 (async()=>{try{const i=await (await fetch("/api/info")).json();
   $("#live").innerHTML='<span class="dot"></span>'+esc(i.fhir.server.replace(/^https?:\/\//,""));
 }catch(e){$("#live").innerHTML='<span class="dot off"></span>gateway unreachable';}
-ta.focus();})();
+ta.focus();
+if(new URLSearchParams(location.search).has("autorun")) setTimeout(autorun,1200);})();
 </script>
 </body>
 </html>
