@@ -6,6 +6,7 @@ import copy
 import html
 import json
 import os
+import re
 import threading
 import time
 import urllib.error
@@ -25,20 +26,39 @@ PROJECT_ROOT = ROOT.parent
 load_dotenv(PROJECT_ROOT / ".env")
 
 FIXTURE_PATH = ROOT / "data" / "fixtures.json"
+THEME_PATH = ROOT / "data" / "themes.json"
 STATIC_ROOT = ROOT / "static"
 LIVE_BASE_URL = os.getenv("OAH_LIVE_BASE_URL", "http://127.0.0.1:8000").rstrip("/")
-THEMES = [
-    {"id": "aqua", "label": "Aqua", "themeColor": "#f4f3ee", "colorScheme": "light"},
-    {"id": "aqua-dark", "label": "Aqua dark", "themeColor": "#0f1d1a", "colorScheme": "dark"},
-    {"id": "white", "label": "White", "themeColor": "#ffffff", "colorScheme": "light"},
-    {"id": "dark", "label": "Dark", "themeColor": "#121416", "colorScheme": "dark"},
-]
+
+with THEME_PATH.open(encoding="utf-8") as theme_file:
+    THEME_CONFIG = json.load(theme_file)
+
+THEMES = THEME_CONFIG["themes"]
 THEME_IDS = {theme["id"] for theme in THEMES}
+THEMES_BY_ID = {theme["id"]: theme for theme in THEMES}
+FALLBACK_THEME = THEME_CONFIG["fallbackTheme"]
+
+
+def validate_theme_config() -> None:
+    if not THEMES or len(THEME_IDS) != len(THEMES) or FALLBACK_THEME not in THEME_IDS:
+        raise ValueError("Theme catalogue requires unique themes and a valid fallbackTheme")
+    expected_tokens = set(THEMES[0]["tokens"])
+    for theme in THEMES:
+        if theme["colorScheme"] not in {"light", "dark"}:
+            raise ValueError(f"Invalid color scheme for theme {theme['id']}")
+        if set(theme["tokens"]) != expected_tokens:
+            raise ValueError(f"Theme {theme['id']} does not define the complete token map")
+        for name, value in theme["tokens"].items():
+            if not re.fullmatch(r"[a-z][a-z0-9-]*", name) or not isinstance(value, str) or re.search(r"[;{}<>]", value):
+                raise ValueError(f"Unsafe theme token {name!r} in {theme['id']}")
+
+
+validate_theme_config()
 
 
 def resolve_default_theme(value: str | None = None) -> str:
-    candidate = (value or os.getenv("DASHBOARD_DEFAULT_THEME", "aqua")).strip().lower()
-    return candidate if candidate in THEME_IDS else "aqua"
+    candidate = (value or os.getenv("DASHBOARD_DEFAULT_THEME", FALLBACK_THEME)).strip().lower()
+    return candidate if candidate in THEME_IDS else FALLBACK_THEME
 
 
 DEFAULT_THEME = resolve_default_theme()
@@ -642,7 +662,16 @@ def live_ask(payload: dict[str, Any] = Body(...)) -> JSONResponse:
 @app.get("/", include_in_schema=False)
 def index() -> HTMLResponse:
     page = (STATIC_ROOT / "index.html").read_text(encoding="utf-8")
-    return HTMLResponse(page.replace("__DEFAULT_THEME__", DEFAULT_THEME))
+    theme = THEMES_BY_ID[DEFAULT_THEME]
+    tokens = " ".join(f"--{name}: {value};" for name, value in theme["tokens"].items())
+    config_json = json.dumps({"defaultTheme": DEFAULT_THEME, "themes": THEMES}, separators=(",", ":")).replace("<", "\\u003c")
+    return HTMLResponse(
+        page.replace("__DEFAULT_THEME__", DEFAULT_THEME)
+        .replace("__DEFAULT_THEME_COLOR__", html.escape(theme["themeColor"], quote=True))
+        .replace("__DEFAULT_COLOR_SCHEME__", theme["colorScheme"])
+        .replace("__DEFAULT_THEME_TOKENS__", tokens)
+        .replace("__THEME_CONFIG__", config_json)
+    )
 
 
 app.mount("/static", StaticFiles(directory=STATIC_ROOT), name="static")

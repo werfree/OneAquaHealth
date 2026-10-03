@@ -11,6 +11,7 @@ const personaSelector = document.querySelector("#persona-selector");
 const modeIndicator = document.querySelector("#mode-indicator");
 const themeSelector = document.querySelector("#theme-selector");
 const browserThemeColor = document.querySelector("#browser-theme-color");
+const embeddedThemeConfig = JSON.parse(document.querySelector("#theme-config").textContent);
 let pollTimer = null;
 
 function clearPoll() {
@@ -27,6 +28,9 @@ function applyTheme(themeId, { persist = false } = {}) {
   const config = state.themeConfig;
   const theme = config?.themes.find(item => item.id === themeId);
   if (!theme) return;
+  Object.entries(theme.tokens).forEach(([token, value]) => {
+    document.documentElement.style.setProperty(`--${token}`, value);
+  });
   state.theme = theme.id;
   document.documentElement.dataset.theme = theme.id;
   document.documentElement.style.colorScheme = theme.colorScheme;
@@ -61,11 +65,7 @@ async function bootstrap() {
   setState({ loading: true, error: null });
   render();
   try {
-    const [themeConfig, session, summary] = await Promise.all([api.config(), api.session(state.role), api.summary(state.role)]);
-    const savedTheme = localStorage.getItem("oah-theme");
-    const theme = themeConfig.themes.some(item => item.id === savedTheme) ? savedTheme : themeConfig.defaultTheme;
-    setState({ themeConfig, theme });
-    applyTheme(theme);
+    const [session, summary] = await Promise.all([api.session(state.role), api.summary(state.role)]);
     const selectedSiteId = summary.sites.some(site => site.id === state.selectedSiteId)
       ? state.selectedSiteId
       : summary.sites[0]?.id || null;
@@ -223,7 +223,7 @@ function renderGraphTab() {
       <button class="button small" type="button" data-graph-reset>Fit / reset</button>
     </div>
     <div class="graph-canvas" data-graph-canvas aria-label="Relationship graph for ${escapeHtml(state.site.site.name)}">
-      <svg class="graph-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><defs><marker id="arrowhead" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 z" fill="#91a49e"></path></marker></defs>${graph.edges.map(edge => {
+      <svg class="graph-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><defs><marker id="arrowhead" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto"><path class="graph-arrow" d="M0,0 L5,2.5 L0,5 z"></path></marker></defs>${graph.edges.map(edge => {
         const source = nodeMap.get(edge.source); const target = nodeMap.get(edge.target);
         return source && target ? `<line class="${edge.derived ? "derived" : ""}" x1="${source.x}" y1="${source.y}" x2="${target.x}" y2="${target.y}" marker-end="url(#arrowhead)" data-edge-source="${escapeHtml(edge.source)}" data-edge-target="${escapeHtml(edge.target)}"></line>` : "";
       }).join("")}</svg>
@@ -510,4 +510,11 @@ personaSelector.addEventListener("change", () => { changeRole(personaSelector.va
 themeSelector.addEventListener("change", () => { applyTheme(themeSelector.value, { persist: true }); toast(`${themeSelector.selectedOptions[0].text.replace(" · Default", "")} theme selected`); });
 window.addEventListener("beforeunload", clearPoll);
 
+const savedTheme = localStorage.getItem("oah-theme");
+const initialTheme = embeddedThemeConfig.themes.some(theme => theme.id === savedTheme)
+  ? savedTheme
+  : embeddedThemeConfig.defaultTheme;
+setState({ themeConfig: embeddedThemeConfig, theme: initialTheme });
+applyTheme(initialTheme);
+document.querySelector("#initial-theme-tokens")?.remove();
 bootstrap();

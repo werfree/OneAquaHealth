@@ -15,7 +15,7 @@ The browser uses one service layer in `static/js/api.js`. Mock and live adapters
 
 The dashboard server exposes a narrow same-origin proxy under `/api/live/*`. Set `OAH_LIVE_BASE_URL` and open `/?mode=live`. Only allow-listed routes are proxied.
 
-`GET /api/config` is a public, non-sensitive dashboard configuration route. It exposes only the supported theme catalogue and the validated `DASHBOARD_DEFAULT_THEME`; environment values such as service URLs and credentials are not returned.
+`GET /api/config` is a public, non-sensitive dashboard configuration route. It exposes the supported theme catalogue, each theme's complete presentation-token map, and the validated `DASHBOARD_DEFAULT_THEME`; environment values such as service URLs and credentials are not returned. The response is generated from `data/themes.json`, the same source used for the initial server-rendered theme.
 
 ## Mock-backed proposed routes
 
