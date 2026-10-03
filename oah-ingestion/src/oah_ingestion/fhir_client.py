@@ -20,6 +20,7 @@ import gzip
 import json
 import logging
 import os
+import time
 import urllib.parse
 from typing import Dict, List, Optional, Tuple
 from urllib.error import HTTPError, URLError
@@ -43,22 +44,38 @@ def upload_enabled() -> bool:
     return os.getenv("FHIR_UPLOAD_ENABLED", "true").strip().lower() not in {"false", "0", "no"}
 
 
+# A shared public sandbox intermittently stalls under a long ingest run. A
+# transient read timeout is not a reason to lose a reading, so transport-level
+# failures are retried with backoff; an HTTP error (a rejected resource) is not
+# retried, because sending it again will fail the same way.
+RETRIES = int(os.getenv("FHIR_RETRIES", "3"))
+
+
 def _request(method: str, url: str, body: Optional[bytes] = None, timeout: int = 60) -> dict:
     headers = {"Accept": FHIR_JSON, "Accept-Encoding": "gzip"}
     if body is not None:
         headers["Content-Type"] = FHIR_JSON
-    request = Request(url, data=body, headers=headers, method=method)
-    try:
-        with urlopen(request, timeout=timeout) as response:
-            raw = response.read()
-            if response.headers.get("Content-Encoding") == "gzip":
-                raw = gzip.decompress(raw)
-            return json.loads(raw.decode("utf-8")) if raw else {}
-    except HTTPError as exc:
-        detail = exc.read().decode("utf-8", errors="replace")[:1000]
-        raise FhirError(f"{method} {url} -> HTTP {exc.code}: {detail}") from exc
-    except URLError as exc:
-        raise FhirError(f"Cannot reach FHIR server at {url}: {exc.reason}") from exc
+
+    last: Optional[Exception] = None
+    for attempt in range(RETRIES):
+        request = Request(url, data=body, headers=headers, method=method)
+        try:
+            with urlopen(request, timeout=timeout) as response:
+                raw = response.read()
+                if response.headers.get("Content-Encoding") == "gzip":
+                    raw = gzip.decompress(raw)
+                return json.loads(raw.decode("utf-8")) if raw else {}
+        except HTTPError as exc:
+            detail = exc.read().decode("utf-8", errors="replace")[:1000]
+            raise FhirError(f"{method} {url} -> HTTP {exc.code}: {detail}") from exc
+        except (URLError, TimeoutError, OSError) as exc:
+            last = exc
+            if attempt + 1 < RETRIES:
+                wait = 2 ** attempt
+                logger.warning("FHIR %s failed (%s); retrying in %ds", method, exc, wait)
+                time.sleep(wait)
+
+    raise FhirError(f"Cannot reach FHIR server at {url} after {RETRIES} attempts: {last}")
 
 
 def upload_bundle(bundle: dict, *, timeout: int = 60) -> Tuple[int, int]:

@@ -36,8 +36,10 @@ from oah_models.fhir import (
     simple_indicator_to_fhir,
     structured_indicator_to_fhir,
 )
+from oah_models.fhir import ObservationComponent
 from oah_models.fhir.resources import (
     CODE_SYSTEM_URL,
+    FHIRQuantity,
     Device,
     FHIRCodeableConcept,
     FHIRCoding,
@@ -73,10 +75,13 @@ def _slug(value: str) -> str:
 UCUM = {
     "mg/L": "mg/L",
     "mg NO3-N/L": "mg/L",
+    "MPN/100mL": "{MPN}/dL",
     "ug/m3": "ug/m3",
     "Cel": "Cel",
     "%": "%",
     "pH": "[pH]",
+    "/100000": "/100000",
+    "{cases}": "{cases}",
 }
 
 # `StructuredIndicator.component` slice codes, per observation-with-component-oah.
@@ -293,6 +298,49 @@ def public_health_to_fhir(envelope: PublicHealthEnvelope) -> List[object]:
         # The agency's own LOW/MODERATE/HIGH reading of the score.
         obs.valueQuantity.unit = f"{{score}} ({risk.interpretation})"
         _stamp(obs, envelope, f"-r{index}")
+        resources.extend([obs, location])
+
+    # IDSP syndromic surveillance -> cohort health measures. The rate is the
+    # Observation value; the raw case count and denominator ride along as
+    # components so the figure stays auditable back to what was counted.
+    for index, line in enumerate(payload.disease_surveillance):
+        obs, location = health_measure_to_fhir(
+            HealthMeasureOah(
+                site=health_site,
+                dateOrPeriod=envelope.timestamp,
+                performer=[agency],
+                type=_oah_concept(line.condition),
+                result=Quantity(
+                    value=line.rate_per_100k,
+                    unit="per 100,000",
+                    system="http://unitsofmeasure.org",
+                    code="/100000",
+                ),
+                cohort=cohort_ref,
+            )
+        )
+        obs.component = [
+            ObservationComponent(
+                code=FHIRCodeableConcept(coding=[FHIRCoding(system=CODE_SYSTEM_URL, code="cases", display="Cases reported")]),
+                valueQuantity=FHIRQuantity(value=line.cases, unit="cases"),
+            ),
+            ObservationComponent(
+                code=FHIRCodeableConcept(
+                    coding=[FHIRCoding(system=CODE_SYSTEM_URL, code="populationAtRisk", display="Population at risk")]
+                ),
+                valueQuantity=FHIRQuantity(value=line.population_at_risk, unit="persons"),
+            ),
+        ]
+        if line.baseline_rate_per_100k is not None:
+            obs.component.append(
+                ObservationComponent(
+                    code=FHIRCodeableConcept(
+                        coding=[FHIRCoding(system=CODE_SYSTEM_URL, code="baseline", display="Baseline rate")]
+                    ),
+                    valueQuantity=FHIRQuantity(value=line.baseline_rate_per_100k, unit="per 100,000"),
+                )
+            )
+        _stamp(obs, envelope, f"-d{index}")
         resources.extend([obs, location])
 
     # Chemical summaries are environmental, not cohort measures -> they belong

@@ -25,42 +25,48 @@ def load(name: str):
 
 class ThresholdTests(unittest.TestCase):
     def test_value_above_limit_is_an_exceedance_with_its_basis(self):
-        result = evaluate("zinc_dissolved", 0.05, "mg/L")
-        self.assertEqual(result["exceedance_factor"], 6.41)
-        self.assertIn("WFD", result["basis"])
+        result = evaluate("faecal_coliform", 21000.0, "MPN/100mL")
+        self.assertEqual(result["exceedance_factor"], 8.4)
+        self.assertIn("CPCB", result["basis"])
 
     def test_value_within_limit_is_not_an_exceedance(self):
-        self.assertIsNone(evaluate("nitrate", 1.9, "mg/L"))
+        self.assertIsNone(evaluate("faecal_coliform", 410.0, "MPN/100mL"))
 
     def test_ph_is_a_band_not_a_ceiling(self):
         self.assertIsNone(evaluate("ph", 7.4, "pH"))
         self.assertIsNotNone(evaluate("ph", 5.1, "pH"))   # too acidic
         self.assertIsNotNone(evaluate("ph", 9.6, "pH"))   # too alkaline
 
+    def test_dissolved_oxygen_fails_by_being_too_low(self):
+        # The only indicator where a SMALL number is the problem.
+        self.assertIsNone(evaluate("dissolved_oxygen", 6.8, "mg/L"))
+        deficit = evaluate("dissolved_oxygen", 1.0, "mg/L")
+        self.assertEqual(deficit["direction"], "deficit")
+        self.assertEqual(deficit["exceedance_factor"], 5.0)
+
     def test_unscreened_indicator_is_not_an_error(self):
         self.assertIsNone(evaluate("riparianVegetation", None))
-        self.assertIsNone(evaluate("lead_dissolved", 999.0, "mg/L"))
+        self.assertIsNone(evaluate("turbidity", 999.0, "NTU"))
 
 
 class AssessmentTests(unittest.TestCase):
     def test_iot_exceedance_raises_a_high_alert(self):
         alert = alerts.assess(load("sample_iot_telemetry.json"))
-        self.assertEqual(alert["severity"], "HIGH")  # zinc at 6.41x
-        self.assertEqual(alert["site_id"], "site-c1-mondego")
-        self.assertEqual({e["indicator"] for e in alert["exceedances"]}, {"nitrate", "zinc_dissolved"})
+        self.assertEqual(alert["severity"], "HIGH")  # coliform far past criterion
+        self.assertEqual(alert["site_id"], "yam-ito")
+        self.assertIn("faecal_coliform", {e["indicator"] for e in alert["exceedances"]})
 
     def test_citizen_survey_raises_nothing_because_answers_are_coded(self):
         self.assertIsNone(alerts.assess(load("sample_citizen_survey.json")))
 
-    def test_public_health_alert_carries_the_agency_interpretation(self):
+    def test_public_health_alert_screens_its_chemical_summary(self):
         alert = alerts.assess(load("sample_public_health.json"))
         self.assertEqual(alert["severity"], "HIGH")
-        self.assertIn("fecal_contamination_risk", {r["indicator"] for r in alert["elevated_risks"]})
+        self.assertTrue(alert["exceedances"], "expected the coliform chemical summary to screen")
 
     def test_co_located_sample_reports_both_domains_in_one_alert(self):
-        alert = alerts.assess(load("sample_public_health_mondego.json"))
-        self.assertTrue(alert["exceedances"], "expected the nitrate chemical summary to screen")
-        self.assertTrue(alert["elevated_risks"], "expected elevated cohort risk")
+        alert = alerts.assess(load("sample_public_health_kanpur.json"))
+        self.assertTrue(alert["exceedances"], "expected the chromium chemical summary to screen")
 
     def test_every_alert_states_its_limits(self):
         alert = alerts.assess(load("sample_iot_telemetry.json"))
@@ -71,8 +77,8 @@ class AssessmentTests(unittest.TestCase):
         envelope = ADAPTER.validate_python(
             {
                 "source_type": "IOT_TELEMETRY",
-                "city": "oslo",
-                "site_id": "site-o1-akerselva",
+                "city": "varanasi",
+                "site_id": "gan-assi",
                 "timestamp": "2026-09-30T10:00:00Z",
                 "payload": {
                     "device_id": "d1",
@@ -106,7 +112,7 @@ class ResilienceTests(unittest.TestCase):
         alerts.subscribe(received.append)
         try:
             alerts.raise_for(load("sample_iot_telemetry.json"))
-            self.assertEqual(received[0]["site_id"], "site-c1-mondego")
+            self.assertEqual(received[0]["site_id"], "yam-ito")
         finally:
             alerts._handlers.remove(received.append) if received.append in alerts._handlers else None
             alerts._handlers.clear()

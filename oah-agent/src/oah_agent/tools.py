@@ -132,10 +132,14 @@ def search_observations(
     site_id: Optional[str] = None,
     min_value: Optional[float] = None,
     max_value: Optional[float] = None,
+    since: Optional[str] = None,
+    until: Optional[str] = None,
     limit: int = 50,
     dataset_tag: str = "oah-demo",
 ) -> dict:
     """Search Observations by OAH profile, indicator code, site, and value range.
+
+    `since`/`until` are ISO dates (YYYY-MM-DD) bounding `Observation.effective[x]`.
 
     `kind` selects the OAH profile: `environmental_simple`
     (observation-indicators-oah -- single readings and citizen survey answers),
@@ -153,6 +157,17 @@ def search_observations(
         params["code"] = indicator
     if site_id:
         params["subject"] = f"Location/{site_id}"
+    # FHIR `date` accepts repeated prefixed values, which urlencode cannot
+    # express as one key; the client joins them with a comma and the server
+    # reads that as AND.
+    bounds = []
+    if since:
+        bounds.append(f"ge{since}")
+    if until:
+        bounds.append(f"le{until}")
+    if bounds:
+        params["date"] = ",".join(bounds)
+    params["_sort"] = "date"
 
     url = search_url("Observation", params)
     try:
@@ -284,9 +299,10 @@ TOOL_SCHEMAS = [
                 "Search OAH Observations on the FHIR server. Use kind='environmental_simple' for single sensor "
                 "readings and citizen-survey answers, kind='environmental_component' for readings that carry "
                 "average/minimum/maximum statistics, and kind='health' for population health and risk measures. "
-                "Indicator codes seen in this dataset include: ph, nitrate, zinc_dissolved (environmental); "
-                "riparianVegetation, waterFlow, waterAspect (citizen survey); fecal_contamination_risk, "
-                "pathogen_risk, arg_risk, overall_health_risk_score (health)."
+                "Use since/until to ask whether something CHANGED rather than what it is now. "
+                "Indicator codes in this dataset: faecal_coliform, bod, dissolved_oxygen, ph, "
+                "ammoniacal_nitrogen, chromium_total (water, CPCB parameters); "
+                "acute_diarrhoeal_disease, enteric_fever, viral_hepatitis_a_e, cholera (IDSP syndromic, health)."
             ),
             "parameters": {
                 "type": "object",
@@ -300,6 +316,8 @@ TOOL_SCHEMAS = [
                     "site_id": {"type": "string", "description": "Restrict to one site, e.g. 'site-c1-mondego'."},
                     "min_value": {"type": "number", "description": "Only return readings at or above this value."},
                     "max_value": {"type": "number", "description": "Only return readings at or below this value."},
+                    "since": {"type": "string", "description": "Only readings on or after this ISO date, e.g. '2026-09-20'."},
+                    "until": {"type": "string", "description": "Only readings on or before this ISO date."},
                     "limit": {"type": "integer", "description": "Maximum results (default 50)."},
                 },
                 "required": ["kind"],

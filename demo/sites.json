@@ -1,57 +1,62 @@
 {
   "_comment": [
-    "Site gazetteer: site_id -> name + WGS84 position, used to give FHIR Location",
-    "resources a `position` for the GIS layer. IoT telemetry and public-health",
-    "envelopes carry a site_id but no coordinates, so without this their Locations",
-    "would be unmappable. Citizen-survey envelopes DO carry coordinates and those",
-    "always win over this file.",
+    "Site gazetteer: site_id -> name, district and WGS84 position. Gives FHIR",
+    "Location resources a `position` for the map layer.",
     "",
-    "COORDINATES BELOW ARE APPROXIMATE DEMO VALUES for the pilot cities, not",
-    "surveyed station positions. Replace with the real OAH station gazetteer",
-    "before presenting any of this as authoritative."
+    "Station names and reaches follow CPCB's National Water Quality Monitoring",
+    "Programme locations on the Yamuna and Ganga. COORDINATES ARE APPROXIMATE",
+    "and the readings in demo/timeseries/ are SYNTHETIC - this is demonstration",
+    "data shaped to be realistic, not observed measurement. Replace with the",
+    "real CPCB/state-PCB feed before presenting any of it as authoritative."
   ],
   "sites": {
-    "site-c1-mondego": {
-      "name": "Mondego river station C1",
-      "city": "coimbra",
-      "latitude": 40.2111,
-      "longitude": -8.4291
+    "yam-wazirabad": {
+      "name": "Yamuna at Wazirabad Barrage",
+      "city": "delhi",
+      "district": "North Delhi",
+      "reach": "Yamuna — upstream of city discharge",
+      "latitude": 28.7045,
+      "longitude": 77.2295
     },
-    "site-c6-casa-do-sal": {
-      "name": "Casa do Sal stream reach C6",
-      "city": "coimbra",
-      "latitude": 40.2194,
-      "longitude": -8.4377
+    "yam-ito": {
+      "name": "Yamuna at ITO Bridge",
+      "city": "delhi",
+      "district": "Central Delhi",
+      "reach": "Yamuna — mid-city, downstream of Najafgarh drain",
+      "latitude": 28.6280,
+      "longitude": 77.2495
     },
-    "site-coimbra-t1": {
-      "name": "Coimbra urban catchment T1",
-      "city": "coimbra",
-      "latitude": 40.2033,
-      "longitude": -8.4103
+    "yam-okhla": {
+      "name": "Yamuna at Okhla Barrage",
+      "city": "delhi",
+      "district": "South East Delhi",
+      "reach": "Yamuna — downstream of city discharge",
+      "latitude": 28.5420,
+      "longitude": 77.3080
     },
-    "site-o1-akerselva": {
-      "name": "Akerselva river station O1",
-      "city": "oslo",
-      "latitude": 59.9276,
-      "longitude": 10.7595
+    "gan-jajmau": {
+      "name": "Ganga at Jajmau",
+      "city": "kanpur",
+      "district": "Kanpur Nagar",
+      "reach": "Ganga — downstream of Jajmau tannery cluster",
+      "latitude": 26.4330,
+      "longitude": 80.4120
     },
-    "site-b1-calore": {
-      "name": "Calore river station B1",
-      "city": "benevento",
-      "latitude": 41.1296,
-      "longitude": 14.7815
+    "gan-assi": {
+      "name": "Ganga at Assi Ghat",
+      "city": "varanasi",
+      "district": "Varanasi",
+      "reach": "Ganga — upstream ghat reach",
+      "latitude": 25.2880,
+      "longitude": 83.0070
     },
-    "site-g1-leie": {
-      "name": "Leie river station G1",
-      "city": "ghent",
-      "latitude": 51.0500,
-      "longitude": 3.7174
-    },
-    "site-t1-garonne": {
-      "name": "Garonne river station T1",
-      "city": "toulouse",
-      "latitude": 43.6007,
-      "longitude": 1.4418
+    "mit-dharavi": {
+      "name": "Mithi at Dharavi outfall",
+      "city": "mumbai",
+      "district": "Mumbai Suburban",
+      "reach": "Mithi — tidal reach before Mahim Creek",
+      "latitude": 19.0430,
+      "longitude": 72.8520
     }
   }
 }

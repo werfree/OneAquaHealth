@@ -1,5 +1,6 @@
 """Shared event envelope and stream-specific payload validation."""
 
+import os
 from datetime import datetime, timezone
 from typing import Annotated, Literal, Optional, Union
 from uuid import UUID, uuid4
@@ -7,7 +8,13 @@ from uuid import UUID, uuid4
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
-PILOT_CITIES = {"coimbra", "oslo", "benevento", "ghent", "toulouse"}
+# Cities in the current deployment. Set OAH_CITIES to a comma-separated list
+# to run the pipeline somewhere else without editing code.
+PILOT_CITIES = {
+    c.strip().lower()
+    for c in os.getenv("OAH_CITIES", "delhi,kanpur,varanasi,mumbai,chennai,hyderabad").split(",")
+    if c.strip()
+}
 
 
 class EnvelopeBase(BaseModel):
@@ -35,6 +42,11 @@ class EnvelopeBase(BaseModel):
         return value.astimezone(timezone.utc)
 
 
+# Parameters where a negative reading is physically meaningful; everything else
+# is a concentration or a count and cannot be below zero.
+MAY_BE_NEGATIVE = {"water_temperature", "temperature", "air_temperature", "redox_potential", "orp"}
+
+
 class QuantitativeMeasurement(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -57,7 +69,7 @@ class IoTPayload(BaseModel):
         for measurement in self.measurements:
             if measurement.parameter == "ph" and not 0.0 <= measurement.value <= 14.0:
                 raise ValueError("ph measurements must be between 0 and 14")
-            if measurement.parameter in {"nitrate", "zinc_dissolved", "cadmium_dissolved"} and measurement.value < 0.0:
+            if measurement.parameter not in MAY_BE_NEGATIVE and measurement.value < 0.0:
                 raise ValueError(f"{measurement.parameter} measurements cannot be negative")
         return self
 
@@ -121,14 +133,44 @@ class ChemicalSummary(BaseModel):
     unit: str = Field(min_length=1, max_length=30)
 
 
+class DiseaseSurveillance(BaseModel):
+    """One IDSP/IHIP syndromic surveillance line for a reporting period.
+
+    IDSP reports case counts against a catchment population, not a normalized
+    score, so the rate is carried explicitly rather than derived downstream
+    where the denominator would be lost.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    condition: str = Field(min_length=1, max_length=100, description="e.g. acute_diarrhoeal_disease, cholera")
+    cases: int = Field(ge=0, le=10_000_000)
+    population_at_risk: int = Field(gt=0, le=2_000_000_000)
+    rate_per_100k: Optional[float] = Field(default=None, ge=0, allow_inf_nan=False)
+    baseline_rate_per_100k: Optional[float] = Field(default=None, ge=0, allow_inf_nan=False)
+
+    @model_validator(mode="after")
+    def derive_rate(self):
+        if self.rate_per_100k is None:
+            object.__setattr__(self, "rate_per_100k", round(self.cases / self.population_at_risk * 100_000, 2))
+        return self
+
+
 class PublicHealthPayload(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     health_agency: str = Field(min_length=1, max_length=250)
     evaluation_period: str = Field(min_length=1, max_length=100)
     cohort: Cohort
-    risk_scores: list[RiskScore] = Field(min_length=1, max_length=500)
+    risk_scores: list[RiskScore] = Field(default_factory=list, max_length=500)
     chemical_summaries: list[ChemicalSummary] = Field(default_factory=list, max_length=500)
+    disease_surveillance: list[DiseaseSurveillance] = Field(default_factory=list, max_length=500)
+
+    @model_validator(mode="after")
+    def require_some_content(self):
+        if not (self.risk_scores or self.disease_surveillance or self.chemical_summaries):
+            raise ValueError("a public-health event must carry risk scores, surveillance lines or chemistry")
+        return self
 
 
 class PublicHealthEnvelope(EnvelopeBase):

@@ -7,6 +7,7 @@
 #   ./run-demo.sh verify    read the resources back off the FHIR server
 #   ./run-demo.sh ask "…"   put a question to the assistant
 #   ./run-demo.sh brief     generate the One Health risk briefing
+#   ./run-demo.sh seed      generate + ingest the 28-day series (takes a few minutes)
 #   ./run-demo.sh down      stop RabbitMQ
 set -euo pipefail
 cd "$(dirname "$0")"
@@ -23,6 +24,7 @@ case "${1:-}" in
     echo ' ready'
     ;;
   app)     exec python3 -m oah_ingestion.app ;;
+  seed)    exec python3 demo/generate_timeseries.py --days 28 --ingest ;;
   publish) exec python3 -m oah_demo_publishers ;;
   verify)  exec python3 - <<'PY'
 from oah_agent.tools import search_observations, list_sites

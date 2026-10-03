@@ -30,6 +30,8 @@ class Site(NamedTuple):
     city: Optional[str]
     latitude: Optional[float]
     longitude: Optional[float]
+    district: Optional[str] = None
+    reach: Optional[str] = None
 
 
 _registry: Optional[Dict[str, Site]] = None
@@ -49,6 +51,8 @@ def _load() -> Dict[str, Site]:
             city=entry.get("city"),
             latitude=entry.get("latitude"),
             longitude=entry.get("longitude"),
+            district=entry.get("district"),
+            reach=entry.get("reach"),
         )
     logger.info("Loaded %d sites from %s", len(sites), path)
     return sites

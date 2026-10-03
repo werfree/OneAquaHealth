@@ -1,11 +1,12 @@
 {
-  "device_id": "ESP32-DEMO-COIMBRA-01",
-  "city": "coimbra",
-  "site_id": "site-c1-mondego",
+  "device_id": "CPCB-DL-ITO-01",
+  "city": "delhi",
+  "site_id": "yam-ito",
   "timestamp": "2026-09-30T10:30:00Z",
   "measurements": [
     {"parameter": "ph", "unit": "pH", "value": 7.3},
-    {"parameter": "nitrate", "unit": "mg/L", "value": 12.8},
-    {"parameter": "zinc_dissolved", "unit": "mg/L", "value": 0.04}
+    {"parameter": "faecal_coliform", "unit": "MPN/100mL", "value": 73034},
+    {"parameter": "bod", "unit": "mg/L", "value": 15.2},
+    {"parameter": "dissolved_oxygen", "unit": "mg/L", "value": 1.1}
   ]
 }

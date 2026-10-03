@@ -44,10 +44,10 @@ DEMO = Path(__file__).resolve().parents[3] / "demo"
 ENVELOPE = TypeAdapter(IngestionEnvelope)
 
 SAMPLES = {
-    "iot": ("sample_iot_telemetry.json", "IoT telemetry", "Mondego C1 sensor: pH, nitrate with statistics, zinc"),
-    "survey": ("sample_citizen_survey.json", "Citizen survey", "StreamKeepers volunteer at Casa do Sal C6"),
-    "health": ("sample_public_health.json", "Public health", "Coimbra observatory, urban catchment T1"),
-    "health-mondego": ("sample_public_health_mondego.json", "Public health", "Riverside residents at Mondego C1"),
+    "iot": ("sample_iot_telemetry.json", "CPCB telemetry", "Yamuna at ITO Bridge: coliform with statistics, BOD, DO"),
+    "survey": ("sample_citizen_survey.json", "Citizen survey", "Ganga Prahari volunteer at Assi Ghat, Varanasi"),
+    "health": ("sample_public_health.json", "IDSP return", "Central Delhi riverside ward, week ending 2 Oct"),
+    "health-kanpur": ("sample_public_health_kanpur.json", "IDSP return", "Jajmau ward, Kanpur Nagar"),
 }
 
 
