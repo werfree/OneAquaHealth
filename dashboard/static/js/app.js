@@ -1,17 +1,20 @@
 import { api, apiMode, ApiError } from "./api.js";
-import { state, setState, changeRole } from "./state.js";
+import { state, setState, changeRole, routeFromLocation } from "./state.js";
+import { initStudio } from "./studio.js";
 import {
   copyButton, downloadBlob, emptyState, errorState, escapeHtml, formatDate,
   humanBytes, jsonBlock, statusPill, toast, valueDisplay,
 } from "./components.js";
 
 const routeContent = document.querySelector("#route-content");
+const studioRoot = document.querySelector("#studio-root");
 const siteSelector = document.querySelector("#site-selector");
 const personaSelector = document.querySelector("#persona-selector");
 const modeIndicator = document.querySelector("#mode-indicator");
 const themeSelector = document.querySelector("#theme-selector");
 const browserThemeColor = document.querySelector("#browser-theme-color");
 let pollTimer = null;
+initStudio();
 
 function clearPoll() {
   if (pollTimer) window.clearTimeout(pollTimer);
@@ -103,9 +106,10 @@ async function loadGraph(shouldRender = true) {
   if (shouldRender) render();
 }
 
-async function navigate(route) {
+async function navigate(route, updateHistory = true) {
   clearPoll();
   setState({ route, error: null });
+  if (updateHistory && window.location.hash !== `#${route}`) window.history.pushState(null, "", `#${route}`);
   if (route === "ingestion" && !state.runs) await loadRuns();
   if (route === "reports" && !state.reports) await loadReports();
   render();
@@ -114,6 +118,9 @@ async function navigate(route) {
 
 function render() {
   syncChrome();
+  routeContent.hidden = state.route === "studio";
+  studioRoot.hidden = state.route !== "studio";
+  if (state.route === "studio") return;
   if (state.loading && !state.summary) {
     routeContent.innerHTML = `<div class="loading"><span class="sr-only">Loading dashboard</span></div>`;
     return;
@@ -236,7 +243,7 @@ function renderGraphTab() {
 function renderAssistant() {
   const canAsk = state.session?.capabilities.canQueryAssistant;
   return `<section class="panel assistant-panel">
-    <div class="panel-head"><div><span class="eyebrow">Observable assistance</span><h2>Ask about this site</h2><p>Answers cite returned records and expose tool/evidence steps—not hidden reasoning.</p>${apiMode === "live" ? `<a class="button small" href="/studio" target="_blank" rel="noopener">Open Surveillance Studio</a>` : ""}</div>${canAsk ? statusPill("observed", apiMode === "mock" ? "Deterministic demo" : "Existing API") : statusPill("unavailable")}</div>
+    <div class="panel-head"><div><span class="eyebrow">Observable assistance</span><h2>Ask about this site</h2><p>Answers cite returned records and expose tool/evidence steps—not hidden reasoning.</p>${apiMode === "live" ? `<button class="button small" type="button" data-route="studio">Open Surveillance Studio</button>` : ""}</div>${canAsk ? statusPill("observed", apiMode === "mock" ? "Deterministic demo" : "Existing API") : statusPill("unavailable")}</div>
     ${canAsk ? `<div class="assistant-layout"><div class="assistant-main"><form id="assistant-form"><input id="assistant-question" name="question" maxlength="500" required aria-label="Question about selected site" placeholder="Ask about findings, evidence, or source timing"><button class="button primary" type="submit">Ask</button></form><div class="question-chips"><button class="question-chip" type="button" data-question="What needs attention at ${escapeHtml(state.site?.site.shortName || "this site")}?">What needs attention?</button><button class="question-chip" type="button" data-question="What evidence supports the co-location finding?">Show supporting evidence</button><button class="question-chip" type="button" data-question="Are the environmental and health observations contemporaneous?">Are the source periods aligned?</button></div>${state.assistant ? `<div class="assistant-answer"><span class="eyebrow">Grounded response</span><p>${escapeHtml(state.assistant.answer)}</p></div>` : ""}</div><div class="trace-list"><span class="eyebrow">Execution trace</span>${state.assistant ? `<ol>${(state.assistant.trace || []).map(step => `<li><strong>${escapeHtml(step.label || step.tool || step.kind)}</strong><br>${escapeHtml(step.kind || "TOOL")} · ${escapeHtml(step.status || "completed")}</li>`).join("")}</ol><p class="station-meta">${escapeHtml(state.assistant.grounding?.notCovered || state.assistant.grounding?.not_covered || "Grounding checks are limited.")}</p>` : `<p style="margin-top:10px;color:var(--ink-3)">Run a suggested question to see evidence retrieval and grounding steps.</p>`}</div></div>` : emptyState("Assistant unavailable", "This persona cannot query scoped evidence, or the optional live assistant endpoint is unavailable.")}
   </section>`;
 }
@@ -509,5 +516,6 @@ siteSelector.addEventListener("change", () => loadSite(siteSelector.value));
 personaSelector.addEventListener("change", () => { changeRole(personaSelector.value); bootstrap(); });
 themeSelector.addEventListener("change", () => { applyTheme(themeSelector.value, { persist: true }); toast(`${themeSelector.selectedOptions[0].text.replace(" · Default", "")} theme selected`); });
 window.addEventListener("beforeunload", clearPoll);
+window.addEventListener("popstate", () => navigate(routeFromLocation(), false));
 
 bootstrap();

@@ -8,6 +8,7 @@
     <link rel="icon" href="data:,">
     <title>OneAquaHealth · Evidence dashboard</title>
     <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="/static/studio.css">
     <script type="module" src="/static/js/app.js"></script>
   </head>
   <body>
@@ -30,6 +31,9 @@
           <button class="nav-item" type="button" data-route="reports">
             <span class="nav-icon nav-icon-reports" aria-hidden="true"></span>
             <span>Reports</span>
+          </button>
+          <button class="nav-item" type="button" data-route="studio">
+            <span class="nav-icon" aria-hidden="true">✦</span><span class="nav-label-wide">Surveillance</span><span class="nav-label-small">Studio</span>
           </button>
         </nav>
         <label class="theme-control" for="theme-selector">
@@ -70,6 +74,7 @@
 
         <main id="main-content" tabindex="-1">
           <div id="route-content" aria-live="polite"></div>
+          <div id="studio-root" hidden></div>
         </main>
       </section>
     </div>

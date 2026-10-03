@@ -6,8 +6,8 @@ import test from "node:test";
 const source = await readFile(new URL("../static/js/api.js", import.meta.url), "utf8");
 let sequence = 0;
 
-async function adapter({ search = "", defaultMode = "mock", respond = () => ({}) } = {}) {
-  globalThis.window = { location: { search } };
+async function adapter({ search = "", pathname = "/", defaultMode = "mock", respond = () => ({}) } = {}) {
+  globalThis.window = { location: { search, pathname } };
   globalThis.document = { documentElement: { dataset: { defaultMode } } };
   const calls = [];
   globalThis.fetch = async (path, options) => {
@@ -75,13 +75,18 @@ test("live station maps observations, agency scores, screening basis and finding
   assert.equal(result.findings[2].caveat, station.caveat);
 });
 
-test("live ask sends station context and unsupported features stay unavailable", async () => {
+test("live ask sends station context, invalid evidence is rejected, and graph stays unavailable", async () => {
   const { api, calls, ApiError } = await adapter({ defaultMode: "live" });
   await api.ask("analyst", station.site_id, "What needs attention?");
   assert.equal(calls[0].path, "/api/live/ask");
   assert.deepEqual(JSON.parse(calls[0].body), { question: "What needs attention?", siteId: station.site_id });
-  await assert.rejects(api.evidence(), error => error instanceof ApiError && error.status === 501);
+  await assert.rejects(api.evidence("analyst", "unknown"), error => error instanceof ApiError && error.status === 404);
   await assert.rejects(api.graph(), error => error instanceof ApiError && error.status === 501);
+});
+
+test("native Studio defaults to live while explicit mock still wins", async () => {
+  assert.equal((await adapter({ pathname: "/studio" })).apiMode, "live");
+  assert.equal((await adapter({ pathname: "/studio", search: "?mode=mock" })).apiMode, "mock");
 });
 
 test("mock mode retains persona headers and station endpoint", async () => {

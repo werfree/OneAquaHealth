@@ -1,7 +1,13 @@
 const listeners = new Set();
 
+export function routeFromLocation() {
+  const route = window.location.hash.slice(1);
+  return ["overview", "ingestion", "reports", "studio"].includes(route)
+    ? route : window.location.pathname === "/studio" ? "studio" : "overview";
+}
+
 export const state = {
-  route: "overview",
+  route: routeFromLocation(),
   role: sessionStorage.getItem("oah-demo-role") || "analyst",
   theme: document.documentElement.dataset.theme || "aqua",
   themeConfig: null,

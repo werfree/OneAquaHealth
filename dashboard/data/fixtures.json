@@ -391,26 +391,8 @@
       }
     }
   ],
-  "seedRuns": [
-    {"id": "run-001", "sampleKey": "iot", "siteId": "site-c1-mondego", "sourceType": "IOT_TELEMETRY", "executionStatus": "completed", "fhirOutcome": "UPLOADED", "startedAt": "2026-09-30T10:00:00Z", "completedAt": "2026-09-30T10:00:05Z", "attempt": 1},
-    {"id": "run-002", "sampleKey": "survey", "siteId": "site-c6-casa-do-sal", "sourceType": "CITIZEN_SURVEY", "executionStatus": "completed", "fhirOutcome": "UPLOADED", "startedAt": "2026-09-30T10:15:00Z", "completedAt": "2026-09-30T10:15:05Z", "attempt": 1, "warnings": ["External photo reference retained; binary content is not imported."]},
-    {"id": "run-003", "sampleKey": "health", "siteId": "site-coimbra-t1", "sourceType": "PUBLIC_HEALTH", "executionStatus": "failed", "fhirOutcome": "UPLOAD_FAILED", "startedAt": "2026-09-30T10:20:00Z", "completedAt": "2026-09-30T10:20:05Z", "attempt": 1, "error": "FHIR transaction service unavailable"},
-    {"id": "run-004", "sampleKey": "health", "siteId": "site-coimbra-t1", "sourceType": "PUBLIC_HEALTH", "executionStatus": "completed", "fhirOutcome": "UPLOADED", "startedAt": "2026-09-30T10:23:00Z", "completedAt": "2026-09-30T10:23:03Z", "attempt": 2, "retryOf": "run-003"}
-  ],
-  "reports": [
-    {
-      "id": "report-001",
-      "siteId": "site-c1-mondego",
-      "title": "Mondego C1 · Site One Health Briefing",
-      "status": "generated",
-      "visibility": "published",
-      "ownerId": "user-analyst-01",
-      "requestedAt": "2026-10-02T09:59:55Z",
-      "generatedAt": "2026-10-02T10:00:00Z",
-      "snapshotObservationIds": ["obs-mondego-ph", "obs-mondego-nitrate", "obs-mondego-zinc", "obs-mondego-health"],
-      "snapshotFindingIds": ["finding-nitrate", "finding-zinc", "finding-colocation"]
-    }
-  ],
+  "seedRuns": [],
+  "reports": [],
   "assistant": {
     "questions": [
       "What needs attention at Mondego C1?",

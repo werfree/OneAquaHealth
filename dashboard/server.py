@@ -11,13 +11,15 @@ import threading
 import time
 import urllib.error
 import urllib.request
+import urllib.parse
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 from fastapi import Body, FastAPI, Header, HTTPException, Query, Response
 from fastapi import Path as PathParam
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
+from starlette.background import BackgroundTask
 from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 
@@ -663,10 +665,101 @@ def index() -> HTMLResponse:
     return HTMLResponse(page.replace("__DEFAULT_THEME__", DEFAULT_THEME).replace("__DEFAULT_MODE__", DEFAULT_MODE))
 
 
+def studio_upstream(path: str, payload: dict[str, Any] | None = None):
+    """Open only the fixed Studio routes selected by the handlers below."""
+    body = json.dumps(payload).encode("utf-8") if payload is not None else None
+    request = urllib.request.Request(
+        f"{LIVE_BASE_URL}/api/officer/{path}", data=body,
+        headers={"Content-Type": "application/json", "Accept": "*/*"},
+    )
+    try:
+        return urllib.request.urlopen(request, timeout=LIVE_TIMEOUT_SECONDS)
+    except urllib.error.HTTPError as exc:
+        try:
+            detail = json.loads(exc.read().decode("utf-8")).get("detail", str(exc))
+        except (ValueError, UnicodeDecodeError):
+            detail = str(exc)
+        finally:
+            exc.close()
+        raise HTTPException(status_code=exc.code, detail=detail) from exc
+    except (urllib.error.URLError, TimeoutError, OSError) as exc:
+        raise HTTPException(status_code=502, detail="Surveillance service unavailable. Start the ingestion gateway and try again.") from exc
+
+
+@app.post("/api/live/studio/run")
+def live_studio_run(payload: dict[str, Any] = Body(...)) -> StreamingResponse:
+    question = payload.get("question")
+    if not isinstance(question, str) or not question.strip() or len(question) > 4000:
+        raise HTTPException(status_code=422, detail="Enter a question of 1–4000 characters.")
+    site_id = payload.get("siteId")
+    if site_id is not None and (not isinstance(site_id, str) or not re.fullmatch(SITE_ID_PATTERN, site_id)):
+        raise HTTPException(status_code=422, detail="Invalid station ID")
+    scoped_question = question.strip()
+    if site_id:
+        scoped_question += f"\n\nDashboard context: investigate station {site_id}. Use other stations only where needed for comparison."
+    upstream = studio_upstream("studio/run", {"question": scoped_question})
+    if not upstream.headers.get("Content-Type", "").startswith("text/event-stream"):
+        upstream.close()
+        raise HTTPException(status_code=502, detail="Surveillance service returned an invalid stream.")
+
+    def chunks():
+        try:
+            # read1 returns available bytes without waiting to fill a buffer.
+            while chunk := upstream.read1(4096):
+                yield chunk
+        except (OSError, TimeoutError):
+            yield b'data: {"type":"error","message":"The investigation connection was interrupted. Please retry."}\n\n'
+        finally:
+            upstream.close()
+
+    return StreamingResponse(chunks(), media_type="text/event-stream",
+                             headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+                             background=BackgroundTask(upstream.close))
+
+
+def studio_document(path: str, payload: dict[str, Any] | None = None) -> Response:
+    with studio_upstream(path, payload) as upstream:
+        headers = {}
+        if disposition := upstream.headers.get("Content-Disposition"):
+            headers["Content-Disposition"] = disposition
+        headers["Content-Type"] = upstream.headers.get("Content-Type", "application/octet-stream")
+        return Response(upstream.read(), status_code=upstream.status, headers=headers)
+
+
+@app.get("/api/live/studio/transcript/{session_id}")
+def live_studio_transcript(session_id: str = PathParam(pattern=r"^[A-Za-z0-9-]{1,64}$")) -> Response:
+    return studio_document(f"studio/report/{session_id}")
+
+
+@app.post("/api/live/studio/executive")
+def live_studio_executive(payload: dict[str, Any] = Body(...)) -> Response:
+    session_id = payload.get("session")
+    if not isinstance(session_id, str) or not re.fullmatch(r"[A-Za-z0-9-]{1,64}", session_id):
+        raise HTTPException(status_code=422, detail="Invalid investigation session")
+    figures = payload.get("figures", [])
+    if not isinstance(figures, list) or len(figures) > 30 or any(not isinstance(figure, dict) for figure in figures):
+        raise HTTPException(status_code=422, detail="Invalid report figures")
+    return studio_document("studio/executive", {"session": session_id, "figures": figures})
+
+
+@app.get("/api/live/studio/export/{kind}")
+def live_studio_export(kind: str, days: int = Query(28, ge=1, le=365),
+                      site_id: str | None = Query(None, pattern=SITE_ID_PATTERN)) -> Response:
+    exports = {"readings": "readings.csv", "surveillance": "surveillance.csv", "fhir": "bundle.json"}
+    if kind not in exports:
+        raise HTTPException(status_code=404, detail="Unknown Studio export")
+    if kind == "fhir" and not site_id:
+        raise HTTPException(status_code=422, detail="Choose a station for the FHIR export")
+    params: dict[str, Any] = {"days": days}
+    if site_id and kind != "surveillance":
+        params["site_id"] = site_id
+    return studio_document(f"export/{exports[kind]}?{urllib.parse.urlencode(params)}")
+
+
 @app.get("/studio", include_in_schema=False)
-def studio() -> RedirectResponse:
-    """Open the gateway's Studio, where its streaming and export routes live."""
-    return RedirectResponse(f"{LIVE_BASE_URL}/api/officer/panel")
+def studio() -> HTMLResponse:
+    """Serve the native dashboard workspace with live Studio selected."""
+    return index()
 
 
 app.mount("/static", StaticFiles(directory=STATIC_ROOT), name="static")

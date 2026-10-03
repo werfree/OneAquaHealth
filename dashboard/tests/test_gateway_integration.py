@@ -29,6 +29,9 @@ def test_both_interfaces_and_csv_template_are_available(client):
     assert client.get("/health").json() == {"status": "ok"}
     assert client.get("/").status_code == 200
     assert client.get("/api/officer/panel").status_code == 200
+    charts = client.get("/api/officer/assets/studio-charts.js")
+    assert charts.status_code == 200
+    assert "createChartRenderer" in charts.text
     assert "Surveillance Studio" in client.get("/api/officer/panel").text
     assert client.get("/ingest/public-health/csv/template").status_code == 200
     assert client.get("/api/sites/bad%20id!").status_code == 422

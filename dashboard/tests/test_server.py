@@ -173,10 +173,12 @@ def test_live_overview_forwards_refresh():
         proxy.assert_called_once_with("/api/overview?refresh=true")
 
 
-def test_studio_opens_configured_gateway():
-    with mock.patch.object(server, "LIVE_BASE_URL", "http://127.0.0.1:18001"):
-        response = server.studio()
-    assert response.headers["location"] == "http://127.0.0.1:18001/api/officer/panel"
+def test_studio_serves_native_dashboard():
+    response = server.studio()
+    assert response.status_code == 200
+    assert b'id="studio-root"' in response.body
+    assert b'data-route="studio"' in response.body
+    assert response.body.index(b'id="studio-root"') < response.body.index(b'</main>')
 
 
 def test_all_gateway_samples_can_be_proxied():
