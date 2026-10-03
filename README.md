@@ -201,6 +201,40 @@ All optional; every value below is the default.
 
 ---
 
+## API
+
+| | |
+|---|---|
+| `GET /health` | process health |
+| `GET /api/info` | configured channel, FHIR, sample, and threshold information |
+| `POST /ingest` | accept a typed event envelope, including `PUBLIC_HEALTH` |
+| `POST /ingest/public-health/csv` | ingest grouped `PUBLIC_HEALTH` events from long-form CSV (`Content-Type: text/csv`); rows sharing an `event_id` form one event — see `demo/sample_public_health.csv` |
+| `GET /ingest/public-health/csv/template` | download an empty CSV template |
+| `POST /api/ingest-demo/{key}` | run a bundled JSON sample through the real pipeline; keys: `iot`, `iot-oslo`, `iot-benevento`, `survey`, `survey-ghent`, `survey-toulouse`, `health`, `health-kanpur` |
+| `GET /api/overview` | summarize the FHIR dataset (requires the agent package and a reachable server) |
+| `POST /api/ask` | ask the assistant about FHIR data (requires `OPENAI_API_KEY`) |
+
+Upload the included health CSV from PowerShell with:
+
+```powershell
+curl.exe -X POST "http://localhost:8001/ingest/public-health/csv" `
+  -H "Content-Type: text/csv" `
+  --data-binary "@demo/sample_public_health.csv"
+```
+
+Download the blank template with:
+
+```powershell
+curl.exe -L "http://localhost:8001/ingest/public-health/csv/template" -o "public-health-template.csv"
+```
+
+The CSV endpoint validates the whole file before processing. Rows are grouped by `event_id`; the
+response reports the result for each grouped event. IoT and citizen-survey sample files remain JSON
+and use their existing MQTT and RabbitMQ channels (or the JSON `/ingest` route for direct API
+submissions).
+
+---
+
 ## Evidence dashboard
 
 The separate evidence dashboard runs alongside the ingestion gateway. Install and start it from

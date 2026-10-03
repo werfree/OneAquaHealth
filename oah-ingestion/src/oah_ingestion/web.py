@@ -45,7 +45,11 @@ ENVELOPE = TypeAdapter(IngestionEnvelope)
 
 SAMPLES = {
     "iot": ("sample_iot_telemetry.json", "CPCB telemetry", "Yamuna at ITO Bridge: coliform with statistics, BOD, DO"),
+    "iot-oslo": ("sample_iot_telemetry_oslo.json", "IoT telemetry", "Oslo Akerselva sensor readings"),
+    "iot-benevento": ("sample_iot_telemetry_benevento.json", "IoT telemetry", "Benevento Calore sensor readings"),
     "survey": ("sample_citizen_survey.json", "Citizen survey", "Ganga Prahari volunteer at Assi Ghat, Varanasi"),
+    "survey-ghent": ("sample_citizen_survey_ghent.json", "Citizen survey", "StreamKeepers volunteer at the Leie in Ghent"),
+    "survey-toulouse": ("sample_citizen_survey_toulouse.json", "Citizen survey", "StreamKeepers volunteer at the Garonne in Toulouse"),
     "health": ("sample_public_health.json", "IDSP return", "Central Delhi riverside ward, week ending 2 Oct"),
     "health-kanpur": ("sample_public_health_kanpur.json", "IDSP return", "Jajmau ward, Kanpur Nagar"),
 }
@@ -74,7 +78,7 @@ def info():
         "channels": {
             "mqtt": f"{mqtt_host}:{mqtt_port} -> {os.getenv('MQTT_TOPIC', 'oneaquahealth/sensors/+/+')}",
             "rabbitmq": f"{os.getenv('RABBITMQ_HOST', 'localhost')} -> {CITIZEN_SURVEY_QUEUE}",
-            "http": "POST /ingest",
+            "http": ["POST /ingest (JSON)", "POST /ingest/public-health/csv (CSV batch)"],
         },
         "fhir": {"server": base_url(), "dataset_tag": dataset_tag()},
         "samples": [{"key": k, "channel": v[1], "detail": v[2]} for k, v in SAMPLES.items()],

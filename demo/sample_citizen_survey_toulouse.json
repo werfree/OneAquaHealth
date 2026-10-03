@@ -1,0 +1,19 @@
+{
+  "event_id": "a6f47815-e564-476d-83d9-224829b3586f",
+  "source_type": "CITIZEN_SURVEY",
+  "city": "toulouse",
+  "site_id": "site-toulouse-garonne-03",
+  "timestamp": "2026-10-01T14:05:00Z",
+  "received_at": "2026-10-01T14:08:00Z",
+  "payload": {
+    "app_id": "StreamKeepers_Mobile_v2",
+    "volunteer_id": "VOL-TOULOUSE-27",
+    "coordinates": {"latitude": 43.6045, "longitude": 1.4442},
+    "observations": [
+      {"indicator": "riparianVegetation", "value_code": "grass_sparse"},
+      {"indicator": "waterFlow", "value_code": "slow"},
+      {"indicator": "waterAspect", "value_code": "turbid", "notes": "Visibility reduced after rainfall"}
+    ],
+    "photo_urls": []
+  }
+}

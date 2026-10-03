@@ -1,0 +1,16 @@
+{
+  "event_id": "424e366f-9199-4a4f-a63a-a3c512083ddb",
+  "source_type": "IOT_TELEMETRY",
+  "city": "oslo",
+  "site_id": "site-oslo-akerselva-01",
+  "timestamp": "2026-10-01T10:00:00Z",
+  "received_at": "2026-10-01T10:00:03Z",
+  "payload": {
+    "device_id": "OSLO-WQ-DEVICE-01",
+    "measurements": [
+      {"parameter": "ph", "unit": "pH", "value": 7.8},
+      {"parameter": "nitrate", "unit": "mg/L", "value": 4.8, "min_value": 4.1, "max_value": 5.3, "avg_value": 4.8},
+      {"parameter": "zinc_dissolved", "unit": "mg/L", "value": 0.003}
+    ]
+  }
+}
