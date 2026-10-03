@@ -32,6 +32,9 @@ class Site(NamedTuple):
     longitude: Optional[float]
     district: Optional[str] = None
     reach: Optional[str] = None
+    river: Optional[str] = None
+    flow_km: Optional[float] = None
+    position_note: Optional[str] = None
 
 
 _registry: Optional[Dict[str, Site]] = None
@@ -53,6 +56,9 @@ def _load() -> Dict[str, Site]:
             longitude=entry.get("longitude"),
             district=entry.get("district"),
             reach=entry.get("reach"),
+            river=entry.get("river"),
+            flow_km=entry.get("flow_km"),
+            position_note=entry.get("position_note"),
         )
     logger.info("Loaded %d sites from %s", len(sites), path)
     return sites

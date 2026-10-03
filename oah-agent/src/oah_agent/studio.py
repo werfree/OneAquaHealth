@@ -177,6 +177,49 @@ def show_scatter(days: int = 28, caption: str = "") -> dict:
             "summary": f"{len(data['wards'])} wards plotted; priority: {data['priority'] or 'none'}"}
 
 
+def show_river_profile(river: str, indicator: str = "faecal_coliform", days: int = 14, caption: str = "") -> dict:
+    """One indicator along a river in flow order, station by station.
+
+    The view that localises a source. A station tells you the water is bad; the
+    step between two consecutive stations tells you which stretch the load
+    entered on — the difference between "the Yamuna is polluted" and "something
+    discharges in these 12 km", and only the second is actionable.
+    """
+
+    data = _officer().river_profile(river=river, indicator=indicator, days=days)
+    worst = data.get("largest_increase")
+    return {"_render": {"type": "profile", "data": data, "caption": caption},
+            "summary": (f"{river}: {len(data['points'])} stations; largest step "
+                        f"{worst['ratio']}× between {worst['from']} and {worst['to']} over {worst['reach_km']} km"
+                        if worst else f"{river}: {len(data['points'])} stations"),
+            "points": [{k: p[k] for k in ("site_id", "name", "flow_km", "mean", "factor", "exceeds")}
+                       for p in data["points"]],
+            "largest_increase": worst, "threshold": data["threshold"], "unit": data["unit"],
+            "fhir_urls": data.get("fhir_urls", [])}
+
+
+def show_persistence(indicator: str = "faecal_coliform", days: int = 28, caption: str = "") -> dict:
+    """How many days each station sat above its criterion, day by day.
+
+    Distinguishes a one-off exceedance from a sustained condition, which warrant
+    different responses and which a latest-value view cannot tell apart.
+    """
+
+    data = _officer().persistence(days=days, indicator=indicator)
+    return {"_render": {"type": "persistence", "data": data, "caption": caption},
+            "summary": "; ".join(f"{s['name'].split(' at ')[-1]} {s['days_over']}/{s['days_measured']} days over"
+                                 for s in data["stations"][:3]),
+            "stations": [{k: s[k] for k in ("site_id", "name", "days_over", "days_measured", "pct_over", "longest_run")}
+                         for s in data["stations"]],
+            "threshold": data["threshold"], "fhir_urls": data.get("fhir_urls", [])}
+
+
+def peak_offset(site_id: str, indicator: str = "faecal_coliform", days: int = 28) -> dict:
+    """Days between the water peak and the notified-case peak. Descriptive only."""
+
+    return _officer().peak_offset(site_id=site_id, indicator=indicator, days=days)
+
+
 STUDIO_IMPLEMENTATIONS = {
     **TOOL_IMPLEMENTATIONS,
     "rank_wards": rank_wards,
@@ -186,12 +229,34 @@ STUDIO_IMPLEMENTATIONS = {
     "show_ranking": show_ranking,
     "show_trend": show_trend,
     "show_scatter": show_scatter,
+    "show_river_profile": show_river_profile,
+    "show_persistence": show_persistence,
+    "peak_offset": peak_offset,
 }
 
 _D = {"type": "integer", "description": "Window in days (default 28)."}
 _C = {"type": "string", "description": "One short sentence saying what this shows and why you chose it."}
 
 STUDIO_SCHEMAS = TOOL_SCHEMAS + [
+    {"type": "function", "function": {
+        "name": "show_river_profile",
+        "description": "Display one indicator along a river in flow order, station by station, with the step between consecutive stations. USE THIS when the question is where pollution is coming from, or to localise a source — it is the only view that shows which stretch a load enters on. Rivers: Yamuna (Wazirabad → ITO → Okhla), Ganga (Jajmau → Assi), Mithi.",
+        "parameters": {"type": "object", "properties": {
+            "river": {"type": "string", "enum": ["Yamuna", "Ganga", "Mithi"]},
+            "indicator": {"type": "string"}, "days": _D, "caption": _C},
+            "required": ["river"], "additionalProperties": False}}},
+    {"type": "function", "function": {
+        "name": "show_persistence",
+        "description": "Display, per station, how many days of the window sat above the criterion, as a day-by-day strip. Use to tell a one-off exceedance from a sustained condition — they warrant different responses.",
+        "parameters": {"type": "object", "properties": {
+            "indicator": {"type": "string"}, "days": _D, "caption": _C},
+            "required": [], "additionalProperties": False}}},
+    {"type": "function", "function": {
+        "name": "peak_offset",
+        "description": "Days between the water peak and the notified-case peak at one station. A plain descriptive offset, NOT a correlation — the window holds only a few weekly surveillance points. Quote its caveat whenever you use it.",
+        "parameters": {"type": "object", "properties": {
+            "site_id": {"type": "string"}, "indicator": {"type": "string"}, "days": _D},
+            "required": ["site_id"], "additionalProperties": False}}},
     {"type": "function", "function": {
         "name": "rank_wards",
         "description": "Screen every ward and rank it: exceedances with their criteria, change in notified acute diarrhoeal disease, and whether the two co-occur. The usual first call for any district-wide question.",
@@ -257,7 +322,8 @@ Rules you must not break:
 - Never state a number you did not get from a tool. If the data is not there, say so.
 - Thresholds are numbers too. Call get_thresholds before describing anything as safe, high or exceeding, and \
 quote the basis it returns. A filter value you chose is not a threshold.
-- Do not write URLs. The harness records every query and shows it to the officer.
+- Do not write URLs, links, or markdown image syntax. A chart you rendered is already on the officer's screen;
+  refer to it in words ("the profile above"), never with ![...](...) or a link, which renders as a broken image.
 - Co-location of a water exceedance and a rise in notifications is an association worth investigating, never \
 evidence of causation. Say so plainly.
 - This is a prototype dataset. Do not describe a single reading as a trend."""

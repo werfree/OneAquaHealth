@@ -220,7 +220,9 @@ const TOOLS=[
   ["Find co-location","Is there any ward where water quality and notified cases both moved? Show me the timeline."],
   ["Compare wards","Compare every ward: water exceedance against change in notifications."],
   ["Investigate ITO","Investigate the Yamuna at ITO Bridge over the last month."],
-  ["Chromium at Jajmau","What is happening with chromium at Jajmau, and who lives there?"]
+  ["Chromium at Jajmau","What is happening with chromium at Jajmau, and who lives there?"],
+  ["Locate the source","Where along the Yamuna is the contamination entering?"],
+  ["One-off or sustained?","Is the coliform problem a one-off spike or a sustained condition? Show me day by day."]
 ];
 $("#tools").innerHTML='<span class="tool-l">Start with</span>'+
   TOOLS.map(([l,q])=>`<button class="tool" data-q="${esc(q)}">${esc(l)}</button>`).join("");
@@ -328,7 +330,8 @@ function handle(e,work){
     add(`<div class="answer">${md(e.text)}
       <div class="ground">${chip}<span class="gnote">${note}</span></div>
       <div class="finish">
-        <a class="btn g" href="/api/officer/studio/report/${esc(current)}" download>⤓ Download full report</a>
+        <button class="btn" data-exec="${esc(current)}">⤓ Executive report (PDF)</button>
+        <a class="btn g" href="/api/officer/studio/report/${esc(current)}" download>⤓ Full transcript</a>
         <a class="btn g" href="/api/officer/export/readings.csv?days=28" download>⤓ Readings CSV</a>
         <a class="btn g" href="/api/officer/export/surveillance.csv?days=90" download>⤓ IDSP returns CSV</a>
       </div></div>`);
@@ -350,6 +353,81 @@ function draw(s){
   if(s.type==="ranking") return drawRanking(s);
   if(s.type==="trend")   return drawTrend(s);
   if(s.type==="scatter") return drawScatter(s);
+  if(s.type==="profile") return drawProfile(s);
+  if(s.type==="persistence") return drawPersistence(s);
+}
+
+/* River longitudinal profile. Stations in flow order on a distance axis, with
+   the step between consecutive stations called out — that step is what names
+   the stretch a load enters on. Log scale because coliform spans two orders of
+   magnitude along one river and a linear axis flattens the upstream station to
+   the floor. */
+function drawProfile(s){
+  const d=s.data||{},pts=(d.points||[]).filter(p=>p.mean!=null);
+  if(pts.length<2){add(shell("River profile",s.caption,'<div style="color:var(--label-3)">Not enough stations with readings on this river.</div>'));return;}
+  const W=820,H=300,L=60,R=130,T=24,B=48;
+  const lg=v=>Math.log10(Math.max(v,1));
+  const vals=pts.map(p=>p.mean).concat(d.threshold?[d.threshold]:[]);
+  const lo=lg(Math.min(...vals))-.25, hi=lg(Math.max(...vals))+.25;
+  const kms=pts.map(p=>p.flow_km||0), kmax=Math.max(...kms)||1;
+  const X=k=>L+(k/kmax)*(W-L-R), Y=v=>T+(1-(lg(v)-lo)/(hi-lo))*(H-T-B);
+  const ticks=[];for(let e=Math.floor(lo);e<=Math.ceil(hi);e++)ticks.push(Math.pow(10,e));
+
+  const el=add(shell(`${esc(d.river)} — ${esc(LBL[d.indicator]||d.indicator)} in flow order`,s.caption,
+    `<svg class="v" viewBox="0 0 ${W} ${H}">
+      ${ticks.filter(t=>lg(t)>=lo&&lg(t)<=hi).map(t=>
+        `<line class="gl" x1="${L}" y1="${Y(t).toFixed(1)}" x2="${W-R}" y2="${Y(t).toFixed(1)}"/>
+         <text class="ax" x="${L-8}" y="${(Y(t)+3.5).toFixed(1)}" text-anchor="end">${fmt(t)}</text>`).join("")}
+      ${d.threshold?`<line class="thr" stroke="var(--critical)" x1="${L}" y1="${Y(d.threshold).toFixed(1)}" x2="${W-R}" y2="${Y(d.threshold).toFixed(1)}"/>
+        <text class="ax" fill="var(--critical)" x="${W-R+6}" y="${(Y(d.threshold)+3.5).toFixed(1)}">CPCB ${fmt(d.threshold)}</text>`:""}
+      <path d="${pts.map((p,i)=>`${i?"L":"M"}${X(p.flow_km||0).toFixed(1)},${Y(p.mean).toFixed(1)}`).join(" ")}"
+        fill="none" stroke="var(--water)" stroke-width="2.5" stroke-linejoin="round"/>
+      ${pts.map(p=>{const x=X(p.flow_km||0),y=Y(p.mean);
+        const c=p.exceeds?(p.factor>=4?"var(--critical)":"var(--warning)"):"var(--good)";
+        return `<g data-t="${esc(p.name)}<br>${fmt(p.mean)} ${esc(d.unit||"")}${p.factor?` · ${p.factor}× criterion`:" · within criteria"}<br>${esc(p.position_note||"")}">
+          <circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="7" fill="${c}" stroke="#fff" stroke-width="2.5"/>
+          <text class="ax" x="${x.toFixed(1)}" y="${(y-14).toFixed(1)}" text-anchor="middle" fill="var(--label)" font-weight="600">${fmt(p.mean)}</text>
+          <text class="ax" x="${x.toFixed(1)}" y="${H-B+16}" text-anchor="middle">${esc((p.name.split(" at ")[1]||p.name).slice(0,14))}</text>
+          <text class="ax" x="${x.toFixed(1)}" y="${H-B+29}" text-anchor="middle" fill="var(--label-3)">${p.flow_km||0} km</text>
+        </g>`;}).join("")}
+      ${pts.slice(1).map((p,i)=>{const st=d.points.find(q=>q.site_id===p.site_id)?.step_from_previous;
+        if(!st||!st.ratio||st.ratio<1.5)return "";
+        const x0=X(pts[i].flow_km||0),x1=X(p.flow_km||0),ym=Math.min(Y(pts[i].mean),Y(p.mean))-30;
+        return `<g><line x1="${x0}" y1="${ym+8}" x2="${x1}" y2="${ym+8}" stroke="var(--critical)" stroke-width="1.5"/>
+          <text class="ax" x="${((x0+x1)/2).toFixed(1)}" y="${ym+3}" text-anchor="middle" fill="var(--critical)" font-weight="600">×${st.ratio} over ${st.reach_km} km</text></g>`;}).join("")}
+      <text class="ax" x="${L+(W-L-R)/2}" y="${H-6}" text-anchor="middle">downstream distance →</text>
+    </svg>`,
+    `<span class="lg"><span class="sq" style="border-radius:50%;background:var(--good)"></span>within criteria</span>
+     <span class="lg"><span class="sq" style="border-radius:50%;background:var(--warning)"></span>exceeds</span>
+     <span class="lg"><span class="sq" style="border-radius:50%;background:var(--critical)"></span>≥4× criterion</span>
+     <span class="lg">log scale</span>
+     <span class="lg" style="flex-basis:100%;color:var(--label-3)">${esc(d.note||"")}</span>`));
+  el.querySelectorAll("g[data-t]").forEach(g=>hover(g,g.dataset.t));
+}
+
+/* Day-by-day strip per station: a one-off exceedance and a month-long condition
+   look identical in a latest-value view and call for different responses. */
+function drawPersistence(s){
+  const d=s.data||{},st=(d.stations||[]).filter(x=>x.days_measured);
+  if(!st.length){add(shell("Persistence",s.caption,'<div style="color:var(--label-3)">No readings in this window.</div>'));return;}
+  const el=add(shell(`Days above criterion — ${esc(LBL[d.indicator]||d.indicator)}`,s.caption,
+    `<div style="display:flex;flex-direction:column;gap:9px">
+      ${st.map(x=>`<div style="display:flex;align-items:center;gap:10px">
+        <div style="width:150px;flex:none;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(x.name)}</div>
+        <div style="flex:1;display:flex;gap:2px;min-width:0" data-t="${esc(x.name)}<br>${x.days_over} of ${x.days_measured} sampling days above criterion<br>longest run ${x.longest_run} days">
+          ${x.daily.map(c=>`<div style="flex:1;height:18px;border-radius:2px;min-width:2px;
+            background:${c.over?"var(--critical)":"var(--ok-w)"}" title="${esc(c.date)}: ${fmt(c.value)}"></div>`).join("")}
+        </div>
+        <div style="width:96px;flex:none;text-align:right;font-size:12px;font-variant-numeric:tabular-nums">
+          <b style="color:${x.pct_over>70?"var(--critical)":x.pct_over>0?"var(--warning)":"var(--good)"}">${x.days_over}/${x.days_measured}</b>
+          <span style="color:var(--label-3)"> days</span></div>
+      </div>`).join("")}
+    </div>`,
+    `<span class="lg"><span class="sq" style="background:var(--critical)"></span>above criterion</span>
+     <span class="lg"><span class="sq" style="background:var(--ok-w)"></span>within</span>
+     <span class="lg" style="color:var(--label-3)">each cell is one sampling day, oldest at left</span>
+     <span class="lg" style="flex-basis:100%;color:var(--label-3)">${esc(d.threshold_basis||"")}</span>`));
+  el.querySelectorAll("[data-t]").forEach(g=>hover(g,g.dataset.t));
 }
 
 function drawStats(s){
@@ -499,6 +577,31 @@ function drawScatter(s){
      <span class="lg" style="flex-basis:100%;color:var(--label-3)">Association only — position in the shaded quadrant is a reason to sample, not evidence of causation.</span>`));
   el.querySelectorAll("g[data-t]").forEach(g=>hover(g,g.dataset.t));
 }
+
+/* The executive report is a document, not the transcript: it restructures the
+   same evidence into situation, findings, assessment and actions. The figures
+   the analyst chose are posted back as SVG so the report carries the actual
+   charts rather than a description of them. */
+document.addEventListener("click",async ev=>{
+  const b=ev.target.closest("[data-exec]"); if(!b) return;
+  const session=b.dataset.exec, label=b.textContent;
+  b.disabled=true; b.textContent="Preparing…";
+  const figures=$$(".viz").map(v=>{
+    const svg=v.querySelector("svg");
+    return svg?{title:v.querySelector(".viz-t")?.textContent||"",
+                caption:v.querySelector(".viz-c")?.textContent||"",
+                svg:svg.outerHTML}:null;
+  }).filter(Boolean);
+  try{
+    const r=await fetch("/api/officer/studio/executive",{method:"POST",
+      headers:{"Content-Type":"application/json"},body:JSON.stringify({session,figures})});
+    if(!r.ok){const d=await r.json().catch(()=>({}));throw new Error(d.detail||`HTTP ${r.status}`);}
+    const w=window.open("","_blank");
+    if(!w) throw new Error("the browser blocked the report window — allow pop-ups for this site");
+    w.document.write(await r.text()); w.document.close();
+  }catch(e){ add(`<div class="err">${esc(e.message)}</div>`); }
+  b.disabled=false; b.textContent=label;
+});
 
 /* ══════════ autodemo ══════════
    Drives the real studio: it types into the real composer and waits on the real

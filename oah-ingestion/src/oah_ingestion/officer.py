@@ -658,3 +658,420 @@ causation, and confirmatory sampling is required before any attribution.
         media_type="text/html",
         headers={"Content-Disposition": f'attachment; filename="investigation-{session_id}.html"'},
     )
+
+
+# ─────────────────────── longitudinal and persistence analysis ───────────────────────
+
+
+def _river_chain(river: str) -> List:
+    """Stations on one river, ordered downstream."""
+
+    return sorted(
+        [s for s in registry().values() if (s.river or "").lower() == river.lower()],
+        key=lambda s: s.flow_km if s.flow_km is not None else 0,
+    )
+
+
+@router.get("/profile")
+def river_profile(
+    river: str = Query(..., description="Yamuna, Ganga or Mithi"),
+    indicator: str = Query("faecal_coliform"),
+    days: int = Query(14, ge=1, le=365),
+):
+    """One indicator along a river, station by station in flow order.
+
+    This is the view that localises a source. A single station tells you the
+    water is bad; the gradient between consecutive stations tells you which
+    stretch it entered on, which is the difference between "the Yamuna is
+    polluted" and "something discharges between Wazirabad and ITO" -- only the
+    second is a referral the State Pollution Control Board can act on.
+    """
+
+    since = (datetime.now(timezone.utc).date() - timedelta(days=days)).isoformat()
+    urls = []
+    chain = _river_chain(river)
+    if not chain:
+        raise HTTPException(status_code=404, detail=f"no monitored stations on {river!r}")
+
+    points, previous = [], None
+    for site in chain:
+        rows = _water(site_id=site.site_id, indicator=indicator, since=since)
+        urls.append(search_url("Observation", {"_profile": BASE + WATER_PROFILE, "_tag": _tag(),
+                                               "code": indicator, "subject": f"Location/{site.site_id}",
+                                               "date": f"ge{since}"}))
+        values = [r["value"] for r in rows if r["value"] is not None]
+        mean = round(sum(values) / len(values), 2) if values else None
+        exceedance = evaluate(indicator, mean, rows[0]["unit"] if rows else None) if mean is not None else None
+
+        step = None
+        if mean is not None and previous and previous["mean"]:
+            delta = mean - previous["mean"]
+            step = {
+                "from": previous["site_id"],
+                "to": site.site_id,
+                "reach_km": round((site.flow_km or 0) - (previous["flow_km"] or 0), 1),
+                "change": round(delta, 2),
+                "ratio": round(mean / previous["mean"], 2) if previous["mean"] else None,
+            }
+
+        point = {
+            "site_id": site.site_id, "name": site.name, "district": site.district,
+            "flow_km": site.flow_km, "position_note": site.position_note,
+            "mean": mean, "readings": len(values),
+            "unit": rows[0]["unit"] if rows else None,
+            "exceeds": exceedance is not None,
+            "factor": (exceedance or {}).get("exceedance_factor"),
+            "step_from_previous": step,
+        }
+        points.append(point)
+        previous = {"site_id": site.site_id, "mean": mean, "flow_km": site.flow_km}
+
+    rule = THRESHOLDS.get(indicator, {})
+    steps = [p["step_from_previous"] for p in points if p["step_from_previous"]]
+    worst = max(steps, key=lambda s: s["ratio"] or 0, default=None)
+    return {
+        "river": river, "indicator": indicator, "window_days": days,
+        "unit": next((p["unit"] for p in points if p["unit"]), rule.get("unit")),
+        "threshold": rule.get("limit"), "threshold_basis": rule.get("basis"),
+        "points": points,
+        "largest_increase": worst,
+        "fhir_urls": urls,
+        "note": (
+            "Means over the window at each station, ordered downstream. A step between two "
+            "stations locates the stretch a load enters on; it does not identify the discharge."
+        ),
+    }
+
+
+@router.get("/persistence")
+def persistence(days: int = Query(28, ge=7, le=365), indicator: str = Query("faecal_coliform")):
+    """How many days each station sat above its criterion, not just the latest value.
+
+    A single reading over a criterion can be a sampling artefact. Fourteen days
+    of twenty-eight is a condition, and the two warrant different responses --
+    which a dashboard showing only the most recent value cannot distinguish.
+    """
+
+    since = (datetime.now(timezone.utc).date() - timedelta(days=days)).isoformat()
+    rows = _water(indicator=indicator, since=since)
+    query = search_url("Observation", {"_profile": BASE + WATER_PROFILE, "_tag": _tag(),
+                                       "code": indicator, "date": f"ge{since}"})
+    by_site: Dict[str, List[dict]] = defaultdict(list)
+    for row in rows:
+        by_site[row["site_id"]].append(row)
+
+    gazetteer = registry()
+    out = []
+    for site_id, site in gazetteer.items():
+        readings = sorted(by_site.get(site_id, []), key=lambda r: r["date"])
+        if not readings:
+            continue
+        daily = []
+        streak = longest = 0
+        for reading in readings:
+            over = evaluate(indicator, reading["value"], reading["unit"]) is not None
+            daily.append({"date": reading["date"], "value": reading["value"], "over": over})
+            streak = streak + 1 if over else 0
+            longest = max(longest, streak)
+        over_days = sum(1 for d in daily if d["over"])
+        out.append({
+            "site_id": site_id, "name": site.name, "district": site.district,
+            "days_measured": len(daily), "days_over": over_days,
+            "pct_over": round(over_days / len(daily) * 100, 1) if daily else 0,
+            "longest_run": longest, "current_run": streak,
+            "daily": daily,
+        })
+
+    out.sort(key=lambda s: (-s["pct_over"], -s["longest_run"]))
+    rule = THRESHOLDS.get(indicator, {})
+    return {
+        "indicator": indicator, "window_days": days,
+        "threshold": rule.get("limit"), "threshold_basis": rule.get("basis"),
+        "stations": out,
+        "fhir_urls": [query],
+        "note": "A run is consecutive sampling days above the criterion, not calendar days.",
+    }
+
+
+@router.get("/offset")
+def peak_offset(site_id: str = Query(...), indicator: str = Query("faecal_coliform"),
+                days: int = Query(28, ge=14, le=365)):
+    """Days between the water peak and the notified-case peak at one station.
+
+    Reported as a plain descriptive offset, NOT a correlation. With weekly IDSP
+    returns there are only a handful of health points in any usable window, and
+    a correlation coefficient computed on four points would be a statistic in
+    name only. The offset is what the data can honestly support; whether it
+    means anything is for the officer and confirmatory sampling to establish.
+    """
+
+    water = trend(site_id=site_id, indicator=indicator, days=days)
+    health = trend(site_id=site_id, indicator="acute_diarrhoeal_disease", days=days)
+    ws, hs = water["series"], health["series"]
+    if not ws or not hs:
+        return {"site_id": site_id, "indicator": indicator, "offset_days": None,
+                "reason": "not enough data in this window"}
+
+    water_peak = max(ws, key=lambda p: p["value"] or 0)
+    health_peak = max(hs, key=lambda p: p["value"] or 0)
+    gap = (datetime.fromisoformat(health_peak["date"]) - datetime.fromisoformat(water_peak["date"])).days
+
+    return {
+        "site_id": site_id, "indicator": indicator, "window_days": days,
+        "water_peak": {"date": water_peak["date"], "value": water_peak["value"], "unit": water["unit"]},
+        "health_peak": {"date": health_peak["date"], "value": health_peak["value"], "unit": "per 100,000"},
+        "offset_days": gap,
+        "health_points": len(hs),
+        "interpretation": (
+            f"The notified-case peak falls {gap} days after the water peak."
+            if gap > 0 else
+            f"The notified-case peak falls {abs(gap)} days BEFORE the water peak, which does not fit a waterborne route."
+            if gap < 0 else "Both peaks fall on the same date."
+        ),
+        "caveat": (
+            f"Descriptive offset between two maxima, not a correlation. This window holds only "
+            f"{len(hs)} weekly surveillance points, which cannot support a statistical association. "
+            "Treat as a prompt to sample, never as evidence of a causal lag."
+        ),
+    }
+
+
+# ─────────────────────────── executive report (print / PDF) ───────────────────────────
+
+EXEC_PROMPT = """You are drafting an executive situation report for a District Surveillance Officer in an \
+IDSP/IHIP district surveillance unit in India. It will be signed and attached to an incident record, and read \
+by a Chief Medical Officer who was not present for the investigation.
+
+You are given the transcript of an investigation and the figures it retrieved. Rewrite it as a REPORT, not a \
+narration. Nobody wants to read "first I called this tool, then that one" — they want the finding, the evidence \
+and the decision.
+
+Return JSON with exactly these keys:
+  "title":       short, specific, naming the river or district. Not "Investigation Report".
+  "situation":   2-3 sentences a CMO could act on. Lead with the finding.
+  "findings":    array of objects {"station", "indicator", "value", "criterion", "note"} — one row per material
+                 finding. "value" and "criterion" include units. "note" is one short clause saying why it matters.
+  "assessment":  one paragraph interpreting the findings together, including any spatial or temporal pattern.
+  "actions":     array of objects {"action", "owner", "urgency"} — concrete and within the officer's authority:
+                 confirmatory sampling request to the State Pollution Control Board, ward-level advisory,
+                 enhanced case finding, ORS depot activation, water sampling from the ward supply.
+                 "urgency" is one of "immediate", "this week", "routine".
+  "limitations": array of plain sentences stating what the data cannot show.
+
+Rules: use only figures present in the transcript. Quote the CPCB or IS 10500 criterion alongside any value you \
+call elevated. Co-location of a water exceedance and a rise in notifications is an association to investigate, \
+never evidence of causation, and the limitations must say so."""
+
+
+@router.post("/studio/executive")
+def studio_executive(body: dict):
+    """Turn an investigation into a formatted executive report, ready to print or save as PDF.
+
+    Deliberately not the transcript. The transcript answers "how was this
+    reached" and belongs in the appendix; a report that opens with a replay of
+    tool calls will not be read by the person who has to act on it. The model
+    restructures the same evidence into situation, findings, assessment and
+    actions -- and the figures stay bounded to what the transcript retrieved.
+
+    Figures rendered during the investigation are posted back by the browser as
+    SVG and embedded, so the report carries the charts the analyst actually
+    chose rather than a description of them.
+    """
+
+    session_id = (body or {}).get("session")
+    figures = (body or {}).get("figures") or []
+
+    try:
+        from oah_agent.grounding import check
+        from oah_agent.studio import DEFAULT_MODEL, _client, session
+    except ImportError:
+        raise HTTPException(status_code=501, detail="oah-agent is not installed")
+
+    data = session(session_id)
+    if data is None:
+        raise HTTPException(status_code=404, detail="no such session; it may have expired with the process")
+
+    # Rebuild what the run established, without the mechanics.
+    evidence, queries = [], []
+    for entry in data["transcript"]:
+        if entry["kind"] == "tool":
+            if entry.get("summary"):
+                evidence.append({"tool": entry["tool"], "found": entry["summary"]})
+            queries.extend(entry.get("urls") or [])
+        elif entry["kind"] in {"thinking", "answer"}:
+            evidence.append({"reasoning": entry["text"]})
+
+    import json as _json
+    import os
+
+    try:
+        client = _client()
+        response = client.chat.completions.create(
+            model=os.getenv("OPENAI_MODEL", DEFAULT_MODEL),
+            response_format={"type": "json_object"},
+            messages=[
+                {"role": "system", "content": EXEC_PROMPT},
+                {"role": "user", "content": f"REQUEST: {data['question']}\n\nTRANSCRIPT:\n"
+                                            + _json.dumps(evidence, indent=1, default=str)[:14000]},
+            ],
+        )
+        report = _json.loads(response.choices[0].message.content or "{}")
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.exception("Executive report failed")
+        raise HTTPException(status_code=502, detail=f"{type(exc).__name__}: {exc}")
+
+    verdict = check(
+        " ".join(
+            [report.get("situation", ""), report.get("assessment", "")]
+            + [f"{f.get('value','')} {f.get('criterion','')} {f.get('note','')}" for f in report.get("findings", [])]
+        ),
+        [evidence],
+    )
+
+    def esc(v) -> str:
+        return str(v if v is not None else "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+    today = datetime.now(timezone.utc).strftime("%d %B %Y")
+    urgency_rank = {"immediate": 0, "this week": 1, "routine": 2}
+    actions = sorted(report.get("actions", []), key=lambda a: urgency_rank.get((a.get("urgency") or "").lower(), 3))
+
+    findings_rows = "".join(
+        f"<tr><td>{esc(f.get('station'))}</td><td>{esc(f.get('indicator'))}</td>"
+        f"<td class='n'>{esc(f.get('value'))}</td><td class='n'>{esc(f.get('criterion'))}</td>"
+        f"<td>{esc(f.get('note'))}</td></tr>"
+        for f in report.get("findings", [])
+    ) or "<tr><td colspan='5' class='muted'>No material findings recorded.</td></tr>"
+
+    action_rows = "".join(
+        f"<li><span class='u u-{esc((a.get('urgency') or 'routine').replace(' ', '-').lower())}'>"
+        f"{esc(a.get('urgency') or 'routine')}</span><div><b>{esc(a.get('action'))}</b>"
+        + (f"<div class='owner'>{esc(a.get('owner'))}</div>" if a.get("owner") else "")
+        + "</div></li>"
+        for a in actions
+    ) or "<li class='muted'>No action recommended.</li>"
+
+    figure_blocks = "".join(
+        f"<figure><div class='fig'>{fig.get('svg','')}</div>"
+        f"<figcaption>Figure {i}. {esc(fig.get('title'))}"
+        + (f" — {esc(fig.get('caption'))}" if fig.get("caption") else "")
+        + "</figcaption></figure>"
+        for i, fig in enumerate(figures, 1)
+        if fig.get("svg")
+    )
+
+    limitations = "".join(f"<li>{esc(l)}</li>" for l in report.get("limitations", []))
+    query_list = "".join(f"<li>{esc(u)}</li>" for u in dict.fromkeys(queries)) or "<li class='muted'>None recorded.</li>"
+
+    chip = (
+        f"<span class='chip {'ok' if verdict['grounded'] else 'bad'}'>"
+        + (f"Grounded — {verdict['figures_checked']} figure(s) verified against {verdict['source_figure_count']} retrieved"
+           if verdict["grounded"] and verdict["figures_checked"]
+           else "No figures to verify" if verdict["grounded"]
+           else f"{len(verdict['unsupported_figures'])} figure(s) not found in the retrieved data")
+        + "</span>"
+    )
+
+    html = f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
+<title>{esc(report.get('title') or 'Situation report')}</title><style>
+@page{{size:A4;margin:18mm 16mm 20mm}}
+*{{box-sizing:border-box}}
+body{{margin:0;color:#1D1D1F;background:#fff;
+ font:11pt/1.5 -apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Helvetica,Arial,sans-serif;
+ letter-spacing:-.005em;-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+.page{{max-width:190mm;margin:0 auto;padding:14mm 10mm 20mm}}
+.bar{{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;
+ border-bottom:2.5px solid #1D1D1F;padding-bottom:9px;margin-bottom:5px}}
+.org{{font-size:8.5pt;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#6E6E73}}
+.cls{{font-size:8pt;color:#86868B;text-align:right;line-height:1.45}}
+h1{{font-size:19pt;font-weight:600;letter-spacing:-.02em;margin:12px 0 4px;line-height:1.2}}
+.sub{{font-size:9.5pt;color:#6E6E73;margin-bottom:18px}}
+h2{{font-size:9pt;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#0071E3;
+ margin:20px 0 7px;padding-bottom:3px;border-bottom:1px solid #E8E8ED}}
+p{{margin:0 0 9px}}
+.lead{{font-size:11.5pt;line-height:1.55}}
+table{{width:100%;border-collapse:collapse;font-size:9.5pt;margin:4px 0 6px}}
+th{{text-align:left;font-size:8pt;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+ color:#6E6E73;border-bottom:1.5px solid #D2D2D7;padding:5px 7px 4px}}
+td{{padding:6px 7px;border-bottom:1px solid #E8E8ED;vertical-align:top}}
+td.n{{font-variant-numeric:tabular-nums;white-space:nowrap}}
+ol.actions{{list-style:none;padding:0;margin:4px 0 0;counter-reset:a}}
+ol.actions li{{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid #E8E8ED}}
+.u{{flex:none;font-size:7.5pt;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+ padding:2.5px 7px;border-radius:3px;margin-top:1px;min-width:62px;text-align:center}}
+.u-immediate{{background:#FFEBEC;color:#d03b3b}}
+.u-this-week{{background:#FFF6E5;color:#8a5a00}}
+.u-routine{{background:#F5F5F7;color:#6E6E73}}
+.owner{{font-size:8.5pt;color:#6E6E73;margin-top:2px}}
+figure{{margin:12px 0 16px;break-inside:avoid;page-break-inside:avoid}}
+.fig{{border:1px solid #E8E8ED;border-radius:6px;padding:9px}}
+.fig svg{{width:100%;height:auto;display:block}}
+figcaption{{font-size:8.5pt;color:#6E6E73;margin-top:5px;line-height:1.45}}
+ul.lim{{margin:4px 0 0;padding-left:16px}} ul.lim li{{margin-bottom:4px;font-size:10pt}}
+.chip{{display:inline-block;font-size:8.5pt;font-weight:600;padding:3px 9px;border-radius:99px;
+ background:#E9F7E9;color:#0a7a0a;border:1px solid rgba(12,163,12,.3)}}
+.chip.bad{{background:#FFEBEC;color:#d03b3b;border-color:rgba(208,59,59,.3)}}
+.appendix{{margin-top:22px;padding-top:12px;border-top:1px solid #D2D2D7;font-size:8.5pt;color:#6E6E73}}
+.appendix ul{{padding-left:15px;margin:5px 0 0;word-break:break-all;line-height:1.5}}
+.muted{{color:#86868B}}
+.sign{{margin-top:26px;display:flex;gap:40px}}
+.sign div{{flex:1;border-top:1px solid #1D1D1F;padding-top:5px;font-size:8.5pt;color:#6E6E73}}
+.noprint{{position:fixed;top:14px;right:14px;display:flex;gap:8px}}
+.noprint button{{font:inherit;font-size:9.5pt;font-weight:500;padding:7px 15px;border-radius:99px;
+ border:0;background:#0071E3;color:#fff;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.18)}}
+.noprint button.g{{background:#fff;color:#1D1D1F;border:1px solid #D2D2D7}}
+@media print{{.noprint{{display:none}} .page{{padding:0;max-width:none}} h2{{break-after:avoid}}
+ table,figure{{break-inside:avoid}}}}
+</style></head><body>
+<div class="noprint">
+  <button class="g" onclick="window.close()">Close</button>
+  <button onclick="window.print()">Save as PDF</button>
+</div>
+<div class="page">
+  <div class="bar">
+    <div><div class="org">District Surveillance Unit · IDSP / IHIP</div></div>
+    <div class="cls">Situation report<br>{esc(today)}<br>Ref {esc(session_id)}</div>
+  </div>
+  <h1>{esc(report.get('title') or 'Water-associated disease surveillance')}</h1>
+  <div class="sub">Prepared in response to: “{esc(data['question'])}”</div>
+
+  <h2>Situation</h2>
+  <p class="lead">{esc(report.get('situation'))}</p>
+
+  <h2>Key findings</h2>
+  <table><thead><tr><th>Station</th><th>Indicator</th><th>Value</th><th>Criterion</th><th>Significance</th></tr></thead>
+  <tbody>{findings_rows}</tbody></table>
+
+  <h2>Assessment</h2>
+  <p>{esc(report.get('assessment'))}</p>
+
+  {f'<h2>Figures</h2>{figure_blocks}' if figure_blocks else ''}
+
+  <h2>Recommended action</h2>
+  <ol class="actions">{action_rows}</ol>
+
+  <h2>Limitations</h2>
+  <ul class="lim">{limitations}</ul>
+
+  <h2>Verification</h2>
+  <p>{chip}</p>
+  <p class="muted" style="font-size:9pt">{esc(verdict.get('not_covered'))}</p>
+
+  <div class="sign"><div>District Surveillance Officer</div><div>Chief Medical Officer</div></div>
+
+  <div class="appendix">
+    <b>Appendix — evidence queries.</b> Every figure above was read from the FHIR repository at
+    {esc(base_url())}, dataset tag {esc(dataset_tag())}, by these queries:
+    <ul>{query_list}</ul>
+    <p style="margin-top:9px">Screening is against CPCB Primary Water Quality Criteria for Bathing Waters and
+    IS 10500:2012 reference values — prototype screening thresholds, not statutory enforcement limits; the
+    Designated Best Use class for a reach is set by the State Pollution Control Board. The readings in this
+    deployment are synthetic demonstration data. Co-location of a water exceedance and a rise in notifications
+    is an association to investigate; nothing here establishes causation.</p>
+  </div>
+</div></body></html>"""
+
+    from fastapi.responses import HTMLResponse
+
+    return HTMLResponse(html)
