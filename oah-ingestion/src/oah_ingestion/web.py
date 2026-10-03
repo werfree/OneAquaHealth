@@ -147,6 +147,8 @@ def overview():
 
 class Question(BaseModel):
     question: str = Field(min_length=1, max_length=500)
+    provider: Optional[str] = Field(default=None, description="'openai' or 'ollama'; default from LLM_PROVIDER")
+    model: Optional[str] = Field(default=None, description="Override the provider's default model")
 
 
 @router.post("/api/ask")
@@ -159,8 +161,8 @@ def ask(body: Question):
         raise HTTPException(status_code=501, detail="oah-agent is not installed")
 
     try:
-        result = run(body.question)
-    except RuntimeError as exc:  # missing OPENAI_API_KEY, most likely
+        result = run(body.question, provider=body.provider, model=body.model)
+    except RuntimeError as exc:  # missing credentials for the selected provider, most likely
         raise HTTPException(status_code=503, detail=str(exc))
     except Exception as exc:
         logger.exception("Assistant failed")
@@ -171,5 +173,6 @@ def ask(body: Question):
         "answer": result["answer"],
         "trace": result["trace"],
         "grounding": result["grounding"],
+        "provider": result.get("provider"),
         "model": result["model"],
     }

@@ -471,16 +471,14 @@ def report(days: int = Query(28, ge=7, le=365)):
 
     facts = _report_facts(days)
     try:
-        from oah_agent.assistant import DEFAULT_MODEL, _client
+        from oah_agent import llm
     except ImportError:
         raise HTTPException(status_code=501, detail="oah-agent is not installed")
 
-    import os
-
     try:
-        client = _client()
+        client = llm.client()
         response = client.chat.completions.create(
-            model=os.getenv("OPENAI_MODEL", DEFAULT_MODEL),
+            model=llm.default_model(),
             messages=[
                 {"role": "system", "content": REPORT_PROMPT},
                 {"role": "user", "content": f"FACTS:\n{json.dumps(facts, indent=2, default=str)}"},
@@ -529,8 +527,10 @@ def studio_run(body: dict):
     except ImportError:
         raise HTTPException(status_code=501, detail="oah-agent is not installed")
 
+    # Provider and model are optional per-request overrides; by default they
+    # come from the environment (LLM_PROVIDER / OLLAMA_MODEL / OPENAI_MODEL).
     return StreamingResponse(
-        run(question),
+        run(question, model=(body or {}).get("model"), provider=(body or {}).get("provider")),
         media_type="text/event-stream",
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )
@@ -882,8 +882,9 @@ def studio_executive(body: dict):
     figures = (body or {}).get("figures") or []
 
     try:
+        from oah_agent import llm
         from oah_agent.grounding import check
-        from oah_agent.studio import DEFAULT_MODEL, _client, session
+        from oah_agent.studio import session
     except ImportError:
         raise HTTPException(status_code=501, detail="oah-agent is not installed")
 
@@ -902,13 +903,12 @@ def studio_executive(body: dict):
             evidence.append({"reasoning": entry["text"]})
 
     import json as _json
-    import os
 
     try:
-        client = _client()
-        response = client.chat.completions.create(
-            model=os.getenv("OPENAI_MODEL", DEFAULT_MODEL),
-            response_format={"type": "json_object"},
+        client = llm.client()
+        response = llm.json_completion(
+            client,
+            model=llm.default_model(),
             messages=[
                 {"role": "system", "content": EXEC_PROMPT},
                 {"role": "user", "content": f"REQUEST: {data['question']}\n\nTRANSCRIPT:\n"

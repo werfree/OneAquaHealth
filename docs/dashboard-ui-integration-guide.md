@@ -33,7 +33,7 @@ The dashboard has two adapters with a shared UI-facing shape.
 | Mock | `/` | Stateful dashboard fixture endpoints under `/api/mock/*` | Complete product demonstration, including proposed roles, runs, graph, evidence, and reports. |
 | Live | `/?mode=live` | Same-origin allow-listed proxy under `/api/live/*` | Demonstrate only capabilities available from the existing OneAquaHealth gateway. |
 
-The browser must call only the dashboard origin. Service URLs, FHIR credentials, and OpenAI credentials remain server-side.
+The browser must call only the dashboard origin. Service URLs, FHIR credentials, and model-provider credentials remain server-side.
 
 ```text
 Browser view

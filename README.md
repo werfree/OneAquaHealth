@@ -18,7 +18,7 @@ Built for **IEEE Global Hackathon 2026, Track 7 — Digital Health Standards**.
 
 ```bash
 python -m pip install -r requirements.txt     # installs all four packages editable
-cp .env.example .env                          # then add your OPENAI_API_KEY
+cp .env.example .env                          # then add your OPENAI_API_KEY (or set LLM_PROVIDER=ollama)
 ./run-demo.sh stack                           # RabbitMQ (needs docker/colima running)
 ./run-demo.sh app                             # the gateway — leave this running
 ```
@@ -185,9 +185,37 @@ All optional; every value below is the default.
 
 | Variable | Default | |
 |---|---|---|
-| `OPENAI_API_KEY` | — | **required** for the analyst. Put it in `.env` (gitignored) |
-| `OPENAI_MODEL` | `gpt-4o` | |
+| `LLM_PROVIDER` | inferred | `openai` or `ollama`. Inferred from the credentials present when unset |
+| `OPENAI_API_KEY` | — | **required for OpenAI**. Put it in `.env` (gitignored) |
+| `OPENAI_MODEL` | `gpt-4o` | OpenAI model |
+| `OPENAI_BASE_URL` | api.openai.com | only for a compatible gateway/proxy |
+| `OLLAMA_BASE_URL` | `http://localhost:11434` | Ollama server; the SDK talks to its OpenAI-compatible `/v1` |
+| `OLLAMA_MODEL` | `deepseek-v4.1-flash:cloud` | Ollama model name |
+| `OLLAMA_API_KEY` | — | only if your Ollama server requires a token |
+| `LLM_MODEL` | — | generic fallback model for any provider |
 | `FHIR_BASE_URL` | `https://hapi.fhir.org/baseR4` | point at your own server |
+
+### Running against Ollama instead of OpenAI
+
+The analyst, briefing narrator, studio and officer report routes all talk to a
+provider chosen by `LLM_PROVIDER`. Ollama serves the same OpenAI-compatible API,
+so no extra dependency is needed:
+
+```bash
+ollama pull deepseek-v4.1-flash:cloud      # or any tool-calling model you run
+export LLM_PROVIDER=ollama
+./run-demo.sh ask "where does BOD exceed its criterion?"
+```
+
+Set `OLLAMA_BASE_URL` if the server is not on `localhost:11434`. If
+`LLM_PROVIDER` is unset, an `OPENAI_API_KEY` selects OpenAI and an
+`OLLAMA_BASE_URL`/`OLLAMA_MODEL` selects Ollama. `--provider` and `--model`
+override per run:
+
+```bash
+oah-ask --provider ollama --model deepseek-v4.1-flash:cloud "compare the two sites"
+```
+
 | `FHIR_UPLOAD_ENABLED` | `true` | `false` runs everything except the POST |
 | `OAH_DATASET_TAG` | `oah-demo` | scopes every query; the public sandbox holds other parties' OAH data |
 | `OAH_CITIES` | `delhi,kanpur,…` | city allow-list |
@@ -212,7 +240,7 @@ All optional; every value below is the default.
 | `GET /ingest/public-health/csv/template` | download an empty CSV template |
 | `POST /api/ingest-demo/{key}` | run a bundled JSON sample through the real pipeline; keys: `iot`, `iot-oslo`, `iot-benevento`, `survey`, `survey-ghent`, `survey-toulouse`, `health`, `health-kanpur` |
 | `GET /api/overview` | summarize the FHIR dataset (requires the agent package and a reachable server) |
-| `POST /api/ask` | ask the assistant about FHIR data (requires `OPENAI_API_KEY`) |
+| `POST /api/ask` | ask the assistant about FHIR data (requires a configured model provider) |
 
 Upload the included health CSV from PowerShell with:
 

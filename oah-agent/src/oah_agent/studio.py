@@ -29,17 +29,18 @@ from __future__ import annotations
 
 import json
 import logging
-import os
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Iterator, List, Optional
 
-from . import grounding
+from . import grounding, llm
 from .tools import TOOL_IMPLEMENTATIONS, TOOL_SCHEMAS
 
 logger = logging.getLogger("OAH_Studio")
 
-DEFAULT_MODEL = "gpt-4o"
+# Kept for callers that import the name; the effective default now depends on
+# the selected provider -- see `llm.default_model()`.
+DEFAULT_MODEL = llm.DEFAULT_OPENAI_MODEL
 MAX_ROUNDS = 10
 
 # Sessions live in memory: a run is short, and its only consumer is the report
@@ -329,14 +330,10 @@ evidence of causation. Say so plainly.
 - This is a prototype dataset. Do not describe a single reading as a trend."""
 
 
-def _client():
-    try:
-        from openai import OpenAI
-    except ImportError as exc:  # pragma: no cover
-        raise RuntimeError("The studio needs the OpenAI SDK: pip install openai") from exc
-    if not os.getenv("OPENAI_API_KEY"):
-        raise RuntimeError("OPENAI_API_KEY is not set. Add it to .env or export it.")
-    return OpenAI()
+def _client(provider: Optional[str] = None):
+    """An OpenAI-compatible client for the configured provider (OpenAI or Ollama)."""
+
+    return llm.client(provider)
 
 
 # `window_days` is what `rank_wards` *returns*, so the model reasonably assumed
@@ -365,22 +362,23 @@ def _event(kind: str, **payload) -> str:
     return f"data: {json.dumps({'type': kind, **payload}, default=str)}\n\n"
 
 
-def run(question: str, *, model: Optional[str] = None) -> Iterator[str]:
+def run(question: str, *, model: Optional[str] = None, provider: Optional[str] = None) -> Iterator[str]:
     """Run an investigation, yielding SSE events as each step happens."""
 
     session_id = uuid.uuid4().hex[:12]
-    model = model or os.getenv("OPENAI_MODEL", DEFAULT_MODEL)
+    provider = llm.active_provider(provider)
+    model = model or llm.default_model(provider)
     transcript: List[dict] = []
     results: List[object] = []
 
     SESSIONS[session_id] = {
-        "id": session_id, "question": question, "model": model,
+        "id": session_id, "question": question, "model": model, "provider": provider,
         "started_at": datetime.now(timezone.utc).isoformat(), "transcript": transcript,
     }
-    yield _event("start", session=session_id, question=question, model=model)
+    yield _event("start", session=session_id, question=question, model=model, provider=provider)
 
     try:
-        client = _client()
+        client = _client(provider)
     except RuntimeError as exc:
         yield _event("error", message=str(exc))
         return

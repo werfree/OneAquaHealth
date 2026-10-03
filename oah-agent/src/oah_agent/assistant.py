@@ -1,10 +1,10 @@
 """Natural-language One Health assistant over the OAH FHIR repository.
 
-Runs an OpenAI tool-calling loop against the typed FHIR tools in `tools.py`.
-The model never writes a FHIR URL; it chooses a tool and arguments, and this
-code builds and issues the query. Every tool result carries the `fhir_url` it
-called, and the assistant is instructed to cite those, so any claim it makes is
-checkable against the server.
+Runs a tool-calling loop against the typed FHIR tools in `tools.py`. The model
+never writes a FHIR URL; it chooses a tool and arguments, and this code builds
+and issues the query. Every tool result carries the `fhir_url` it called, and
+the assistant is instructed to cite those, so any claim it makes is checkable
+against the server.
 
 Two things keep the output honest, and they are different in kind:
   - the system prompt, which *asks* the model not to invent figures, and
@@ -12,23 +12,26 @@ Two things keep the output honest, and they are different in kind:
 
 Only the second is evidence. Every answer carries its grounding verdict.
 
-Credentials come from `OPENAI_API_KEY` in the environment (the repo's `.env` is
-gitignored). Nothing here embeds a key.
+The model provider is chosen in `llm.py` -- OpenAI by default, or a local
+Ollama server (e.g. `deepseek-v4.1-flash:cloud`) by setting `LLM_PROVIDER=ollama`.
+Both speak the same tool-calling protocol, so this loop is provider-agnostic.
+Nothing here embeds a key.
 """
 
 from __future__ import annotations
 
 import json
 import logging
-import os
 from typing import Callable, Dict, List, Optional
 
-from . import grounding
+from . import grounding, llm
 from .tools import TOOL_IMPLEMENTATIONS, TOOL_SCHEMAS
 
 logger = logging.getLogger("OAH_Assistant")
 
-DEFAULT_MODEL = "gpt-4o"
+# Kept for callers that import the name; the effective default now depends on
+# the selected provider -- see `llm.default_model()`.
+DEFAULT_MODEL = llm.DEFAULT_OPENAI_MODEL
 MAX_TOOL_ROUNDS = 8
 
 SYSTEM_PROMPT = """You are the OneAquaHealth One Health analyst. You answer questions about urban stream \
@@ -58,17 +61,10 @@ a site is an association worth investigating, not a causal finding.
 Reuse what you already retrieved rather than re-querying unchanged facts."""
 
 
-def _client():
-    try:
-        from openai import OpenAI
-    except ImportError as exc:  # pragma: no cover
-        raise RuntimeError("The assistant needs the OpenAI SDK: pip install openai") from exc
+def _client(provider: Optional[str] = None):
+    """An OpenAI-compatible client for the configured provider (OpenAI or Ollama)."""
 
-    if not os.getenv("OPENAI_API_KEY"):
-        raise RuntimeError(
-            "OPENAI_API_KEY is not set. Add it to .env (gitignored) or export it before running the assistant."
-        )
-    return OpenAI()
+    return llm.client(provider)
 
 
 def _run_tool(name: str, arguments: str) -> dict:
@@ -96,8 +92,9 @@ class Conversation:
     cohort there?" legitimately reuses figures fetched two turns ago.
     """
 
-    def __init__(self, *, model: Optional[str] = None, client=None):
-        self.model = model or os.getenv("OPENAI_MODEL", DEFAULT_MODEL)
+    def __init__(self, *, model: Optional[str] = None, provider: Optional[str] = None, client=None):
+        self.provider = llm.active_provider(provider)
+        self.model = model or llm.default_model(self.provider)
         self._client = client
         self.messages: List[dict] = [{"role": "system", "content": SYSTEM_PROMPT}]
         self.tool_results: List[object] = []
@@ -105,7 +102,7 @@ class Conversation:
     @property
     def client(self):
         if self._client is None:
-            self._client = _client()
+            self._client = _client(self.provider)
         return self._client
 
     def ask(self, question: str, *, verbose: bool = False) -> Dict[str, object]:
@@ -125,6 +122,7 @@ class Conversation:
                     "answer": answer,
                     "trace": trace,
                     "model": self.model,
+                    "provider": self.provider,
                     "grounding": grounding.check(answer, self.tool_results),
                 }
 
@@ -151,10 +149,17 @@ class Conversation:
                 )
 
         answer = "Stopped after the maximum number of tool rounds without reaching an answer."
-        return {"answer": answer, "trace": trace, "model": self.model, "grounding": grounding.check(answer, [])}
+        return {
+            "answer": answer,
+            "trace": trace,
+            "model": self.model,
+            "provider": self.provider,
+            "grounding": grounding.check(answer, []),
+        }
 
 
-def ask(question: str, *, model: Optional[str] = None, verbose: bool = False) -> Dict[str, object]:
+def ask(question: str, *, model: Optional[str] = None, provider: Optional[str] = None,
+        verbose: bool = False) -> Dict[str, object]:
     """Answer one standalone question."""
 
-    return Conversation(model=model).ask(question, verbose=verbose)
+    return Conversation(model=model, provider=provider).ask(question, verbose=verbose)

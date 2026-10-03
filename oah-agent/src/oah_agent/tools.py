@@ -259,7 +259,7 @@ def get_thresholds() -> dict:
 
 
 # ---------------------------------------------------------------------------
-# OpenAI tool schemas
+# OpenAI-compatible tool schemas (also understood by Ollama)
 # ---------------------------------------------------------------------------
 
 TOOL_IMPLEMENTATIONS = {

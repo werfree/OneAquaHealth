@@ -41,11 +41,12 @@ def _report(result: dict) -> None:
             print(f"  {url}", file=sys.stderr)
 
 
-def _chat(model, verbose) -> None:
+def _chat(model, provider, verbose) -> None:
     from .assistant import Conversation
+    from .llm import describe
 
-    conversation = Conversation(model=model)
-    print("OAH One Health assistant. Ask a question, or Ctrl-D to leave.\n")
+    conversation = Conversation(model=model, provider=provider)
+    print(f"OAH One Health assistant [{describe(provider, conversation.model)}]. Ask a question, or Ctrl-D to leave.\n")
     while True:
         try:
             question = input("> ").strip()
@@ -71,12 +72,14 @@ def main() -> None:
     parser.add_argument("--facts", action="store_true", help="print computed facts as JSON; makes no model call")
     parser.add_argument("--site", help="restrict a briefing to one site id")
     parser.add_argument("--tag", default="oah-demo", help="dataset tag to query (default: oah-demo)")
-    parser.add_argument("--model", help="override the model (default: $OPENAI_MODEL or gpt-4o)")
+    parser.add_argument("--provider", choices=["openai", "ollama"],
+                        help="model backend (default: $LLM_PROVIDER, else inferred from the environment)")
+    parser.add_argument("--model", help="override the model (default: $OLLAMA_MODEL / $OPENAI_MODEL)")
     parser.add_argument("--verbose", action="store_true", help="show tool calls as they happen")
     args = parser.parse_args()
 
     if args.chat:
-        _chat(args.model, args.verbose)
+        _chat(args.model, args.provider, args.verbose)
         return
 
     if args.brief or args.facts:
@@ -85,7 +88,7 @@ def main() -> None:
             print(json.dumps(facts, indent=2, default=str))
             return
 
-        narrative = narrate(facts, model=args.model)
+        narrative = narrate(facts, model=args.model, provider=args.provider)
         print(narrative, flush=True)
         # The briefing's figures are derived in Python, so the same grounding
         # check applies: the narrative must not introduce numbers of its own.
@@ -103,7 +106,7 @@ def main() -> None:
 
     from .assistant import ask
 
-    _report(ask(" ".join(args.question), model=args.model, verbose=args.verbose))
+    _report(ask(" ".join(args.question), model=args.model, provider=args.provider, verbose=args.verbose))
 
 
 if __name__ == "__main__":

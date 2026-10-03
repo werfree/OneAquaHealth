@@ -38,7 +38,7 @@ The FHIR server is the only durable application data store identified in the imp
 | RabbitMQ worker | `ingestion.citizen_surveys` JSON | Pydantic validation; pipeline; ack/nack | FHIR transaction; durable broker queue | operational feed only | EXISTING |
 | Pipeline | discriminated envelope | screen; map; tag; bundle; upload | logs + configured FHIR server | demo endpoint result | EXISTING |
 | FHIR server | transaction Bundle / search | external FHIR R4 persistence and query | `Location`, `Specimen`, `Observation`, `Group`, provenance resources | overview, assistant | EXISTING, external |
-| Agent | question | OpenAI function-tool loop; FHIR lookups; numeric grounding check | response only; conversation memory is in-process | `/api/ask` | EXISTING when key/server available |
+| Agent | question | OpenAI-compatible function-tool loop (OpenAI or Ollama); FHIR lookups; numeric grounding check | response only; conversation memory is in-process | `/api/ask` | EXISTING when a provider/server is configured |
 
 Primary implementation: `oah-ingestion/src/oah_ingestion/app.py`, `pipeline.py`, `fhir_adapter.py`, `fhir_client.py`, and `oah-agent/src/oah_agent/{assistant,tools,briefing,grounding}.py`.
 

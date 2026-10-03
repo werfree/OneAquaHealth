@@ -121,17 +121,16 @@ Be direct. Co-location of an environmental exceedance and an elevated health ris
 worth investigating, never evidence of causation. Say that plainly rather than hinting at it."""
 
 
-def narrate(facts: dict, *, model: Optional[str] = None) -> str:
+def narrate(facts: dict, *, model: Optional[str] = None, provider: Optional[str] = None) -> str:
     """Have the model write prose over already-computed facts."""
 
     import json
-    import os
 
-    from .assistant import DEFAULT_MODEL, _client
+    from . import llm
 
-    client = _client()
+    client = llm.client(provider)
     response = client.chat.completions.create(
-        model=model or os.getenv("OPENAI_MODEL", DEFAULT_MODEL),
+        model=model or llm.default_model(provider),
         messages=[
             {"role": "system", "content": NARRATIVE_PROMPT},
             {"role": "user", "content": f"FACTS:\n{json.dumps(facts, indent=2, default=str)}"},
