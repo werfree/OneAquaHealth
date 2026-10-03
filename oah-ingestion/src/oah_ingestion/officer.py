@@ -477,3 +477,157 @@ def panel():
     if not page.is_file():
         raise HTTPException(status_code=404, detail="officer.html is missing")
     return FileResponse(page, media_type="text/html")
+
+
+# ─────────────────────────── studio: agent-orchestrated ───────────────────────────
+
+
+@router.post("/studio/run")
+def studio_run(body: dict):
+    """Stream an investigation as it happens.
+
+    Server-sent events rather than a single response: the officer should watch
+    the reasoning and each chart arrive, not wait on a blank panel and receive a
+    finished answer that appeared from nowhere.
+    """
+
+    from fastapi.responses import StreamingResponse
+
+    question = (body or {}).get("question", "").strip()
+    if not question:
+        raise HTTPException(status_code=422, detail="question is required")
+
+    try:
+        from oah_agent.studio import run
+    except ImportError:
+        raise HTTPException(status_code=501, detail="oah-agent is not installed")
+
+    return StreamingResponse(
+        run(question),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
+
+
+@router.get("/studio/report/{session_id}")
+def studio_report(session_id: str):
+    """The whole investigation as a self-contained HTML report.
+
+    Not a summary written afterwards -- the transcript itself: the request, each
+    reasoning step, every tool call with the queries it ran, the figures each
+    returned, and the conclusion with its grounding verdict. That is what makes
+    it attachable to an incident record: a reader can audit how the conclusion
+    was reached, not just what it was.
+    """
+
+    try:
+        from oah_agent.studio import session
+    except ImportError:
+        raise HTTPException(status_code=501, detail="oah-agent is not installed")
+
+    data = session(session_id)
+    if data is None:
+        raise HTTPException(status_code=404, detail="no such session; it may have expired with the process")
+
+    def esc(value) -> str:
+        return (
+            str(value if value is not None else "")
+            .replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+        )
+
+    blocks = []
+    step_no = 0
+    for entry in data["transcript"]:
+        if entry["kind"] == "thinking":
+            blocks.append(f'<div class="think"><div class="lbl">Reasoning</div><p>{esc(entry["text"])}</p></div>')
+        elif entry["kind"] == "tool":
+            step_no += 1
+            args = ", ".join(f"{k}={v}" for k, v in (entry.get("arguments") or {}).items())
+            urls = "".join(
+                f'<div class="url"><a href="{esc(u)}">{esc(u)}</a></div>' for u in entry.get("urls") or []
+            )
+            # Only visualisation tools carry a render; building this line
+            # unconditionally crashed on every data tool.
+            render = entry.get("render")
+            shown = ""
+            if render:
+                shown = f'<div class="shown">Rendered a <b>{esc(render["type"])}</b> view in the panel.'
+                shown += f' {esc(render["caption"])}</div>' if render.get("caption") else "</div>"
+            blocks.append(
+                f'<div class="step"><div class="lbl">Action {step_no}</div>'
+                f'<div class="tool">{esc(entry["tool"])}<span>({esc(args)})</span></div>'
+                + (f'<div class="sum">{esc(entry["summary"])}</div>' if entry.get("summary") else "")
+                + shown
+                + (f'<div class="lbl2">Queries run</div>{urls}' if urls else "")
+                + "</div>"
+            )
+        elif entry["kind"] == "answer":
+            g = entry.get("grounding") or {}
+            chip = (
+                f'<span class="chip {"ok" if g.get("grounded") else "bad"}">'
+                f'{"✓" if g.get("grounded") else "⚠"} '
+                + (
+                    f'Grounded — {g.get("figures_checked", 0)} figure(s) verified against '
+                    f'{g.get("source_figure_count", 0)} retrieved'
+                    if g.get("grounded")
+                    else f'{len(g.get("unsupported_figures") or [])} figure(s) not found in the data'
+                )
+                + "</span>"
+            )
+            body_html = "".join(f"<p>{esc(p)}</p>" for p in (entry["text"] or "").split("\n\n") if p.strip())
+            blocks.append(
+                f'<div class="concl"><div class="lbl">Conclusion</div>{body_html}'
+                f'<div class="ground">{chip}<span class="note">{esc(g.get("not_covered", ""))}</span></div></div>'
+            )
+
+    html = f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
+<title>Investigation {esc(session_id)} — OneAquaHealth</title><style>
+*{{box-sizing:border-box}}
+body{{margin:0;padding:40px 24px 80px;background:#fff;color:#1D1D1F;
+ font:15px/1.6 -apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Helvetica,Arial,sans-serif;
+ letter-spacing:-.01em}}
+.w{{max-width:760px;margin:0 auto}}
+h1{{font-size:25px;font-weight:600;letter-spacing:-.022em;margin:0 0 6px}}
+.meta{{color:#86868B;font-size:12.5px;margin-bottom:4px}}
+.req{{background:#F0F7FF;border:1px solid #CCE4FF;border-radius:10px;padding:14px 16px;margin:20px 0 26px}}
+.req .lbl{{color:#0071E3}}
+.lbl{{font-size:10.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#86868B;margin-bottom:5px}}
+.lbl2{{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#86868B;margin:10px 0 4px}}
+.think{{border-left:2px solid #D2D2D7;padding:2px 0 2px 15px;margin:18px 0;color:#424245}}
+.think p{{margin:0}}
+.step{{border:1px solid #E8E8ED;border-radius:10px;padding:13px 15px;margin:14px 0;background:#FAFAFC}}
+.tool{{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:13px;font-weight:500}}
+.tool span{{color:#86868B;font-weight:400}}
+.sum{{font-size:13.5px;color:#424245;margin-top:5px}}
+.shown{{font-size:13px;color:#424245;margin-top:6px;padding:7px 10px;background:#fff;border-radius:7px;border:1px solid #E8E8ED}}
+.url a{{font-family:ui-monospace,Menlo,monospace;font-size:10.5px;color:#0071E3;word-break:break-all;text-decoration:none}}
+.concl{{border-top:2px solid #1D1D1F;padding-top:18px;margin-top:30px}}
+.concl p{{margin:0 0 11px}}
+.ground{{margin-top:14px;padding-top:12px;border-top:1px solid #E8E8ED}}
+.chip{{display:inline-block;font-size:12px;font-weight:500;padding:4px 11px;border-radius:99px;
+ background:#E9F7E9;color:#0a7a0a;border:1px solid rgba(12,163,12,.25)}}
+.chip.bad{{background:#FFEBEC;color:#d03b3b;border-color:rgba(208,59,59,.25)}}
+.note{{display:block;font-size:12px;color:#86868B;margin-top:7px}}
+footer{{margin-top:40px;padding-top:18px;border-top:1px solid #E8E8ED;font-size:11.5px;color:#86868B;line-height:1.6}}
+@media print{{body{{padding:0}} .step{{break-inside:avoid}}}}
+</style></head><body><div class="w">
+<h1>District surveillance investigation</h1>
+<div class="meta">Session {esc(session_id)} · {esc(data.get("started_at", ""))} · model {esc(data.get("model", ""))}</div>
+<div class="meta">Repository: {esc(base_url())} · dataset tag {esc(dataset_tag())}</div>
+<div class="req"><div class="lbl">Request</div>{esc(data["question"])}</div>
+{"".join(blocks)}
+<footer>
+This report is the transcript of the investigation, not a summary written afterwards: every action the analyst
+took is listed in the order it was taken, with the queries it ran. Figures were screened against CPCB Primary
+Water Quality Criteria for Bathing Waters and IS 10500:2012 reference values — screening thresholds for a
+prototype, not statutory enforcement limits; the Designated Best Use class for a reach is set by the State
+Pollution Control Board. The readings in this deployment are synthetic demonstration data. Co-location of a
+water exceedance and a rise in notifications is an association to investigate; nothing here establishes
+causation, and confirmatory sampling is required before any attribution.
+</footer></div></body></html>"""
+
+    return StreamingResponse(
+        iter([html]),
+        media_type="text/html",
+        headers={"Content-Disposition": f'attachment; filename="investigation-{session_id}.html"'},
+    )
