@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Mondego Watch — OneAquaHealth</title>
+<title>Ingestion Gateway — OneAquaHealth</title>
 <style>
   :root {
     --bg:#FFFFFF; --bg-2:#F5F5F7; --bg-3:#FAFAFC;
@@ -213,7 +213,7 @@
 
 <div class="bar">
   <div class="bar-in">
-    <div class="brand">Mondego Watch <span>· OneAquaHealth</span></div>
+    <div class="brand">Ingestion Gateway <span>· OneAquaHealth</span></div>
     <div class="bar-r">
       <span class="status" id="status"><span class="dot off"></span>connecting…</span>
       <div class="seg" role="group" aria-label="Detail depth">
@@ -227,10 +227,11 @@
 
 <div class="wrap">
   <header>
-    <p class="eyebrow" id="eyebrow">Coimbra, Portugal · live HL7 FHIR</p>
-    <h1>One station carries both.</h1>
-    <p class="sub">Stream chemistry and the health of the people living beside it, in one standards-conformant
-       record. Every figure here is fetched live — and every one can be traced back to the query that produced it.</p>
+    <p class="eyebrow" id="eyebrow">India · live HL7 FHIR R4</p>
+    <h1>Raw feeds in. Conformant FHIR out.</h1>
+    <p class="sub">CPCB sensor telemetry, citizen field surveys and IDSP syndromic returns, normalised to
+       HL7&nbsp;FHIR&nbsp;R4 against the OneAquaHealth IG and written to a live server. Send one through and watch
+       every stage of what actually happens.</p>
     <div class="stats" id="stats">
       <div><div class="stat-n" id="s-obs">—</div><div class="stat-l">Observations</div></div>
       <div><div class="stat-n" id="s-site">—</div><div class="stat-l">Stations</div></div>
@@ -330,8 +331,8 @@ $$("[data-stage]").forEach(b => b.onclick = () => {
 /* ───────── boot ───────── */
 const SUGGESTED = [
   "Which station has both a chemical exceedance and elevated health risk?",
-  "Is nitrate at the Mondego station above safe levels?",
-  "Who lives near the Mondego station?",
+  "Is faecal coliform at the ITO reach above CPCB criteria?",
+  "Who lives in the ward served by the ITO reach?",
   "Which stations have no health data at all?"
 ];
 
@@ -339,7 +340,7 @@ async function boot() {
   try {
     const info = await (await fetch("/api/info")).json();
     $("#status").innerHTML = '<span class="dot"></span>' + esc(info.fhir.server.replace(/^https?:\/\//, ""));
-    $("#eyebrow").textContent = "Coimbra, Portugal · live on " + info.fhir.server.replace(/^https?:\/\//, "");
+    $("#eyebrow").textContent = "India · live on " + info.fhir.server.replace(/^https?:\/\//, "");
     $("#srcs").innerHTML = info.samples.map(s => `
       <button type="button" class="src" data-sample="${esc(s.key)}">
         <div class="src-c">${esc(s.channel)}</div>
@@ -496,7 +497,7 @@ async function sendQuestion() {
     }),
     get_thresholds: g => ({
       label: `Loaded the screening thresholds`,
-      detail: `Nitrate, pH and zinc, each with its regulatory basis. Fetched rather than recalled — a "safe level" from the model's own memory is exactly the kind of figure that should never reach a health officer.`
+      detail: `Faecal coliform, BOD, dissolved oxygen and the rest, each with its CPCB or IS 10500 basis. Fetched rather than recalled — a "safe level" from the model's own memory is exactly the kind of figure that should never reach a health officer.`
     }),
     get_site_profile: g => ({
       label: g.n > 1 ? `Examined all ${g.n} stations` : `Examined one station in full`,
@@ -626,7 +627,7 @@ const script = [
                 await click($('.seg button[data-depth="summary"]')); await sleep(600); },
   async () => { say("Send a real IoT reading through the pipeline.");
                 await click($('[data-sample="iot"]')); await sleep(2600); },
-  async () => { say("Validated, then screened — zinc at 6.4× its threshold.");
+  async () => { say("Validated, then screened against CPCB bathing-water criteria.");
                 await click($('[data-stage="g2"]')); await sleep(2800); },
   async () => { say("The data picks its own FHIR profile.");
                 await click($('[data-stage="g3"]')); await sleep(3000); },
