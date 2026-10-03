@@ -1,4 +1,6 @@
-const MODE = new URLSearchParams(window.location.search).get("mode") === "live" ? "live" : "mock";
+// An explicit ?mode= wins; otherwise the server's DASHBOARD_DEFAULT_MODE.
+const REQUESTED_MODE = new URLSearchParams(window.location.search).get("mode") || document.documentElement.dataset.defaultMode;
+const MODE = REQUESTED_MODE === "live" ? "live" : "mock";
 
 export class ApiError extends Error {
   constructor(message, status = 0, details = null) {
@@ -47,8 +49,6 @@ const mockAdapter = {
   downloadUrl: (reportId, format) => `/api/mock/reports/${encodeURIComponent(reportId)}/download/${format}`,
 };
 
-let liveOverview;
-
 function liveSession(role) {
   return {
     persona: {
@@ -82,20 +82,63 @@ function normalizeLiveSite(item) {
     id: siteId,
     name: item.name || siteId,
     shortName: item.name || siteId,
-    city: item.city || "Pilot dataset",
+    city: item.city ? item.city[0].toUpperCase() + item.city.slice(1) : "City not recorded",
     latitude: item.latitude,
     longitude: item.longitude,
     status: exceedances.length ? "attention" : risks.length ? "health-watch" : "observed",
     observationCount: Number(item.environmental_reading_count || 0) + Number(item.health_measure_count || 0),
-    findingCount: exceedances.length + risks.length,
+    findingCount: exceedances.length + risks.length + (item.co_location ? 1 : 0),
     lastObservedAt: item.observed_at || null,
     _source: item,
   };
 }
 
-async function getLiveOverview() {
-  liveOverview = await request("/api/live/overview");
-  return liveOverview;
+// Agency classifications are carried in unit text, e.g. "{score} (HIGH)".
+function splitScoreUnit(unit) {
+  const match = /^(.*?)\s*\((LOW|MODERATE|HIGH)\)\s*$/.exec(unit || "");
+  return match ? { unit: match[1] === "{score}" ? "score" : match[1], level: match[2] } : { unit: unit === "{score}" ? "score" : unit, level: null };
+}
+
+function liveObservations(source, siteId) {
+  const flagged = new Map((source.exceedances || []).map(item => [item.observation_id, item]));
+  const environmental = (source.environmental_observations || []).map((item, index) => {
+    const flag = flagged.get(item.id);
+    return {
+      id: item.id || `live-env-${index}`, resourceRef: item.id ? `Observation/${item.id}` : null, siteId, kind: "environmental",
+      indicator: item.indicator || "Environmental measure", value: item.value, unit: item.unit, codedValue: item.coded_value,
+      effectiveAt: item.when,
+      interpretation: flag ? `Above prototype screening value ${flag.threshold}` : item.coded_value ? "Coded survey answer" : "No screening flag raised",
+      screeningReference: flag?.basis,
+    };
+  });
+  const health = (source.health_observations || []).map((item, index) => {
+    const { unit, level } = splitScoreUnit(item.unit);
+    return {
+      id: item.id || `live-health-${index}`, resourceRef: item.id ? `Observation/${item.id}` : null, siteId, kind: "health",
+      indicator: item.indicator || "Health measure", value: item.value, unit, effectiveAt: item.when,
+      interpretation: level ? `Agency classification: ${level}` : "Agency classification not recorded",
+      screeningReference: item.cohort ? `Cohort Group/${item.cohort}` : null,
+    };
+  });
+  return [...environmental, ...health].sort((a, b) => String(b.effectiveAt || "").localeCompare(String(a.effectiveAt || "")));
+}
+
+function liveFindings(source, siteId) {
+  const caveat = "Prototype screening reference, not a regulatory limit.";
+  return [
+    ...(source.exceedances || []).map((item, index) => ({
+      id: `live-exceedance-${index}`, siteId, type: "threshold", severity: (item.exceedance_factor || 1) >= 2 ? "high" : "attention",
+      title: `${item.indicator || "Measure"} above prototype screening value`,
+      statement: `${item.value} ${item.unit || ""} against ${item.threshold}${item.exceedance_factor ? ` (${item.exceedance_factor}×)` : ""}. Basis: ${item.basis || "prototype rule"}.`,
+      caveat,
+    })),
+    ...(source.elevated_risks || []).map((item, index) => ({
+      id: `live-risk-${index}`, siteId, type: "health-watch", severity: item.interpretation === "HIGH" ? "high" : "moderate",
+      title: `${item.indicator || "Health measure"} classified ${item.interpretation}`,
+      statement: `Score ${item.score}${item.cohort ? ` for cohort ${item.cohort}` : ""}, as classified by the reporting agency.`,
+    })),
+    ...(source.co_location ? [{ id: "live-colocation", siteId, type: "co-location", severity: "attention", title: "Cross-domain co-location", statement: "An environmental screening flag and an elevated health classification share this Location.", caveat: source.caveat || "Association only, not causation." }] : []),
+  ];
 }
 
 const liveAdapter = {
@@ -103,45 +146,34 @@ const liveAdapter = {
   config: () => request("/api/config"),
   session: async role => liveSession(role),
   summary: async () => {
-    const data = await getLiveOverview();
+    const data = await request("/api/live/overview");
     const sites = (data.briefings || []).map(normalizeLiveSite);
+    // The gateway reports lists of site ids, not counts.
+    const countOf = value => Array.isArray(value) ? value.length : Number(value || 0);
     return {
       metrics: {
         sitesInScope: data.site_count ?? sites.length,
         loadedObservations: sites.reduce((total, site) => total + site.observationCount, 0),
-        screeningFindings: data.sites_with_exceedances ?? sites.filter(site => site._source.exceedances?.length).length,
-        coLocatedSites: data.sites_with_co_location ?? sites.filter(site => site._source.co_location).length,
+        screeningFindings: sites.reduce((total, site) => total + (site._source.exceedances?.length || 0), 0),
+        coLocatedSites: countOf(data.sites_with_co_location),
       },
       sites,
-      scopeLabel: "Current tagged FHIR response",
-      countNotice: "The existing FHIR client may return only the first result page.",
+      scopeLabel: `Dataset tag ${data.dataset_tag || "oah-demo"} on ${data.fhir_server || "the FHIR server"}`,
+      countNotice: data.generated_at ? `Computed from FHIR at ${data.generated_at}; cached briefly by the gateway.` : "Computed from the tagged FHIR dataset.",
     };
   },
   site: async (_role, siteId) => {
-    const data = liveOverview || await getLiveOverview();
-    const source = (data.briefings || []).find(item => (item.site_id || item.id) === siteId);
-    if (!source) throw new ApiError("Site is not present in the live response", 404);
-    const site = normalizeLiveSite(source);
-    const observations = [
-      ...(source.environmental_readings || []).map((item, index) => ({
-        id: item.id || `live-env-${index}`, siteId, kind: "environmental", indicator: item.indicator || item.code || "Environmental measure",
-        value: item.value, unit: item.unit, effectiveAt: item.when || item.effectiveDateTime, interpretation: item.interpretation || "Live FHIR record",
-      })),
-      ...(source.health_measures || []).map((item, index) => ({
-        id: item.id || `live-health-${index}`, siteId, kind: "health", indicator: item.indicator || item.code || "Health measure",
-        value: item.score ?? item.value, unit: item.unit || "score", effectiveAt: item.when || item.effectiveDateTime,
-        evaluationPeriod: item.evaluation_period, interpretation: item.interpretation || "Agency classification",
-      })),
-    ];
-    const findings = [
-      ...(source.exceedances || []).map((item, index) => ({ id: `live-exceedance-${index}`, siteId, type: "threshold", severity: "high", title: `${item.indicator || "Measure"} screening flag`, statement: `${item.value} ${item.unit || ""} · ${item.threshold || item.basis || "prototype rule"}` })),
-      ...(source.co_location ? [{ id: "live-colocation", siteId, type: "co-location", severity: "attention", title: "Cross-domain co-location", statement: "Environmental and elevated health records share this Location.", caveat: "Association only, not causation." }] : []),
-    ];
-    return { site, observations, findings, meta: { coordinateNotice: "Coordinates are approximate demo values.", screeningNotice: "Prototype screening rules only." } };
+    const source = await request(`/api/live/sites/${encodeURIComponent(siteId)}`);
+    return {
+      site: normalizeLiveSite(source),
+      observations: liveObservations(source, siteId),
+      findings: liveFindings(source, siteId),
+      meta: { coordinateNotice: "Coordinates come from the FHIR Location or the demo gazetteer and may be approximate.", screeningNotice: "Prototype screening rules only." },
+    };
   },
   evidence: async () => { throw new ApiError("The live backend has no dashboard evidence endpoint", 501); },
   graph: async () => { throw new ApiError("The live backend has no graph endpoint", 501); },
-  ask: (_role, _siteId, question) => request("/api/live/ask", { method: "POST", body: { question } }),
+  ask: (_role, siteId, question) => request("/api/live/ask", { method: "POST", body: { question, siteId } }),
   runs: async () => {
     const info = await request("/api/live/info");
     return { runs: [], samples: (info.samples || []).map(item => ({ ...item, label: item.channel, description: item.detail, sourceType: item.key })), stateNotice: "The live gateway exposes request-scoped results, not durable run history." };

@@ -24,8 +24,17 @@ load_dotenv()
 logger = logging.getLogger("OAH_Ingestion_App")
 
 
+def ingestion_workers_enabled() -> bool:
+    """`INGESTION_WORKERS_ENABLED=false` serves only the HTTP API and dashboard reads."""
+    return os.getenv("INGESTION_WORKERS_ENABLED", "true").strip().lower() not in {"false", "0", "no"}
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    if not ingestion_workers_enabled():
+        logger.info("Ingestion workers disabled; MQTT and RabbitMQ listeners not started")
+        yield
+        return
     client = create_mqtt_client()
     host, port = mqtt_broker_address()
     logger.info("Starting MQTT sensor listener for %s:%d", host, port)

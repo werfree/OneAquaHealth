@@ -18,7 +18,11 @@ stronger, and the briefing says so rather than implying a trend.
 from __future__ import annotations
 
 import logging
+import os
+from concurrent.futures import ThreadPoolExecutor
 from typing import Dict, List, Optional
+
+from oah_ingestion.sites import lookup
 
 from .tools import get_cohort, get_site_profile, list_sites
 
@@ -53,8 +57,18 @@ def _interpretation(observation: dict) -> Optional[str]:
     return None
 
 
-def site_briefing(site_id: str, dataset_tag: str = "oah-demo") -> dict:
-    """Derive the full cross-domain picture for one site. No model involved."""
+def _latest(observations: List[dict]) -> Optional[str]:
+    """Most recent effective time; ISO-8601 strings in one offset sort lexically."""
+    times = [o["when"] for o in observations if o.get("when")]
+    return max(times) if times else None
+
+
+def site_briefing(site_id: str, dataset_tag: str = "oah-demo", *, include_observations: bool = False) -> dict:
+    """Derive the full cross-domain picture for one site. No model involved.
+
+    `include_observations` adds summarized Observations for a station view.
+    It is off by default so dataset briefings sent to `narrate()` stay small.
+    """
 
     profile = get_site_profile(site_id, dataset_tag=dataset_tag)
     environmental = profile["environmental_observations"]
@@ -74,9 +88,12 @@ def site_briefing(site_id: str, dataset_tag: str = "oah-demo") -> dict:
     elevated = [r for r in risks if RISK_ORDER.get(r["interpretation"] or "", 0) >= 1]
 
     cohorts = [get_cohort(group_id, dataset_tag=dataset_tag) for group_id in profile["cohorts"]]
+    site = lookup(site_id)
 
-    return {
+    briefing = {
         "site_id": site_id,
+        "city": site.city,
+        "observed_at": _latest(environmental + health),
         "environmental_reading_count": len(environmental),
         "health_measure_count": len(health),
         "exceedances": exceedances,
@@ -90,13 +107,28 @@ def site_briefing(site_id: str, dataset_tag: str = "oah-demo") -> dict:
             "per site; no temporal or statistical analysis has been performed and no causal claim is supported."
         ),
     }
+    if include_observations:
+        briefing["environmental_observations"] = environmental
+        briefing["health_observations"] = health
+    return briefing
 
 
 def dataset_briefing(dataset_tag: str = "oah-demo") -> dict:
-    """Run `site_briefing` across every site in the dataset."""
+    """Run `site_briefing` across every site in the dataset.
+
+    Each site costs several FHIR round trips, so sites are briefed concurrently
+    (`OAH_BRIEFING_WORKERS`, default 8) rather than one after another.
+    """
 
     sites = list_sites(dataset_tag=dataset_tag).get("sites", [])
-    briefings = [site_briefing(site["site_id"], dataset_tag=dataset_tag) for site in sites]
+    workers = max(1, int(os.getenv("OAH_BRIEFING_WORKERS", "8")))
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        briefings = list(pool.map(lambda site: site_briefing(site["site_id"], dataset_tag=dataset_tag), sites))
+    # FHIR Location details label and map sites absent from the local gazetteer.
+    for briefing, site in zip(briefings, sites):
+        briefing["name"] = site.get("name")
+        briefing["latitude"] = site.get("latitude")
+        briefing["longitude"] = site.get("longitude")
     return {
         "site_count": len(briefings),
         "sites_with_exceedances": [b["site_id"] for b in briefings if b["exceedances"]],

@@ -4,9 +4,7 @@ A compact vanilla HTML/CSS/JavaScript dashboard with a stateful FastAPI mock ser
 
 ## Design direction and themes
 
-The interface uses restrained operational layouts where station context and evidence tables take priority over generic statistic cards. The sidebar selector offers **OneAquaHealth**, **Aqua**, **Aqua dark**, **White**, and **Dark**. The OneAquaHealth preset follows the public project's blue, cyan, white, and navy visual language; White is deliberately achromatic, including status and graph data colors.
-
-All theme metadata and CSS custom-property values live in [`data/themes.json`](data/themes.json). Each theme must provide the same complete token map, so adding or changing a theme does not require editing component CSS or JavaScript. The server validates the catalogue, injects the selected default before first paint, and exposes the same data through `GET /api/config`. `DASHBOARD_DEFAULT_THEME` in the repository-root `.env` selects the featured theme; an explicit browser choice is retained locally for that browser.
+The interface uses restrained operational layouts where station context and evidence tables take priority over generic statistic cards. The sidebar theme selector offers **Aqua**, **Aqua dark**, **White**, and **Dark**. `DASHBOARD_DEFAULT_THEME` in the repository-root `.env` selects the first featured theme; an explicit browser choice is retained locally for that browser. Semantic amber/red/green/blue remains reserved for attention, failures, completed work, and active processing. The relationship view is deliberately small and has a textual alternative.
 
 ## Set up and start
 

@@ -217,14 +217,19 @@ oah-ask --provider ollama --model deepseek-v4.1-flash:cloud "compare the two sit
 ```
 
 | `FHIR_UPLOAD_ENABLED` | `true` | `false` runs everything except the POST |
+| `FHIR_MAX_SEARCH_RESULTS` | `5000` | upper bound on resources one paginated search collects |
+| `OVERVIEW_CACHE_SECONDS` | `60` | per-process `/api/overview` cache lifetime |
 | `OAH_DATASET_TAG` | `oah-demo` | scopes every query; the public sandbox holds other parties' OAH data |
 | `OAH_CITIES` | `delhi,kanpur,…` | city allow-list |
 | `OAH_SITES_FILE` | `demo/sites.json` | your own station gazetteer |
 | `MQTT_HOST` | `broker.hivemq.com` | **public broker** — use your own for an isolated demo |
 | `RABBITMQ_HOST` | `localhost` | |
 | `APP_HOST` / `APP_PORT` | `0.0.0.0` / `8000` | |
+| `INGESTION_WORKERS_ENABLED` | `true` | `false` skips MQTT/RabbitMQ workers while keeping the HTTP API |
 | `DASHBOARD_PORT` | `8090` | separate evidence dashboard |
 | `OAH_LIVE_BASE_URL` | `http://127.0.0.1:8000` | live-gateway mode for that dashboard |
+| `DASHBOARD_DEFAULT_MODE` | `mock` | `mock` (fixtures) or `live` (reads the gateway); `?mode=` overrides |
+| `OAH_LIVE_TIMEOUT_SECONDS` | `90` | live-gateway proxy timeout |
 | `DASHBOARD_DEFAULT_THEME` | `aqua` | theme selector can override per browser |
 
 ---
@@ -239,8 +244,9 @@ oah-ask --provider ollama --model deepseek-v4.1-flash:cloud "compare the two sit
 | `POST /ingest/public-health/csv` | ingest grouped `PUBLIC_HEALTH` events from long-form CSV (`Content-Type: text/csv`); rows sharing an `event_id` form one event — see `demo/sample_public_health.csv` |
 | `GET /ingest/public-health/csv/template` | download an empty CSV template |
 | `POST /api/ingest-demo/{key}` | run a bundled JSON sample through the real pipeline; keys: `iot`, `iot-oslo`, `iot-benevento`, `survey`, `survey-ghent`, `survey-toulouse`, `health`, `health-kanpur` |
-| `GET /api/overview` | summarize the FHIR dataset (requires the agent package and a reachable server) |
-| `POST /api/ask` | ask the assistant about FHIR data (requires a configured model provider) |
+| `GET /api/overview` | summarize the FHIR dataset (requires the agent package and a reachable server); cached for `OVERVIEW_CACHE_SECONDS`, `?refresh=true` recomputes |
+| `GET /api/sites/{site_id}` | station briefing with summarized environmental and health observations; 404 when the tagged dataset has no observations for that site |
+| `POST /api/ask` | ask the assistant about FHIR data via `{question, site_id?, provider?, model?}`; the optional `site_id` adds station context (requires a configured model provider) |
 
 Upload the included health CSV from PowerShell with:
 
@@ -274,10 +280,17 @@ oah-dashboard
 ```
 
 It opens at <http://localhost:8090> by default and starts in mock mode with sample observations,
-findings, and run/report workflows. Set `OAH_LIVE_BASE_URL` and open
-<http://localhost:8090/?mode=live> to connect it to the live gateway; live mode uses an allow-listed
-same-origin proxy for the existing gateway routes. Durable run history, authorization, evidence
-graph, and report storage remain mock-backed — see `dashboard/API-MAPPING.md` for the boundary.
+findings, and run/report workflows. Mock state survives a browser refresh and resets when the
+dashboard server restarts; an explicit theme choice is remembered in that browser.
+
+To connect it to the live gateway, set `OAH_LIVE_BASE_URL` and open
+<http://localhost:8090/?mode=live> (or set `DASHBOARD_DEFAULT_MODE=live`); live mode uses an
+allow-listed same-origin proxy for the existing gateway routes. Live overview and station views only
+read FHIR, so already-uploaded data appears without ingestion. Set `INGESTION_WORKERS_ENABLED=false`
+for a gateway without MQTT/RabbitMQ listeners — the HTTP ingestion routes remain available. Live mode
+returns **501** for features without gateway endpoints — durable run history/retry, evidence details,
+the relationships graph, and reports — which continue to work in mock mode. See
+`dashboard/API-MAPPING.md` for the boundary.
 
 ---
 
@@ -286,6 +299,8 @@ graph, and report storage remain mock-backed — see `dashboard/API-MAPPING.md` 
 ```bash
 export PYTHONPATH=oah-agent/src:oah-ingestion/src:oah-pydantic-models/src
 for d in oah-agent oah-ingestion oah-pydantic-models; do python3 -m unittest discover -s $d/tests; done
+python -m pytest                       # dashboard/tests (needs the ".[dev]" extras)
+node dashboard/tests/test_api.mjs      # JS adapter checks, no npm dependencies
 ```
 
 **79 tests**, none of which touch the network. Several are regressions from real failures:
@@ -320,7 +335,8 @@ for d in oah-agent oah-ingestion oah-pydantic-models; do python3 -m unittest dis
 
 - `observation-with-component-oah` has almost no instances — the time-series generator does not emit
   min/max/avg, so that profile is barely exercised.
-- Nine `Location` resources exist for six stations; three survive from an earlier European framing.
+- `demo/sites.json` deliberately carries both the India stations and the OAH European pilot stations
+  (Mondego, Akerselva, Calore, Leie, Garonne), so the Location count exceeds the India station set.
 - IDSP returns are weekly, which caps any temporal analysis at a handful of points. The offset analysis
   is honest but weak, and only becomes meaningful with daily returns — a data-collection change.
 - Alerts reach a log and `subscribe()`, but nothing is wired to email, SMS or a duty pager.

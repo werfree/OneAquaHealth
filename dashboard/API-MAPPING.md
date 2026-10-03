@@ -9,13 +9,14 @@ The browser uses one service layer in `static/js/api.js`. Mock and live adapters
 | health | `GET /health` | Existing | Network/5xx shown as unavailable |
 | gateway info | `GET /api/info` | Existing | Network/5xx shown as unavailable |
 | overview | `GET /api/overview` | Existing, may require `oah-agent` and FHIR | 501/502/503 shown as unavailable; no mock fallback |
+| station detail | `GET /api/sites/{site_id}` | Summarized observations and findings from tagged FHIR data | 404 when no observations; invalid site ids return 422 |
 | run supplied sample | `POST /api/ingest-demo/{key}` | Existing, request-scoped | Validation and FHIR outcomes preserved |
 | public ingress | `POST /ingest` | Existing; not called by this dashboard | A `202 ACCEPTED` is not treated as persisted success |
-| assistant | `POST /api/ask` with `{question}` | Existing optional endpoint | 501/502/503 shown as unavailable; no credentials in browser code |
+| assistant | `POST /api/ask` with `{question, site_id?}` | Existing optional endpoint with station context | 501/502/503 shown as unavailable; no credentials in browser code |
 
-The dashboard server exposes a narrow same-origin proxy under `/api/live/*`. Set `OAH_LIVE_BASE_URL` and open `/?mode=live`. Only allow-listed routes are proxied.
+The dashboard server exposes a narrow same-origin proxy under `/api/live/*`. Set `OAH_LIVE_BASE_URL` and open `/?mode=live`, or set `DASHBOARD_DEFAULT_MODE=live` (default `mock`). An explicit `?mode=` wins. Only allow-listed routes are proxied. Site ids match `[A-Za-z0-9.-]{1,64}`; the assistant proxy translates browser `siteId` to gateway `site_id` only for valid ids. `OAH_LIVE_TIMEOUT_SECONDS` defaults to 90 seconds for slow overview queries and assistant tool loops. `GET /api/live/overview?refresh=true` bypasses the gateway overview cache. Overview and station views only read already-uploaded FHIR data.
 
-`GET /api/config` is a public, non-sensitive dashboard configuration route. It exposes the supported theme catalogue, each theme's complete presentation-token map, and the validated `DASHBOARD_DEFAULT_THEME`; environment values such as service URLs and credentials are not returned. The response is generated from `data/themes.json`, the same source used for the initial server-rendered theme.
+`GET /api/config` is a public, non-sensitive dashboard configuration route. It exposes the supported theme catalogue, validated `DASHBOARD_DEFAULT_THEME`, and validated `DASHBOARD_DEFAULT_MODE` as `defaultMode`; environment values such as service URLs and credentials are not returned.
 
 ## Mock-backed proposed routes
 

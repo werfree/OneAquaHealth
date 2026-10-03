@@ -36,8 +36,14 @@ class PaginationTests(unittest.TestCase):
         self.assertEqual(req.call_count, 1)
 
     def test_page_following_is_bounded_and_warns(self):
-        endless = page(["x"], "http://x/next")
-        with mock.patch.object(fhir_client, "_request", return_value=endless):
+        seen = []
+
+        def endless_page(*_args, **_kwargs):
+            # Every page offers a fresh `next` link, so only the page cap stops us.
+            seen.append(1)
+            return page(["x"], f"http://x/page/{len(seen)}")
+
+        with mock.patch.object(fhir_client, "_request", side_effect=endless_page):
             with self.assertLogs("OAH_FHIR_Client", level="WARNING") as logs:
                 got = fhir_client.search("Observation", {})
         self.assertEqual(len(got), fhir_client.MAX_PAGES)

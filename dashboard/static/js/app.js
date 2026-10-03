@@ -11,7 +11,6 @@ const personaSelector = document.querySelector("#persona-selector");
 const modeIndicator = document.querySelector("#mode-indicator");
 const themeSelector = document.querySelector("#theme-selector");
 const browserThemeColor = document.querySelector("#browser-theme-color");
-const embeddedThemeConfig = JSON.parse(document.querySelector("#theme-config").textContent);
 let pollTimer = null;
 
 function clearPoll() {
@@ -28,9 +27,6 @@ function applyTheme(themeId, { persist = false } = {}) {
   const config = state.themeConfig;
   const theme = config?.themes.find(item => item.id === themeId);
   if (!theme) return;
-  Object.entries(theme.tokens).forEach(([token, value]) => {
-    document.documentElement.style.setProperty(`--${token}`, value);
-  });
   state.theme = theme.id;
   document.documentElement.dataset.theme = theme.id;
   document.documentElement.style.colorScheme = theme.colorScheme;
@@ -65,7 +61,11 @@ async function bootstrap() {
   setState({ loading: true, error: null });
   render();
   try {
-    const [session, summary] = await Promise.all([api.session(state.role), api.summary(state.role)]);
+    const [themeConfig, session, summary] = await Promise.all([api.config(), api.session(state.role), api.summary(state.role)]);
+    const savedTheme = localStorage.getItem("oah-theme");
+    const theme = themeConfig.themes.some(item => item.id === savedTheme) ? savedTheme : themeConfig.defaultTheme;
+    setState({ themeConfig, theme });
+    applyTheme(theme);
     const selectedSiteId = summary.sites.some(site => site.id === state.selectedSiteId)
       ? state.selectedSiteId
       : summary.sites[0]?.id || null;
@@ -223,7 +223,7 @@ function renderGraphTab() {
       <button class="button small" type="button" data-graph-reset>Fit / reset</button>
     </div>
     <div class="graph-canvas" data-graph-canvas aria-label="Relationship graph for ${escapeHtml(state.site.site.name)}">
-      <svg class="graph-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><defs><marker id="arrowhead" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto"><path class="graph-arrow" d="M0,0 L5,2.5 L0,5 z"></path></marker></defs>${graph.edges.map(edge => {
+      <svg class="graph-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><defs><marker id="arrowhead" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 z" fill="#91a49e"></path></marker></defs>${graph.edges.map(edge => {
         const source = nodeMap.get(edge.source); const target = nodeMap.get(edge.target);
         return source && target ? `<line class="${edge.derived ? "derived" : ""}" x1="${source.x}" y1="${source.y}" x2="${target.x}" y2="${target.y}" marker-end="url(#arrowhead)" data-edge-source="${escapeHtml(edge.source)}" data-edge-target="${escapeHtml(edge.target)}"></line>` : "";
       }).join("")}</svg>
@@ -237,7 +237,7 @@ function renderAssistant() {
   const canAsk = state.session?.capabilities.canQueryAssistant;
   return `<section class="panel assistant-panel">
     <div class="panel-head"><div><span class="eyebrow">Observable assistance</span><h2>Ask about this site</h2><p>Answers cite returned records and expose tool/evidence steps—not hidden reasoning.</p></div>${canAsk ? statusPill("observed", apiMode === "mock" ? "Deterministic demo" : "Existing API") : statusPill("unavailable")}</div>
-    ${canAsk ? `<div class="assistant-layout"><div class="assistant-main"><form id="assistant-form"><input id="assistant-question" name="question" maxlength="500" required aria-label="Question about selected site" placeholder="Ask about findings, evidence, or source timing"><button class="button primary" type="submit">Ask</button></form><div class="question-chips"><button class="question-chip" type="button" data-question="What needs attention at Mondego C1?">What needs attention?</button><button class="question-chip" type="button" data-question="What evidence supports the co-location finding?">Show supporting evidence</button><button class="question-chip" type="button" data-question="Are the environmental and health observations contemporaneous?">Are the source periods aligned?</button></div>${state.assistant ? `<div class="assistant-answer"><span class="eyebrow">Grounded response</span><p>${escapeHtml(state.assistant.answer)}</p></div>` : ""}</div><div class="trace-list"><span class="eyebrow">Execution trace</span>${state.assistant ? `<ol>${(state.assistant.trace || []).map(step => `<li><strong>${escapeHtml(step.label || step.tool || step.kind)}</strong><br>${escapeHtml(step.kind || "TOOL")} · ${escapeHtml(step.status || "completed")}</li>`).join("")}</ol><p class="station-meta">${escapeHtml(state.assistant.grounding?.notCovered || state.assistant.grounding?.not_covered || "Grounding checks are limited.")}</p>` : `<p style="margin-top:10px;color:var(--ink-3)">Run a suggested question to see evidence retrieval and grounding steps.</p>`}</div></div>` : emptyState("Assistant unavailable", "This persona cannot query scoped evidence, or the optional live assistant endpoint is unavailable.")}
+    ${canAsk ? `<div class="assistant-layout"><div class="assistant-main"><form id="assistant-form"><input id="assistant-question" name="question" maxlength="500" required aria-label="Question about selected site" placeholder="Ask about findings, evidence, or source timing"><button class="button primary" type="submit">Ask</button></form><div class="question-chips"><button class="question-chip" type="button" data-question="What needs attention at ${escapeHtml(state.site?.site.shortName || "this site")}?">What needs attention?</button><button class="question-chip" type="button" data-question="What evidence supports the co-location finding?">Show supporting evidence</button><button class="question-chip" type="button" data-question="Are the environmental and health observations contemporaneous?">Are the source periods aligned?</button></div>${state.assistant ? `<div class="assistant-answer"><span class="eyebrow">Grounded response</span><p>${escapeHtml(state.assistant.answer)}</p></div>` : ""}</div><div class="trace-list"><span class="eyebrow">Execution trace</span>${state.assistant ? `<ol>${(state.assistant.trace || []).map(step => `<li><strong>${escapeHtml(step.label || step.tool || step.kind)}</strong><br>${escapeHtml(step.kind || "TOOL")} · ${escapeHtml(step.status || "completed")}</li>`).join("")}</ol><p class="station-meta">${escapeHtml(state.assistant.grounding?.notCovered || state.assistant.grounding?.not_covered || "Grounding checks are limited.")}</p>` : `<p style="margin-top:10px;color:var(--ink-3)">Run a suggested question to see evidence retrieval and grounding steps.</p>`}</div></div>` : emptyState("Assistant unavailable", "This persona cannot query scoped evidence, or the optional live assistant endpoint is unavailable.")}
   </section>`;
 }
 
@@ -417,7 +417,7 @@ function closeDrawer() { document.querySelector("#drawer-root").innerHTML = ""; 
 
 function showAbout() {
   const targetMode = apiMode === "mock" ? "live" : "mock";
-  const href = targetMode === "live" ? `${location.pathname}?mode=live` : location.pathname;
+  const href = `${location.pathname}?mode=${targetMode}`;
   openDrawer(`<p>This compact evidence workspace uses warm neutral surfaces, a muted water accent, and operational tables so station context stays primary.</p><div class="notice"><strong>Prototype boundaries.</strong> Role policy, durable run history, retry management, graph retrieval, and reports are functional mock-backed proposals—not capabilities discovered in the current backend.</div><h3 style="margin-top:24px">Connection mode</h3><p>The mock service is the complete demo. Live mode connects only features implemented by the existing gateway and shows missing capabilities as unavailable.</p><a class="button" href="${escapeHtml(href)}">Open ${escapeHtml(targetMode)} mode</a>`, "About this dashboard", "Design and data boundary");
 }
 
@@ -510,11 +510,4 @@ personaSelector.addEventListener("change", () => { changeRole(personaSelector.va
 themeSelector.addEventListener("change", () => { applyTheme(themeSelector.value, { persist: true }); toast(`${themeSelector.selectedOptions[0].text.replace(" · Default", "")} theme selected`); });
 window.addEventListener("beforeunload", clearPoll);
 
-const savedTheme = localStorage.getItem("oah-theme");
-const initialTheme = embeddedThemeConfig.themes.some(theme => theme.id === savedTheme)
-  ? savedTheme
-  : embeddedThemeConfig.defaultTheme;
-setState({ themeConfig: embeddedThemeConfig, theme: initialTheme });
-applyTheme(initialTheme);
-document.querySelector("#initial-theme-tokens")?.remove();
 bootstrap();

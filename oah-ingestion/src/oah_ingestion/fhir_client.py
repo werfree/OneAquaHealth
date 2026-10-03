@@ -110,7 +110,26 @@ def upload_bundle(bundle: dict, *, timeout: int = 60) -> Tuple[int, int]:
 MAX_PAGES = int(os.getenv("FHIR_MAX_PAGES", "6"))
 
 
-def search(resource_type: str, params: Dict[str, str], *, timeout: int = 30, paginate: bool = True) -> List[dict]:
+def max_search_results() -> int:
+    """Upper bound on resources one `search()` collects across all pages."""
+    return int(os.getenv("FHIR_MAX_SEARCH_RESULTS", "5000"))
+
+
+def _next_link(bundle: dict) -> Optional[str]:
+    for link in bundle.get("link", []):
+        if link.get("relation") == "next" and link.get("url"):
+            return link["url"]
+    return None
+
+
+def search(
+    resource_type: str,
+    params: Dict[str, str],
+    *,
+    timeout: int = 30,
+    paginate: bool = True,
+    max_results: Optional[int] = None,
+) -> List[dict]:
     """Run a FHIR search and return every matching resource.
 
     `params` are FHIR search parameters, e.g.
@@ -120,27 +139,36 @@ def search(resource_type: str, params: Dict[str, str], *, timeout: int = 30, pag
     you ask for -- so a single-page read silently truncates. That is a bad
     failure anywhere and a dangerous one here: with an ascending date sort the
     rows dropped are the most recent, so "the latest reading" came back days
-    stale and every severity derived from it was wrong. Follow `Bundle.link`
-    rel=next until the result set is exhausted.
+    stale and every severity derived from it was wrong.
+
+    Follow `Bundle.link` rel=next until the result set is exhausted, a repeated
+    page URL is seen, `max_results` (default `FHIR_MAX_SEARCH_RESULTS`) is
+    reached, or `MAX_PAGES` pages have been read. `paginate=False` reads only
+    the first page.
     """
 
+    limit = max_search_results() if max_results is None else max_results
     query = urllib.parse.urlencode({k: v for k, v in params.items() if v is not None})
-    url = f"{base_url()}/{resource_type}?{query}"
+    url: Optional[str] = f"{base_url()}/{resource_type}?{query}"
     resources: List[dict] = []
+    seen_urls = set()
 
-    for page in range(MAX_PAGES):
+    for _ in range(MAX_PAGES):
+        if not url or url in seen_urls or len(resources) >= limit:
+            break
+        seen_urls.add(url)
         logger.debug("FHIR GET %s", url)
         bundle = _request("GET", url, timeout=timeout)
-        resources.extend(e["resource"] for e in bundle.get("entry", []) if "resource" in e)
+        resources.extend(entry["resource"] for entry in bundle.get("entry", []) if "resource" in entry)
         if not paginate:
             break
-        nxt = next((l.get("url") for l in bundle.get("link", []) if l.get("relation") == "next"), None)
-        if not nxt:
-            break
-        url = nxt
+        url = _next_link(bundle)
     else:
         logger.warning("Stopped after %d pages for %s; result may be incomplete", MAX_PAGES, resource_type)
 
+    if len(resources) >= limit:
+        logger.warning("FHIR search for %s stopped at %d resources (FHIR_MAX_SEARCH_RESULTS)", resource_type, limit)
+        return resources[:limit]
     return resources
 
 

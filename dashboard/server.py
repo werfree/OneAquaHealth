@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import Body, FastAPI, Header, HTTPException, Query, Response
+from fastapi import Path as PathParam
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
@@ -26,39 +27,27 @@ PROJECT_ROOT = ROOT.parent
 load_dotenv(PROJECT_ROOT / ".env")
 
 FIXTURE_PATH = ROOT / "data" / "fixtures.json"
-THEME_PATH = ROOT / "data" / "themes.json"
 STATIC_ROOT = ROOT / "static"
 LIVE_BASE_URL = os.getenv("OAH_LIVE_BASE_URL", "http://127.0.0.1:8000").rstrip("/")
-
-with THEME_PATH.open(encoding="utf-8") as theme_file:
-    THEME_CONFIG = json.load(theme_file)
-
-THEMES = THEME_CONFIG["themes"]
+# Overview queries and the assistant's multi-round loop need a longer timeout.
+LIVE_TIMEOUT_SECONDS = float(os.getenv("OAH_LIVE_TIMEOUT_SECONDS", "90"))
+MODES = {"mock", "live"}
+DEFAULT_MODE = os.getenv("DASHBOARD_DEFAULT_MODE", "mock").strip().lower()
+if DEFAULT_MODE not in MODES:
+    DEFAULT_MODE = "mock"
+SITE_ID_PATTERN = r"^[A-Za-z0-9.\-]{1,64}$"
+THEMES = [
+    {"id": "aqua", "label": "Aqua", "themeColor": "#f4f3ee", "colorScheme": "light"},
+    {"id": "aqua-dark", "label": "Aqua dark", "themeColor": "#0f1d1a", "colorScheme": "dark"},
+    {"id": "white", "label": "White", "themeColor": "#ffffff", "colorScheme": "light"},
+    {"id": "dark", "label": "Dark", "themeColor": "#121416", "colorScheme": "dark"},
+]
 THEME_IDS = {theme["id"] for theme in THEMES}
-THEMES_BY_ID = {theme["id"]: theme for theme in THEMES}
-FALLBACK_THEME = THEME_CONFIG["fallbackTheme"]
-
-
-def validate_theme_config() -> None:
-    if not THEMES or len(THEME_IDS) != len(THEMES) or FALLBACK_THEME not in THEME_IDS:
-        raise ValueError("Theme catalogue requires unique themes and a valid fallbackTheme")
-    expected_tokens = set(THEMES[0]["tokens"])
-    for theme in THEMES:
-        if theme["colorScheme"] not in {"light", "dark"}:
-            raise ValueError(f"Invalid color scheme for theme {theme['id']}")
-        if set(theme["tokens"]) != expected_tokens:
-            raise ValueError(f"Theme {theme['id']} does not define the complete token map")
-        for name, value in theme["tokens"].items():
-            if not re.fullmatch(r"[a-z][a-z0-9-]*", name) or not isinstance(value, str) or re.search(r"[;{}<>]", value):
-                raise ValueError(f"Unsafe theme token {name!r} in {theme['id']}")
-
-
-validate_theme_config()
 
 
 def resolve_default_theme(value: str | None = None) -> str:
-    candidate = (value or os.getenv("DASHBOARD_DEFAULT_THEME", FALLBACK_THEME)).strip().lower()
-    return candidate if candidate in THEME_IDS else FALLBACK_THEME
+    candidate = (value or os.getenv("DASHBOARD_DEFAULT_THEME", "aqua")).strip().lower()
+    return candidate if candidate in THEME_IDS else "aqua"
 
 
 DEFAULT_THEME = resolve_default_theme()
@@ -317,7 +306,7 @@ def health() -> dict[str, str]:
 
 @app.get("/api/config")
 def get_config() -> dict[str, Any]:
-    return {"defaultTheme": DEFAULT_THEME, "themes": THEMES}
+    return {"defaultTheme": DEFAULT_THEME, "themes": THEMES, "defaultMode": DEFAULT_MODE}
 
 
 @app.get("/api/mock/session")
@@ -620,7 +609,7 @@ def proxy_live(path: str, method: str = "GET", payload: dict[str, Any] | None = 
     body = json.dumps(payload).encode("utf-8") if payload is not None else None
     request = urllib.request.Request(f"{LIVE_BASE_URL}{path}", data=body, method=method, headers={"Content-Type": "application/json"})
     try:
-        with urllib.request.urlopen(request, timeout=8) as result:
+        with urllib.request.urlopen(request, timeout=LIVE_TIMEOUT_SECONDS) as result:
             return JSONResponse(json.loads(result.read().decode("utf-8")), status_code=result.status)
     except urllib.error.HTTPError as exc:
         try:
@@ -643,8 +632,13 @@ def live_info() -> JSONResponse:
 
 
 @app.get("/api/live/overview")
-def live_overview() -> JSONResponse:
-    return proxy_live("/api/overview")
+def live_overview(refresh: bool = False) -> JSONResponse:
+    return proxy_live("/api/overview?refresh=true" if refresh else "/api/overview")
+
+
+@app.get("/api/live/sites/{site_id}")
+def live_site(site_id: str = PathParam(pattern=SITE_ID_PATTERN)) -> JSONResponse:
+    return proxy_live(f"/api/sites/{site_id}")
 
 
 @app.post("/api/live/ingest-demo/{key}")
@@ -656,22 +650,17 @@ def live_ingest_demo(key: str) -> JSONResponse:
 
 @app.post("/api/live/ask")
 def live_ask(payload: dict[str, Any] = Body(...)) -> JSONResponse:
-    return proxy_live("/api/ask", method="POST", payload={"question": str(payload.get("question", ""))})
+    forwarded: dict[str, Any] = {"question": str(payload.get("question", ""))}
+    site_id = payload.get("siteId")
+    if isinstance(site_id, str) and re.fullmatch(SITE_ID_PATTERN, site_id):
+        forwarded["site_id"] = site_id
+    return proxy_live("/api/ask", method="POST", payload=forwarded)
 
 
 @app.get("/", include_in_schema=False)
 def index() -> HTMLResponse:
     page = (STATIC_ROOT / "index.html").read_text(encoding="utf-8")
-    theme = THEMES_BY_ID[DEFAULT_THEME]
-    tokens = " ".join(f"--{name}: {value};" for name, value in theme["tokens"].items())
-    config_json = json.dumps({"defaultTheme": DEFAULT_THEME, "themes": THEMES}, separators=(",", ":")).replace("<", "\\u003c")
-    return HTMLResponse(
-        page.replace("__DEFAULT_THEME__", DEFAULT_THEME)
-        .replace("__DEFAULT_THEME_COLOR__", html.escape(theme["themeColor"], quote=True))
-        .replace("__DEFAULT_COLOR_SCHEME__", theme["colorScheme"])
-        .replace("__DEFAULT_THEME_TOKENS__", tokens)
-        .replace("__THEME_CONFIG__", config_json)
-    )
+    return HTMLResponse(page.replace("__DEFAULT_THEME__", DEFAULT_THEME).replace("__DEFAULT_MODE__", DEFAULT_MODE))
 
 
 app.mount("/static", StaticFiles(directory=STATIC_ROOT), name="static")
