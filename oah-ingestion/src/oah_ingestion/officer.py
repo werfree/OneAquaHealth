@@ -235,6 +235,20 @@ def wards(days: int = Query(28, ge=7, le=365)):
             latest_by_indicator[row["indicator"]] = row
         exceedances = [e for e in (evaluate(r["indicator"], r["value"], r["unit"]) for r in latest_by_indicator.values()) if e]
 
+        # Every latest reading, not only the failing ones: a severity matrix
+        # needs to distinguish "within criteria" from "never measured", and an
+        # exceedance-only list cannot.
+        readings = {}
+        for indicator, row in latest_by_indicator.items():
+            exceedance = evaluate(indicator, row["value"], row["unit"])
+            readings[indicator] = {
+                "value": row["value"],
+                "unit": row["unit"],
+                "date": row["date"],
+                "factor": (exceedance or {}).get("exceedance_factor"),
+                "exceeds": exceedance is not None,
+            }
+
         add = sorted([r for r in health if r["indicator"] == "acute_diarrhoeal_disease"], key=lambda r: r["when"] or "")
         rise = None
         if len(add) >= 2 and add[-2]["value"]:
@@ -251,6 +265,7 @@ def wards(days: int = Query(28, ge=7, le=365)):
                 "latitude": site.latitude,
                 "longitude": site.longitude,
                 "water_readings": len(water),
+                "readings": readings,
                 "exceedances": exceedances,
                 "severity": severity_of(exceedances),
                 "cohort": latest_add["cohort"] if latest_add else None,
