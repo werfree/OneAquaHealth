@@ -57,11 +57,12 @@ The app starts the MQTT sensor listener, consumes citizen surveys from the durab
 
 Relevant environment variables:
 
-- App: `APP_HOST`, `APP_PORT`, `LOG_LEVEL`
+- App: `APP_HOST`, `APP_PORT`, `LOG_LEVEL`, `INGESTION_WORKERS_ENABLED` (default `true`; `false` skips MQTT/RabbitMQ workers while keeping the HTTP API available)
 - MQTT: `MQTT_HOST`, `MQTT_PORT`, `MQTT_TOPIC`, `MQTT_USERNAME`, `MQTT_PASSWORD`, `MQTT_TLS`, `MQTT_CLIENT_ID`, `MQTT_DEMO_CLIENT_ID`, `MQTT_SESSION_EXPIRY_SECONDS`
 - RabbitMQ: `RABBITMQ_HOST`, `RABBITMQ_PORT`, `RABBITMQ_VHOST`, `RABBITMQ_USER`, `RABBITMQ_PASSWORD`, `FHIR_RETRY_DELAY_SECONDS`
-- FHIR: `FHIR_BASE_URL`, `FHIR_UPLOAD_ENABLED`, `OAH_DATASET_TAG`
-- Evidence dashboard: `DASHBOARD_PORT`, `OAH_LIVE_BASE_URL`, `DASHBOARD_DEFAULT_THEME`
+- FHIR: `FHIR_BASE_URL`, `FHIR_UPLOAD_ENABLED`, `OAH_DATASET_TAG`, `FHIR_MAX_SEARCH_RESULTS` (default `5000`, maximum resources collected across search pages)
+- Briefings: `OVERVIEW_CACHE_SECONDS` (default `60`, per-process overview cache lifetime), `OAH_BRIEFING_WORKERS` (default `8`, concurrent site briefings)
+- Evidence dashboard: `DASHBOARD_PORT`, `OAH_LIVE_BASE_URL`, `DASHBOARD_DEFAULT_THEME`, `OAH_LIVE_TIMEOUT_SECONDS` (default `90`, gateway proxy timeout), `DASHBOARD_DEFAULT_MODE` (`mock` by default, or `live`; an explicit `?mode=` overrides it)
 
 ## Send demo data
 
@@ -95,8 +96,9 @@ Open `http://localhost:8000/` (or the configured `APP_PORT`) for the live dashbo
 - `POST /ingest/public-health/csv` — ingest one or more grouped `PUBLIC_HEALTH` events from long-form CSV (`Content-Type: text/csv`). Each row is one `risk_score` or `chemical_summary`; rows with the same `event_id` form one event. See `demo/sample_public_health.csv` for the required columns and format.
 - `GET /ingest/public-health/csv/template` — download an empty CSV template for preparing a public-health batch.
 - `POST /api/ingest-demo/{key}` — run a bundled JSON sample through validation, screening, mapping, and upload. Sample keys: `iot`, `iot-oslo`, `iot-benevento`, `survey`, `survey-ghent`, `survey-toulouse`, `health`, `health-mondego`.
-- `GET /api/overview` — summarize data on the FHIR server; requires the agent package and a reachable server.
-- `POST /api/ask` — ask the assistant about FHIR data; requires `OPENAI_API_KEY`, the agent package, and a reachable server.
+- `GET /api/overview` — summarize data on the FHIR server; requires the agent package and a reachable server. Cached for 60 seconds by default; `GET /api/overview?refresh=true` recomputes it.
+- `GET /api/sites/{site_id}` — station briefing with summarized environmental and health observations; returns 404 when the tagged dataset has no observations for that site. Site ids match `[A-Za-z0-9.-]{1,64}`.
+- `POST /api/ask` — ask the assistant about FHIR data with `{question, site_id?}`; the optional `site_id` adds station context. Requires `OPENAI_API_KEY`, the agent package, and a reachable server.
 
 Upload the included health CSV from PowerShell with:
 
@@ -124,7 +126,7 @@ oah-dashboard
 
 It opens at `http://localhost:8090` by default. It starts in mock mode with sample observations, findings, and run/report workflows. Its state survives browser refresh and resets when the dashboard server restarts. The dashboard theme selector remembers an explicit choice in that browser.
 
-To connect it to the live ingestion gateway, set `OAH_LIVE_BASE_URL` in `.env` and open `http://localhost:8090/?mode=live`. Live mode uses an allow-listed same-origin proxy for existing gateway routes, including health/info, overview, supplied-sample execution, and the optional assistant. Other dashboard features such as durable run history, authorization, evidence graph, and report storage remain mock-backed; see [dashboard/API-MAPPING.md](dashboard/API-MAPPING.md) for the boundary.
+To connect it to the live ingestion gateway, set `OAH_LIVE_BASE_URL` in `.env` and open `http://localhost:8090/?mode=live`, or set `DASHBOARD_DEFAULT_MODE=live`. Live overview and station views only read FHIR, so already-uploaded data appears without ingestion. Set `INGESTION_WORKERS_ENABLED=false` for a gateway without MQTT/RabbitMQ listeners; the HTTP ingestion routes remain available. The allow-listed same-origin proxy also supports health/info, explicit supplied-sample execution, and the optional assistant. Live mode returns 501 for features without gateway endpoints, including durable run history/retry, evidence details, the relationships graph, and reports; these work in mock mode. See [dashboard/API-MAPPING.md](dashboard/API-MAPPING.md) for the boundary.
 
 ## Tests and examples
 
@@ -135,7 +137,8 @@ python -m unittest discover -s oah-ingestion/tests -v
 python -m unittest discover -s oah-pydantic-models/tests -v
 python -m unittest discover -s oah-agent/tests -v
 python -m pytest
+node dashboard/tests/test_api.mjs
 python oah-pydantic-models/examples/build_examples.py
 ```
 
-The root `pyproject.toml` configures pytest for `dashboard/tests`; install the dashboard extras first if pytest and httpx are not already installed.
+The root `pyproject.toml` configures pytest for `dashboard/tests`; install the dashboard extras first if pytest and httpx are not already installed. The JavaScript adapter checks use Node's built-in test runner with stubbed fetch responses and require no npm dependencies.

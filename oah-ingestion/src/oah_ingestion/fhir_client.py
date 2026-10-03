@@ -90,18 +90,44 @@ def upload_bundle(bundle: dict, *, timeout: int = 60) -> Tuple[int, int]:
     return succeeded, failed
 
 
-def search(resource_type: str, params: Dict[str, str], *, timeout: int = 60) -> List[dict]:
-    """Run a FHIR search and return the matching resources (first page).
+def max_search_results() -> int:
+    """Upper bound on resources one `search()` collects across all pages."""
+    return int(os.getenv("FHIR_MAX_SEARCH_RESULTS", "5000"))
+
+
+def _next_link(bundle: dict) -> Optional[str]:
+    for link in bundle.get("link", []):
+        if link.get("relation") == "next" and link.get("url"):
+            return link["url"]
+    return None
+
+
+def search(
+    resource_type: str, params: Dict[str, str], *, timeout: int = 60, max_results: Optional[int] = None
+) -> List[dict]:
+    """Run a FHIR search and return the matching resources from every page.
 
     `params` are FHIR search parameters, e.g.
     `{"_profile": OBSERVATION_WITH_COMPONENT_PROFILE, "code": "nitrate"}`.
+    Reading only the first searchset page silently truncated sites with more
+    readings than `_count`. Follow `next` until it ends or `max_results`
+    (default `FHIR_MAX_SEARCH_RESULTS`) is reached; stop repeated page URLs.
     """
 
+    limit = max_search_results() if max_results is None else max_results
     query = urllib.parse.urlencode({k: v for k, v in params.items() if v is not None})
-    url = f"{base_url()}/{resource_type}?{query}"
-    logger.debug("FHIR GET %s", url)
-    bundle = _request("GET", url, timeout=timeout)
-    return [entry["resource"] for entry in bundle.get("entry", []) if "resource" in entry]
+    url: Optional[str] = f"{base_url()}/{resource_type}?{query}"
+    resources: List[dict] = []
+    seen_urls = set()
+    while url and url not in seen_urls and len(resources) < limit:
+        seen_urls.add(url)
+        logger.debug("FHIR GET %s", url)
+        bundle = _request("GET", url, timeout=timeout)
+        resources.extend(entry["resource"] for entry in bundle.get("entry", []) if "resource" in entry)
+        url = _next_link(bundle)
+    if url and len(resources) >= limit:
+        logger.warning("FHIR search for %s stopped at %d resources (FHIR_MAX_SEARCH_RESULTS)", resource_type, limit)
+    return resources[:limit]
 
 
 def search_url(resource_type: str, params: Dict[str, str]) -> str:

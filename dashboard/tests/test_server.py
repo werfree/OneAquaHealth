@@ -1,7 +1,11 @@
 import json
+from unittest import mock
 
 import pytest
 from fastapi import HTTPException
+from fastapi.testclient import TestClient
+
+from dashboard import server
 
 from dashboard.server import (
     FIXTURE,
@@ -43,6 +47,9 @@ def test_theme_configuration_is_validated_and_applied_before_paint():
     page = index().body.decode("utf-8")
     assert f'data-theme="{config["defaultTheme"]}"' in page
     assert "__DEFAULT_THEME__" not in page
+    assert config["defaultMode"] in {"mock", "live"}
+    assert f'data-default-mode="{config["defaultMode"]}"' in page
+    assert "__DEFAULT_MODE__" not in page
 
 
 def test_viewer_scope_and_evidence_permission_are_enforced():
@@ -96,3 +103,49 @@ def test_graph_is_scoped_and_direct_unauthorized_requests_fail():
     with pytest.raises(HTTPException) as viewer_graph:
         get_graph("site-c1-mondego", "viewer")
     assert viewer_graph.value.status_code == 403
+
+
+class FakeResponse:
+    status = 200
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        return False
+
+    def read(self):
+        return b'{"ok": true}'
+
+
+def test_live_site_proxies_with_configured_timeout():
+    with mock.patch.object(server, "LIVE_TIMEOUT_SECONDS", 42.0), mock.patch("urllib.request.urlopen", return_value=FakeResponse()) as request:
+        result = server.live_site("site-c1-mondego")
+    assert json.loads(result.body) == {"ok": True}
+    assert request.call_args.args[0].full_url == f"{server.LIVE_BASE_URL}/api/sites/site-c1-mondego"
+    assert request.call_args.kwargs["timeout"] == 42.0
+
+
+def test_live_ask_only_forwards_valid_site_context():
+    for site_id in ("site-c1-mondego", "../../etc/passwd", "bad id!", "x" * 65, None):
+        with mock.patch("urllib.request.urlopen", return_value=FakeResponse()) as request:
+            server.live_ask({"question": "What needs attention?", "siteId": site_id})
+        payload = json.loads(request.call_args.args[0].data)
+        assert payload["question"] == "What needs attention?"
+        if site_id == "site-c1-mondego":
+            assert payload["site_id"] == site_id
+        else:
+            assert "site_id" not in payload
+
+
+def test_live_site_rejects_invalid_path_ids():
+    with TestClient(server.app) as client, mock.patch.object(server, "proxy_live") as proxy:
+        assert client.get("/api/live/sites/bad%20id!").status_code == 422
+        assert client.get("/api/live/sites/" + "x" * 65).status_code == 422
+    proxy.assert_not_called()
+
+
+def test_live_overview_forwards_refresh():
+    with mock.patch.object(server, "proxy_live") as proxy:
+        server.live_overview(refresh=True)
+        proxy.assert_called_once_with("/api/overview?refresh=true")

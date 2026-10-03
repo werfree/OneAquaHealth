@@ -6,6 +6,7 @@ import copy
 import html
 import json
 import os
+import re
 import threading
 import time
 import urllib.error
@@ -15,6 +16,7 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import Body, FastAPI, Header, HTTPException, Query, Response
+from fastapi import Path as PathParam
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
@@ -27,6 +29,13 @@ load_dotenv(PROJECT_ROOT / ".env")
 FIXTURE_PATH = ROOT / "data" / "fixtures.json"
 STATIC_ROOT = ROOT / "static"
 LIVE_BASE_URL = os.getenv("OAH_LIVE_BASE_URL", "http://127.0.0.1:8000").rstrip("/")
+# Overview queries and the assistant's multi-round loop need a longer timeout.
+LIVE_TIMEOUT_SECONDS = float(os.getenv("OAH_LIVE_TIMEOUT_SECONDS", "90"))
+MODES = {"mock", "live"}
+DEFAULT_MODE = os.getenv("DASHBOARD_DEFAULT_MODE", "mock").strip().lower()
+if DEFAULT_MODE not in MODES:
+    DEFAULT_MODE = "mock"
+SITE_ID_PATTERN = r"^[A-Za-z0-9.\-]{1,64}$"
 THEMES = [
     {"id": "aqua", "label": "Aqua", "themeColor": "#f4f3ee", "colorScheme": "light"},
     {"id": "aqua-dark", "label": "Aqua dark", "themeColor": "#0f1d1a", "colorScheme": "dark"},
@@ -297,7 +306,7 @@ def health() -> dict[str, str]:
 
 @app.get("/api/config")
 def get_config() -> dict[str, Any]:
-    return {"defaultTheme": DEFAULT_THEME, "themes": THEMES}
+    return {"defaultTheme": DEFAULT_THEME, "themes": THEMES, "defaultMode": DEFAULT_MODE}
 
 
 @app.get("/api/mock/session")
@@ -600,7 +609,7 @@ def proxy_live(path: str, method: str = "GET", payload: dict[str, Any] | None = 
     body = json.dumps(payload).encode("utf-8") if payload is not None else None
     request = urllib.request.Request(f"{LIVE_BASE_URL}{path}", data=body, method=method, headers={"Content-Type": "application/json"})
     try:
-        with urllib.request.urlopen(request, timeout=8) as result:
+        with urllib.request.urlopen(request, timeout=LIVE_TIMEOUT_SECONDS) as result:
             return JSONResponse(json.loads(result.read().decode("utf-8")), status_code=result.status)
     except urllib.error.HTTPError as exc:
         try:
@@ -623,8 +632,13 @@ def live_info() -> JSONResponse:
 
 
 @app.get("/api/live/overview")
-def live_overview() -> JSONResponse:
-    return proxy_live("/api/overview")
+def live_overview(refresh: bool = False) -> JSONResponse:
+    return proxy_live("/api/overview?refresh=true" if refresh else "/api/overview")
+
+
+@app.get("/api/live/sites/{site_id}")
+def live_site(site_id: str = PathParam(pattern=SITE_ID_PATTERN)) -> JSONResponse:
+    return proxy_live(f"/api/sites/{site_id}")
 
 
 @app.post("/api/live/ingest-demo/{key}")
@@ -636,13 +650,17 @@ def live_ingest_demo(key: str) -> JSONResponse:
 
 @app.post("/api/live/ask")
 def live_ask(payload: dict[str, Any] = Body(...)) -> JSONResponse:
-    return proxy_live("/api/ask", method="POST", payload={"question": str(payload.get("question", ""))})
+    forwarded: dict[str, Any] = {"question": str(payload.get("question", ""))}
+    site_id = payload.get("siteId")
+    if isinstance(site_id, str) and re.fullmatch(SITE_ID_PATTERN, site_id):
+        forwarded["site_id"] = site_id
+    return proxy_live("/api/ask", method="POST", payload=forwarded)
 
 
 @app.get("/", include_in_schema=False)
 def index() -> HTMLResponse:
     page = (STATIC_ROOT / "index.html").read_text(encoding="utf-8")
-    return HTMLResponse(page.replace("__DEFAULT_THEME__", DEFAULT_THEME))
+    return HTMLResponse(page.replace("__DEFAULT_THEME__", DEFAULT_THEME).replace("__DEFAULT_MODE__", DEFAULT_MODE))
 
 
 app.mount("/static", StaticFiles(directory=STATIC_ROOT), name="static")
