@@ -1,16 +1,20 @@
 """Single-process gateway for IoT, citizen survey, and public health events."""
 
+import csv
+import io
 import logging
 import os
 import threading
 from contextlib import asynccontextmanager
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, Response
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import Response
 
+from .csv_ingestion import CSV_TEMPLATE_COLUMNS, CsvIngestionError, parse_public_health_csv
 from .envelope import IngestionEnvelope, envelope_as_message
-from .pipeline import print_generic_event, process
-from .mqtt_worker import create_mqtt_client, mqtt_broker_address
+from .pipeline import process
+from .mqtt_worker import create_mqtt_client, mqtt_broker_address, mqtt_connect_options
 from .rabbitmq_worker import consume_citizen_surveys
 from .web import router as web_router
 
@@ -24,7 +28,7 @@ async def lifespan(app: FastAPI):
     client = create_mqtt_client()
     host, port = mqtt_broker_address()
     logger.info("Starting MQTT sensor listener for %s:%d", host, port)
-    client.connect_async(host, port, keepalive=60)
+    client.connect_async(host, port, keepalive=60, **mqtt_connect_options())
     client.loop_start()
     app.state.mqtt_client = client
     stop_event = threading.Event()
@@ -62,6 +66,16 @@ def ingest_event(envelope: IngestionEnvelope):
     """Validate, normalize and print one event for the downstream handoff."""
     message = envelope_as_message(envelope)
     result = process(envelope, message)
+    if result.get("fhir") == "UPLOAD_FAILED":
+        raise HTTPException(
+            status_code=502,
+            detail={"status": "FHIR_UPLOAD_FAILED", "event_id": str(message["event_id"]), **result},
+        )
+    if result.get("fhir") == "CONVERSION_FAILED":
+        raise HTTPException(
+            status_code=500,
+            detail={"status": "FHIR_CONVERSION_FAILED", "event_id": str(message["event_id"]), **result},
+        )
     logger.info("Normalized API event %s (%s)", message["event_id"], message["source_type"])
     return {
         "status": "ACCEPTED",
@@ -69,6 +83,54 @@ def ingest_event(envelope: IngestionEnvelope):
         "source_type": message["source_type"],
         **result,
     }
+
+
+@app.post("/ingest/public-health/csv", status_code=202)
+async def ingest_public_health_csv(request: Request):
+    """Validate a long-form CSV batch and ingest each grouped health event."""
+    content_type = request.headers.get("content-type", "").split(";", 1)[0].strip().lower()
+    if content_type not in {"text/csv", "application/csv"}:
+        raise HTTPException(status_code=415, detail="Content-Type must be text/csv")
+
+    try:
+        text = (await request.body()).decode("utf-8-sig")
+        envelopes = parse_public_health_csv(text)
+    except UnicodeDecodeError as exc:
+        raise HTTPException(status_code=400, detail="CSV must be UTF-8 encoded") from exc
+    except CsvIngestionError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    results = []
+    for envelope in envelopes:
+        message = envelope_as_message(envelope)
+        result = process(envelope, message)
+        results.append({"event_id": message["event_id"], "source_type": "PUBLIC_HEALTH", **result})
+
+    failed = [item for item in results if item.get("fhir") in {"UPLOAD_FAILED", "CONVERSION_FAILED"}]
+    if any(item.get("fhir") == "CONVERSION_FAILED" for item in failed):
+        status_code = 500
+    elif failed:
+        status_code = 502
+    else:
+        status_code = 202
+    if status_code != 202:
+        raise HTTPException(
+            status_code=status_code,
+            detail={"status": "CSV_BATCH_PARTIALLY_FAILED", "events": results},
+        )
+    return {"status": "ACCEPTED", "event_count": len(results), "events": results}
+
+
+@app.get("/ingest/public-health/csv/template", include_in_schema=True)
+def download_public_health_csv_template():
+    """Download an empty CSV template for public-health batch ingestion."""
+    output = io.StringIO(newline="")
+    csv.writer(output, lineterminator="\r\n").writerow(CSV_TEMPLATE_COLUMNS)
+    return Response(
+        content=output.getvalue(),
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": 'attachment; filename="public-health-template.csv"'},
+    )
 
 
 def main():

@@ -26,12 +26,14 @@ def _parameters(pika):
 
 
 def consume_citizen_surveys(stop_event: threading.Event, emit_event) -> None:
-    """Consume survey envelopes, normalize and emit them, then acknowledge."""
+    """Consume surveys and acknowledge only after the downstream pipeline succeeds."""
     try:
         import pika
     except ImportError as exc:
         logger.error("RabbitMQ support requires pika: %s", exc)
         return
+
+    retry_delay = max(0.1, float(os.getenv("FHIR_RETRY_DELAY_SECONDS", "5")))
 
     while not stop_event.is_set():
         connection = None
@@ -45,11 +47,29 @@ def consume_citizen_surveys(stop_event: threading.Event, emit_event) -> None:
                 del properties
                 try:
                     envelope = CitizenSurveyEnvelope.model_validate_json(body)
-                    emit_event(envelope, envelope_as_message(envelope))
-                    ch.basic_ack(delivery_tag=method.delivery_tag)
                 except Exception:
                     logger.exception("Rejected invalid citizen survey message")
                     ch.basic_nack(delivery_tag=method.delivery_tag, requeue=False)
+                    return
+
+                try:
+                    result = emit_event(envelope, envelope_as_message(envelope))
+                except Exception:
+                    logger.exception("Could not process citizen survey; retrying after %.1f seconds", retry_delay)
+                    connection.sleep(retry_delay)
+                    ch.basic_nack(delivery_tag=method.delivery_tag, requeue=True)
+                    return
+
+                status = result.get("fhir") if isinstance(result, dict) else None
+                if status == "UPLOAD_FAILED":
+                    logger.error("FHIR upload failed for citizen survey; retrying after %.1f seconds", retry_delay)
+                    connection.sleep(retry_delay)
+                    ch.basic_nack(delivery_tag=method.delivery_tag, requeue=True)
+                elif status == "CONVERSION_FAILED":
+                    logger.error("FHIR conversion failed for citizen survey; rejecting message")
+                    ch.basic_nack(delivery_tag=method.delivery_tag, requeue=False)
+                else:
+                    ch.basic_ack(delivery_tag=method.delivery_tag)
 
             channel.basic_consume(
                 queue=CITIZEN_SURVEY_QUEUE,
