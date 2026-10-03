@@ -20,7 +20,7 @@ import logging
 from datetime import datetime, timezone
 from typing import Callable, List, Optional
 
-from .thresholds import evaluate_many
+from .thresholds import evaluate_many, severity_of
 
 logger = logging.getLogger("OAH_Alerts")
 
@@ -72,13 +72,12 @@ def assess(envelope) -> Optional[dict]:
     sits -- never invented beyond what the data states.
     """
 
-    exceedances = evaluate_many(_readings_from(envelope))
+    exceedances = evaluate_many(_readings_from(envelope), city=envelope.city)
     risks = _elevated_risks(envelope)
     if not exceedances and not risks:
         return None
 
-    worst_factor = max((e.get("exceedance_factor") or 1 for e in exceedances), default=1)
-    if any(r["interpretation"] == "HIGH" for r in risks) or worst_factor >= 2:
+    if any(r["interpretation"] == "HIGH" for r in risks) or severity_of(exceedances, city=envelope.city) == "HIGH":
         severity = "HIGH"
     else:
         severity = "MODERATE"

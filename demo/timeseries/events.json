@@ -1,0 +1,6894 @@
+[
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-wazirabad",
+  "timestamp": "2026-09-05T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-WZB-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 845.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 2.43
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 7.4
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 8.46
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 0.64
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-ito",
+  "timestamp": "2026-09-05T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-ITO-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 19208.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 9.77
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 1.89
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 8.05
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 4.66
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-okhla",
+  "timestamp": "2026-09-05T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-OKH-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 30194.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 15.94
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 1.35
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.78
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 6.23
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "kanpur",
+  "site_id": "gan-jajmau",
+  "timestamp": "2026-09-05T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-KNP-JAJ-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 7326.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 5.51
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 4.38
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.55
+    },
+    {
+     "parameter": "chromium_total",
+     "unit": "mg/L",
+     "value": 0.1
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "varanasi",
+  "site_id": "gan-assi",
+  "timestamp": "2026-09-05T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-VNS-ASI-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 2912.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 3.38
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 5.92
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 8.6
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "mumbai",
+  "site_id": "mit-dharavi",
+  "timestamp": "2026-09-05T09:00:00Z",
+  "payload": {
+   "device_id": "MPCB-MUM-MIT-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 14912.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 9.14
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 2.49
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 6.99
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 2.89
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-wazirabad",
+  "timestamp": "2026-09-06T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-WZB-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 997.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 2.28
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 6.95
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 6.77
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 0.67
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-ito",
+  "timestamp": "2026-09-06T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-ITO-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 22507.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 10.29
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 2.14
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 8.02
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 3.88
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-okhla",
+  "timestamp": "2026-09-06T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-OKH-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 31813.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 14.57
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 1.47
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.43
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 5.62
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "kanpur",
+  "site_id": "gan-jajmau",
+  "timestamp": "2026-09-06T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-KNP-JAJ-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 6874.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 6.51
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 4.7
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.75
+    },
+    {
+     "parameter": "chromium_total",
+     "unit": "mg/L",
+     "value": 0.11
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "varanasi",
+  "site_id": "gan-assi",
+  "timestamp": "2026-09-06T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-VNS-ASI-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 3249.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 3.36
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 6.15
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 8.44
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "mumbai",
+  "site_id": "mit-dharavi",
+  "timestamp": "2026-09-06T09:00:00Z",
+  "payload": {
+   "device_id": "MPCB-MUM-MIT-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 16599.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 9.22
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 2.8
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 6.83
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 2.93
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-wazirabad",
+  "timestamp": "2026-09-07T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-WZB-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 891.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 2.44
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 7.24
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 8.01
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 0.56
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-ito",
+  "timestamp": "2026-09-07T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-ITO-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 20860.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 10.4
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 1.97
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.13
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 4.46
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-okhla",
+  "timestamp": "2026-09-07T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-OKH-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 31358.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 15.37
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 1.26
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.25
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 5.5
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "kanpur",
+  "site_id": "gan-jajmau",
+  "timestamp": "2026-09-07T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-KNP-JAJ-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 7241.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 6.1
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 4.23
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.38
+    },
+    {
+     "parameter": "chromium_total",
+     "unit": "mg/L",
+     "value": 0.11
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "varanasi",
+  "site_id": "gan-assi",
+  "timestamp": "2026-09-07T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-VNS-ASI-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 3159.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 3.51
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 5.73
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.98
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "mumbai",
+  "site_id": "mit-dharavi",
+  "timestamp": "2026-09-07T09:00:00Z",
+  "payload": {
+   "device_id": "MPCB-MUM-MIT-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 15107.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 8.39
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 2.33
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 6.7
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 3.28
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-wazirabad",
+  "timestamp": "2026-09-08T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-WZB-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 862.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 2.36
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 6.08
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.78
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 0.66
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-ito",
+  "timestamp": "2026-09-08T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-ITO-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 23391.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 9.97
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 2.14
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.41
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 3.73
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-okhla",
+  "timestamp": "2026-09-08T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-OKH-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 35768.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 13.4
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 1.26
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.72
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 5.26
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "kanpur",
+  "site_id": "gan-jajmau",
+  "timestamp": "2026-09-08T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-KNP-JAJ-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 7019.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 6.83
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 4.18
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.82
+    },
+    {
+     "parameter": "chromium_total",
+     "unit": "mg/L",
+     "value": 0.1
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "varanasi",
+  "site_id": "gan-assi",
+  "timestamp": "2026-09-08T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-VNS-ASI-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 3038.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 3.63
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 6.04
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.44
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "mumbai",
+  "site_id": "mit-dharavi",
+  "timestamp": "2026-09-08T09:00:00Z",
+  "payload": {
+   "device_id": "MPCB-MUM-MIT-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 16937.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 9.52
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 2.77
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.58
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 3.07
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-wazirabad",
+  "timestamp": "2026-09-09T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-WZB-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 802.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 2.34
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 7.35
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.73
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 0.66
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-ito",
+  "timestamp": "2026-09-09T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-ITO-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 19907.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 12.07
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 2.2
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 8.03
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 4.49
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-okhla",
+  "timestamp": "2026-09-09T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-OKH-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 33278.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 15.94
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 1.48
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.74
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 6.32
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "kanpur",
+  "site_id": "gan-jajmau",
+  "timestamp": "2026-09-09T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-KNP-JAJ-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 7257.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 6.79
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 4.5
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.27
+    },
+    {
+     "parameter": "chromium_total",
+     "unit": "mg/L",
+     "value": 0.12
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "varanasi",
+  "site_id": "gan-assi",
+  "timestamp": "2026-09-09T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-VNS-ASI-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 3389.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 3.19
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 5.37
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.96
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "mumbai",
+  "site_id": "mit-dharavi",
+  "timestamp": "2026-09-09T09:00:00Z",
+  "payload": {
+   "device_id": "MPCB-MUM-MIT-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 17572.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 8.89
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 2.69
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 8.03
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 3.14
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-wazirabad",
+  "timestamp": "2026-09-10T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-WZB-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 941.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 2.12
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 6.93
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 6.92
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 0.65
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-ito",
+  "timestamp": "2026-09-10T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-ITO-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 22910.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 10.88
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 1.98
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.51
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 4.65
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-okhla",
+  "timestamp": "2026-09-10T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-OKH-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 32307.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 15.32
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 1.55
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 6.48
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 5.94
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "kanpur",
+  "site_id": "gan-jajmau",
+  "timestamp": "2026-09-10T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-KNP-JAJ-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 7316.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 5.74
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 4.22
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.83
+    },
+    {
+     "parameter": "chromium_total",
+     "unit": "mg/L",
+     "value": 0.11
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "varanasi",
+  "site_id": "gan-assi",
+  "timestamp": "2026-09-10T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-VNS-ASI-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 3330.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 3.79
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 6.55
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 8.92
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "mumbai",
+  "site_id": "mit-dharavi",
+  "timestamp": "2026-09-10T09:00:00Z",
+  "payload": {
+   "device_id": "MPCB-MUM-MIT-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 17615.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 10.03
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 2.38
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 6.4
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 2.81
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-wazirabad",
+  "timestamp": "2026-09-11T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-WZB-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 885.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 2.19
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 7.61
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 8.23
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 0.54
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "PUBLIC_HEALTH",
+  "city": "delhi",
+  "site_id": "yam-wazirabad",
+  "timestamp": "2026-09-11T17:00:00Z",
+  "payload": {
+   "health_agency": "IDSP_District_Surveillance_Unit",
+   "evaluation_period": "week ending 2026-09-11",
+   "cohort": {
+    "group_id": "ward-delhi-north-riverside",
+    "age_range": "0-99",
+    "gender": "all"
+   },
+   "disease_surveillance": [
+    {
+     "condition": "acute_diarrhoeal_disease",
+     "cases": 63,
+     "population_at_risk": 265000,
+     "baseline_rate_per_100k": 24.0
+    },
+    {
+     "condition": "enteric_fever",
+     "cases": 18,
+     "population_at_risk": 265000,
+     "baseline_rate_per_100k": 6.5
+    },
+    {
+     "condition": "viral_hepatitis_a_e",
+     "cases": 8,
+     "population_at_risk": 265000,
+     "baseline_rate_per_100k": 3.2
+    },
+    {
+     "condition": "cholera",
+     "cases": 1,
+     "population_at_risk": 265000,
+     "baseline_rate_per_100k": 0.4
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-ito",
+  "timestamp": "2026-09-11T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-ITO-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 19184.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 11.74
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 2.01
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 6.53
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 4.12
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "PUBLIC_HEALTH",
+  "city": "delhi",
+  "site_id": "yam-ito",
+  "timestamp": "2026-09-11T17:00:00Z",
+  "payload": {
+   "health_agency": "IDSP_District_Surveillance_Unit",
+   "evaluation_period": "week ending 2026-09-11",
+   "cohort": {
+    "group_id": "ward-delhi-central-riverside",
+    "age_range": "0-99",
+    "gender": "all"
+   },
+   "disease_surveillance": [
+    {
+     "condition": "acute_diarrhoeal_disease",
+     "cases": 108,
+     "population_at_risk": 412000,
+     "baseline_rate_per_100k": 26.66
+    },
+    {
+     "condition": "enteric_fever",
+     "cases": 28,
+     "population_at_risk": 412000,
+     "baseline_rate_per_100k": 7.22
+    },
+    {
+     "condition": "viral_hepatitis_a_e",
+     "cases": 14,
+     "population_at_risk": 412000,
+     "baseline_rate_per_100k": 3.55
+    },
+    {
+     "condition": "cholera",
+     "cases": 2,
+     "population_at_risk": 412000,
+     "baseline_rate_per_100k": 0.44
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-okhla",
+  "timestamp": "2026-09-11T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-OKH-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 36910.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 16.22
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 1.29
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.95
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 5.33
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "PUBLIC_HEALTH",
+  "city": "delhi",
+  "site_id": "yam-okhla",
+  "timestamp": "2026-09-11T17:00:00Z",
+  "payload": {
+   "health_agency": "IDSP_District_Surveillance_Unit",
+   "evaluation_period": "week ending 2026-09-11",
+   "cohort": {
+    "group_id": "ward-delhi-se-riverside",
+    "age_range": "0-99",
+    "gender": "all"
+   },
+   "disease_surveillance": [
+    {
+     "condition": "acute_diarrhoeal_disease",
+     "cases": 106,
+     "population_at_risk": 388000,
+     "baseline_rate_per_100k": 27.26
+    },
+    {
+     "condition": "enteric_fever",
+     "cases": 31,
+     "population_at_risk": 388000,
+     "baseline_rate_per_100k": 7.38
+    },
+    {
+     "condition": "viral_hepatitis_a_e",
+     "cases": 14,
+     "population_at_risk": 388000,
+     "baseline_rate_per_100k": 3.64
+    },
+    {
+     "condition": "cholera",
+     "cases": 2,
+     "population_at_risk": 388000,
+     "baseline_rate_per_100k": 0.45
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "kanpur",
+  "site_id": "gan-jajmau",
+  "timestamp": "2026-09-11T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-KNP-JAJ-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 8434.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 6.29
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 3.94
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 8.28
+    },
+    {
+     "parameter": "chromium_total",
+     "unit": "mg/L",
+     "value": 0.11
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "PUBLIC_HEALTH",
+  "city": "kanpur",
+  "site_id": "gan-jajmau",
+  "timestamp": "2026-09-11T17:00:00Z",
+  "payload": {
+   "health_agency": "IDSP_District_Surveillance_Unit",
+   "evaluation_period": "week ending 2026-09-11",
+   "cohort": {
+    "group_id": "ward-kanpur-jajmau",
+    "age_range": "0-99",
+    "gender": "all"
+   },
+   "disease_surveillance": [
+    {
+     "condition": "acute_diarrhoeal_disease",
+     "cases": 52,
+     "population_at_risk": 198000,
+     "baseline_rate_per_100k": 25.42
+    },
+    {
+     "condition": "enteric_fever",
+     "cases": 12,
+     "population_at_risk": 198000,
+     "baseline_rate_per_100k": 6.89
+    },
+    {
+     "condition": "viral_hepatitis_a_e",
+     "cases": 7,
+     "population_at_risk": 198000,
+     "baseline_rate_per_100k": 3.39
+    },
+    {
+     "condition": "cholera",
+     "cases": 1,
+     "population_at_risk": 198000,
+     "baseline_rate_per_100k": 0.42
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "varanasi",
+  "site_id": "gan-assi",
+  "timestamp": "2026-09-11T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-VNS-ASI-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 2777.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 3.74
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 5.67
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 8.57
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "PUBLIC_HEALTH",
+  "city": "varanasi",
+  "site_id": "gan-assi",
+  "timestamp": "2026-09-11T17:00:00Z",
+  "payload": {
+   "health_agency": "IDSP_District_Surveillance_Unit",
+   "evaluation_period": "week ending 2026-09-11",
+   "cohort": {
+    "group_id": "ward-varanasi-ghats",
+    "age_range": "0-99",
+    "gender": "all"
+   },
+   "disease_surveillance": [
+    {
+     "condition": "acute_diarrhoeal_disease",
+     "cases": 35,
+     "population_at_risk": 142000,
+     "baseline_rate_per_100k": 24.27
+    },
+    {
+     "condition": "enteric_fever",
+     "cases": 10,
+     "population_at_risk": 142000,
+     "baseline_rate_per_100k": 6.57
+    },
+    {
+     "condition": "viral_hepatitis_a_e",
+     "cases": 5,
+     "population_at_risk": 142000,
+     "baseline_rate_per_100k": 3.24
+    },
+    {
+     "condition": "cholera",
+     "cases": 1,
+     "population_at_risk": 142000,
+     "baseline_rate_per_100k": 0.4
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "mumbai",
+  "site_id": "mit-dharavi",
+  "timestamp": "2026-09-11T09:00:00Z",
+  "payload": {
+   "device_id": "MPCB-MUM-MIT-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 15946.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 9.2
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 2.31
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.16
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 3.27
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "PUBLIC_HEALTH",
+  "city": "mumbai",
+  "site_id": "mit-dharavi",
+  "timestamp": "2026-09-11T17:00:00Z",
+  "payload": {
+   "health_agency": "IDSP_District_Surveillance_Unit",
+   "evaluation_period": "week ending 2026-09-11",
+   "cohort": {
+    "group_id": "ward-mumbai-dharavi",
+    "age_range": "0-99",
+    "gender": "all"
+   },
+   "disease_surveillance": [
+    {
+     "condition": "acute_diarrhoeal_disease",
+     "cases": 172,
+     "population_at_risk": 630000,
+     "baseline_rate_per_100k": 26.32
+    },
+    {
+     "condition": "enteric_fever",
+     "cases": 48,
+     "population_at_risk": 630000,
+     "baseline_rate_per_100k": 7.13
+    },
+    {
+     "condition": "viral_hepatitis_a_e",
+     "cases": 22,
+     "population_at_risk": 630000,
+     "baseline_rate_per_100k": 3.51
+    },
+    {
+     "condition": "cholera",
+     "cases": 3,
+     "population_at_risk": 630000,
+     "baseline_rate_per_100k": 0.44
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-wazirabad",
+  "timestamp": "2026-09-12T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-WZB-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 801.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 2.25
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 7.02
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.17
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 0.63
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-ito",
+  "timestamp": "2026-09-12T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-ITO-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 18992.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 11.54
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 2.27
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.7
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 4.34
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-okhla",
+  "timestamp": "2026-09-12T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-OKH-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 33740.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 14.4
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 1.3
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.54
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 5.15
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "kanpur",
+  "site_id": "gan-jajmau",
+  "timestamp": "2026-09-12T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-KNP-JAJ-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 8430.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 6.54
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 4.13
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.05
+    },
+    {
+     "parameter": "chromium_total",
+     "unit": "mg/L",
+     "value": 0.11
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "varanasi",
+  "site_id": "gan-assi",
+  "timestamp": "2026-09-12T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-VNS-ASI-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 3015.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 3.56
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 6.08
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.87
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "mumbai",
+  "site_id": "mit-dharavi",
+  "timestamp": "2026-09-12T09:00:00Z",
+  "payload": {
+   "device_id": "MPCB-MUM-MIT-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 14880.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 8.72
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 2.53
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.39
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 3.09
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-wazirabad",
+  "timestamp": "2026-09-13T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-WZB-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 915.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 2.24
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 7.6
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.74
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 0.62
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-ito",
+  "timestamp": "2026-09-13T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-ITO-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 20889.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 12.17
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 2.24
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.7
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 4.65
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-okhla",
+  "timestamp": "2026-09-13T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-OKH-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 37255.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 14.3
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 1.53
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.92
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 5.19
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "kanpur",
+  "site_id": "gan-jajmau",
+  "timestamp": "2026-09-13T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-KNP-JAJ-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 7975.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 5.46
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 4.6
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.8
+    },
+    {
+     "parameter": "chromium_total",
+     "unit": "mg/L",
+     "value": 0.12
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "varanasi",
+  "site_id": "gan-assi",
+  "timestamp": "2026-09-13T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-VNS-ASI-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 3131.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 3.77
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 5.87
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 8.42
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "mumbai",
+  "site_id": "mit-dharavi",
+  "timestamp": "2026-09-13T09:00:00Z",
+  "payload": {
+   "device_id": "MPCB-MUM-MIT-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 15849.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 9.19
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 2.76
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.86
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 3.4
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-wazirabad",
+  "timestamp": "2026-09-14T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-WZB-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 850.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 2.14
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 6.43
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.88
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 0.6
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-ito",
+  "timestamp": "2026-09-14T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-ITO-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 20428.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 11.27
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 1.88
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 8.27
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 4.43
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-okhla",
+  "timestamp": "2026-09-14T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-OKH-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 37082.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 13.52
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 1.54
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.04
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 6.32
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "kanpur",
+  "site_id": "gan-jajmau",
+  "timestamp": "2026-09-14T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-KNP-JAJ-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 8689.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 5.78
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 4.67
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.27
+    },
+    {
+     "parameter": "chromium_total",
+     "unit": "mg/L",
+     "value": 0.12
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "varanasi",
+  "site_id": "gan-assi",
+  "timestamp": "2026-09-14T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-VNS-ASI-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 3205.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 3.4
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 5.71
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.45
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "mumbai",
+  "site_id": "mit-dharavi",
+  "timestamp": "2026-09-14T09:00:00Z",
+  "payload": {
+   "device_id": "MPCB-MUM-MIT-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 17014.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 10.05
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 2.66
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 6.49
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 3.06
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-wazirabad",
+  "timestamp": "2026-09-15T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-WZB-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 806.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 2.18
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 6.99
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 8.19
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 0.59
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-ito",
+  "timestamp": "2026-09-15T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-ITO-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 19533.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 10.96
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 2.0
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 6.94
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 4.51
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-okhla",
+  "timestamp": "2026-09-15T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-OKH-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 31638.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 14.7
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 1.54
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.28
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 6.41
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "kanpur",
+  "site_id": "gan-jajmau",
+  "timestamp": "2026-09-15T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-KNP-JAJ-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 8036.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 6.06
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 4.4
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 8.68
+    },
+    {
+     "parameter": "chromium_total",
+     "unit": "mg/L",
+     "value": 0.1
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "varanasi",
+  "site_id": "gan-assi",
+  "timestamp": "2026-09-15T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-VNS-ASI-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 3137.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 3.16
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 5.87
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.96
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "mumbai",
+  "site_id": "mit-dharavi",
+  "timestamp": "2026-09-15T09:00:00Z",
+  "payload": {
+   "device_id": "MPCB-MUM-MIT-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 17245.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 9.38
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 2.59
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 6.53
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 3.09
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-wazirabad",
+  "timestamp": "2026-09-16T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-WZB-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 990.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 2.47
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 6.15
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.14
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 0.53
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-ito",
+  "timestamp": "2026-09-16T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-ITO-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 18657.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 10.97
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 2.01
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 6.69
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 4.69
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-okhla",
+  "timestamp": "2026-09-16T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-OKH-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 35217.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 15.99
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 1.28
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.45
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 5.91
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "kanpur",
+  "site_id": "gan-jajmau",
+  "timestamp": "2026-09-16T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-KNP-JAJ-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 8261.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 5.87
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 4.85
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 8.82
+    },
+    {
+     "parameter": "chromium_total",
+     "unit": "mg/L",
+     "value": 0.12
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "varanasi",
+  "site_id": "gan-assi",
+  "timestamp": "2026-09-16T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-VNS-ASI-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 3224.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 3.76
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 6.0
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.97
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "mumbai",
+  "site_id": "mit-dharavi",
+  "timestamp": "2026-09-16T09:00:00Z",
+  "payload": {
+   "device_id": "MPCB-MUM-MIT-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 16335.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 8.29
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 2.84
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.4
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 3.43
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-wazirabad",
+  "timestamp": "2026-09-17T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-WZB-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 990.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 2.29
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 7.47
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.56
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 0.62
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-ito",
+  "timestamp": "2026-09-17T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-ITO-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 18750.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 10.84
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 1.88
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.02
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 4.57
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-okhla",
+  "timestamp": "2026-09-17T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-OKH-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 32944.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 12.84
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 1.42
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.2
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 6.45
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "kanpur",
+  "site_id": "gan-jajmau",
+  "timestamp": "2026-09-17T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-KNP-JAJ-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 6962.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 5.74
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 4.82
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.57
+    },
+    {
+     "parameter": "chromium_total",
+     "unit": "mg/L",
+     "value": 0.11
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "varanasi",
+  "site_id": "gan-assi",
+  "timestamp": "2026-09-17T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-VNS-ASI-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 2917.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 3.72
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 5.56
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 8.33
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "mumbai",
+  "site_id": "mit-dharavi",
+  "timestamp": "2026-09-17T09:00:00Z",
+  "payload": {
+   "device_id": "MPCB-MUM-MIT-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 15972.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 8.85
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 2.57
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.03
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 3.45
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-wazirabad",
+  "timestamp": "2026-09-18T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-WZB-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 820.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 2.49
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 7.06
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 8.18
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 0.54
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "PUBLIC_HEALTH",
+  "city": "delhi",
+  "site_id": "yam-wazirabad",
+  "timestamp": "2026-09-18T17:00:00Z",
+  "payload": {
+   "health_agency": "IDSP_District_Surveillance_Unit",
+   "evaluation_period": "week ending 2026-09-18",
+   "cohort": {
+    "group_id": "ward-delhi-north-riverside",
+    "age_range": "0-99",
+    "gender": "all"
+   },
+   "disease_surveillance": [
+    {
+     "condition": "acute_diarrhoeal_disease",
+     "cases": 64,
+     "population_at_risk": 265000,
+     "baseline_rate_per_100k": 24.0
+    },
+    {
+     "condition": "enteric_fever",
+     "cases": 16,
+     "population_at_risk": 265000,
+     "baseline_rate_per_100k": 6.5
+    },
+    {
+     "condition": "viral_hepatitis_a_e",
+     "cases": 8,
+     "population_at_risk": 265000,
+     "baseline_rate_per_100k": 3.2
+    },
+    {
+     "condition": "cholera",
+     "cases": 1,
+     "population_at_risk": 265000,
+     "baseline_rate_per_100k": 0.4
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-ito",
+  "timestamp": "2026-09-18T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-ITO-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 20851.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 12.01
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 1.93
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.21
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 4.1
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "PUBLIC_HEALTH",
+  "city": "delhi",
+  "site_id": "yam-ito",
+  "timestamp": "2026-09-18T17:00:00Z",
+  "payload": {
+   "health_agency": "IDSP_District_Surveillance_Unit",
+   "evaluation_period": "week ending 2026-09-18",
+   "cohort": {
+    "group_id": "ward-delhi-central-riverside",
+    "age_range": "0-99",
+    "gender": "all"
+   },
+   "disease_surveillance": [
+    {
+     "condition": "acute_diarrhoeal_disease",
+     "cases": 121,
+     "population_at_risk": 412000,
+     "baseline_rate_per_100k": 26.66
+    },
+    {
+     "condition": "enteric_fever",
+     "cases": 27,
+     "population_at_risk": 412000,
+     "baseline_rate_per_100k": 7.22
+    },
+    {
+     "condition": "viral_hepatitis_a_e",
+     "cases": 14,
+     "population_at_risk": 412000,
+     "baseline_rate_per_100k": 3.55
+    },
+    {
+     "condition": "cholera",
+     "cases": 2,
+     "population_at_risk": 412000,
+     "baseline_rate_per_100k": 0.44
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-okhla",
+  "timestamp": "2026-09-18T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-OKH-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 35925.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 12.79
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 1.39
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.72
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 5.99
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "PUBLIC_HEALTH",
+  "city": "delhi",
+  "site_id": "yam-okhla",
+  "timestamp": "2026-09-18T17:00:00Z",
+  "payload": {
+   "health_agency": "IDSP_District_Surveillance_Unit",
+   "evaluation_period": "week ending 2026-09-18",
+   "cohort": {
+    "group_id": "ward-delhi-se-riverside",
+    "age_range": "0-99",
+    "gender": "all"
+   },
+   "disease_surveillance": [
+    {
+     "condition": "acute_diarrhoeal_disease",
+     "cases": 112,
+     "population_at_risk": 388000,
+     "baseline_rate_per_100k": 27.26
+    },
+    {
+     "condition": "enteric_fever",
+     "cases": 31,
+     "population_at_risk": 388000,
+     "baseline_rate_per_100k": 7.38
+    },
+    {
+     "condition": "viral_hepatitis_a_e",
+     "cases": 15,
+     "population_at_risk": 388000,
+     "baseline_rate_per_100k": 3.64
+    },
+    {
+     "condition": "cholera",
+     "cases": 2,
+     "population_at_risk": 388000,
+     "baseline_rate_per_100k": 0.45
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "kanpur",
+  "site_id": "gan-jajmau",
+  "timestamp": "2026-09-18T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-KNP-JAJ-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 7886.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 6.23
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 4.2
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 8.25
+    },
+    {
+     "parameter": "chromium_total",
+     "unit": "mg/L",
+     "value": 0.11
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "PUBLIC_HEALTH",
+  "city": "kanpur",
+  "site_id": "gan-jajmau",
+  "timestamp": "2026-09-18T17:00:00Z",
+  "payload": {
+   "health_agency": "IDSP_District_Surveillance_Unit",
+   "evaluation_period": "week ending 2026-09-18",
+   "cohort": {
+    "group_id": "ward-kanpur-jajmau",
+    "age_range": "0-99",
+    "gender": "all"
+   },
+   "disease_surveillance": [
+    {
+     "condition": "acute_diarrhoeal_disease",
+     "cases": 54,
+     "population_at_risk": 198000,
+     "baseline_rate_per_100k": 25.42
+    },
+    {
+     "condition": "enteric_fever",
+     "cases": 13,
+     "population_at_risk": 198000,
+     "baseline_rate_per_100k": 6.89
+    },
+    {
+     "condition": "viral_hepatitis_a_e",
+     "cases": 7,
+     "population_at_risk": 198000,
+     "baseline_rate_per_100k": 3.39
+    },
+    {
+     "condition": "cholera",
+     "cases": 1,
+     "population_at_risk": 198000,
+     "baseline_rate_per_100k": 0.42
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "varanasi",
+  "site_id": "gan-assi",
+  "timestamp": "2026-09-18T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-VNS-ASI-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 3323.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 3.31
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 5.56
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 8.01
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "PUBLIC_HEALTH",
+  "city": "varanasi",
+  "site_id": "gan-assi",
+  "timestamp": "2026-09-18T17:00:00Z",
+  "payload": {
+   "health_agency": "IDSP_District_Surveillance_Unit",
+   "evaluation_period": "week ending 2026-09-18",
+   "cohort": {
+    "group_id": "ward-varanasi-ghats",
+    "age_range": "0-99",
+    "gender": "all"
+   },
+   "disease_surveillance": [
+    {
+     "condition": "acute_diarrhoeal_disease",
+     "cases": 31,
+     "population_at_risk": 142000,
+     "baseline_rate_per_100k": 24.27
+    },
+    {
+     "condition": "enteric_fever",
+     "cases": 9,
+     "population_at_risk": 142000,
+     "baseline_rate_per_100k": 6.57
+    },
+    {
+     "condition": "viral_hepatitis_a_e",
+     "cases": 4,
+     "population_at_risk": 142000,
+     "baseline_rate_per_100k": 3.24
+    },
+    {
+     "condition": "cholera",
+     "cases": 1,
+     "population_at_risk": 142000,
+     "baseline_rate_per_100k": 0.4
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "mumbai",
+  "site_id": "mit-dharavi",
+  "timestamp": "2026-09-18T09:00:00Z",
+  "payload": {
+   "device_id": "MPCB-MUM-MIT-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 17015.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 10.17
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 2.83
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 6.45
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 3.21
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "PUBLIC_HEALTH",
+  "city": "mumbai",
+  "site_id": "mit-dharavi",
+  "timestamp": "2026-09-18T17:00:00Z",
+  "payload": {
+   "health_agency": "IDSP_District_Surveillance_Unit",
+   "evaluation_period": "week ending 2026-09-18",
+   "cohort": {
+    "group_id": "ward-mumbai-dharavi",
+    "age_range": "0-99",
+    "gender": "all"
+   },
+   "disease_surveillance": [
+    {
+     "condition": "acute_diarrhoeal_disease",
+     "cases": 175,
+     "population_at_risk": 630000,
+     "baseline_rate_per_100k": 26.32
+    },
+    {
+     "condition": "enteric_fever",
+     "cases": 45,
+     "population_at_risk": 630000,
+     "baseline_rate_per_100k": 7.13
+    },
+    {
+     "condition": "viral_hepatitis_a_e",
+     "cases": 23,
+     "population_at_risk": 630000,
+     "baseline_rate_per_100k": 3.51
+    },
+    {
+     "condition": "cholera",
+     "cases": 3,
+     "population_at_risk": 630000,
+     "baseline_rate_per_100k": 0.44
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-wazirabad",
+  "timestamp": "2026-09-19T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-WZB-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 859.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 2.38
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 7.11
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 6.88
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 0.67
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-ito",
+  "timestamp": "2026-09-19T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-ITO-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 21816.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 9.74
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 2.2
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.3
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 4.23
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-okhla",
+  "timestamp": "2026-09-19T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-OKH-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 34965.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 14.68
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 1.29
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.29
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 6.26
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "kanpur",
+  "site_id": "gan-jajmau",
+  "timestamp": "2026-09-19T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-KNP-JAJ-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 7716.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 6.19
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 4.74
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.8
+    },
+    {
+     "parameter": "chromium_total",
+     "unit": "mg/L",
+     "value": 0.11
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "varanasi",
+  "site_id": "gan-assi",
+  "timestamp": "2026-09-19T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-VNS-ASI-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 3397.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 3.02
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 6.49
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.18
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "mumbai",
+  "site_id": "mit-dharavi",
+  "timestamp": "2026-09-19T09:00:00Z",
+  "payload": {
+   "device_id": "MPCB-MUM-MIT-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 17559.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 8.5
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 2.62
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.7
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 2.81
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-wazirabad",
+  "timestamp": "2026-09-20T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-WZB-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 799.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 2.67
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 7.35
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 8.02
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 0.56
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-ito",
+  "timestamp": "2026-09-20T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-ITO-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 20247.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 10.38
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 2.02
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 8.24
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 3.7
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-okhla",
+  "timestamp": "2026-09-20T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-OKH-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 32822.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 14.38
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 1.3
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 6.43
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 5.61
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "kanpur",
+  "site_id": "gan-jajmau",
+  "timestamp": "2026-09-20T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-KNP-JAJ-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 8420.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 6.38
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 4.12
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 8.2
+    },
+    {
+     "parameter": "chromium_total",
+     "unit": "mg/L",
+     "value": 0.12
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "varanasi",
+  "site_id": "gan-assi",
+  "timestamp": "2026-09-20T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-VNS-ASI-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 3057.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 3.06
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 5.93
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 8.7
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "mumbai",
+  "site_id": "mit-dharavi",
+  "timestamp": "2026-09-20T09:00:00Z",
+  "payload": {
+   "device_id": "MPCB-MUM-MIT-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 16642.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 9.24
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 2.66
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 6.76
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 2.99
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-wazirabad",
+  "timestamp": "2026-09-21T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-WZB-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 900.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 2.54
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 6.31
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.73
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 0.58
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-ito",
+  "timestamp": "2026-09-21T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-ITO-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 21400.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 11.84
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 1.86
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.57
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 3.98
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-okhla",
+  "timestamp": "2026-09-21T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-OKH-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 32127.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 12.81
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 1.56
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 8.11
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 5.62
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "kanpur",
+  "site_id": "gan-jajmau",
+  "timestamp": "2026-09-21T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-KNP-JAJ-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 7671.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 5.85
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 4.88
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.76
+    },
+    {
+     "parameter": "chromium_total",
+     "unit": "mg/L",
+     "value": 0.11
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "varanasi",
+  "site_id": "gan-assi",
+  "timestamp": "2026-09-21T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-VNS-ASI-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 3044.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 3.31
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 6.3
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.92
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "mumbai",
+  "site_id": "mit-dharavi",
+  "timestamp": "2026-09-21T09:00:00Z",
+  "payload": {
+   "device_id": "MPCB-MUM-MIT-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 14464.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 8.76
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 2.38
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 6.95
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 3.14
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-wazirabad",
+  "timestamp": "2026-09-22T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-WZB-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 857.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 2.65
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 7.07
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.28
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 0.59
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-ito",
+  "timestamp": "2026-09-22T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-ITO-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 19323.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 10.99
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 1.97
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.94
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 4.1
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-okhla",
+  "timestamp": "2026-09-22T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-OKH-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 31227.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 13.74
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 1.34
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.3
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 6.32
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "kanpur",
+  "site_id": "gan-jajmau",
+  "timestamp": "2026-09-22T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-KNP-JAJ-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 8413.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 6.9
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 4.82
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 8.08
+    },
+    {
+     "parameter": "chromium_total",
+     "unit": "mg/L",
+     "value": 0.11
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "varanasi",
+  "site_id": "gan-assi",
+  "timestamp": "2026-09-22T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-VNS-ASI-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 2794.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 3.12
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 5.93
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.83
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "mumbai",
+  "site_id": "mit-dharavi",
+  "timestamp": "2026-09-22T09:00:00Z",
+  "payload": {
+   "device_id": "MPCB-MUM-MIT-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 17785.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 10.06
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 2.66
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.24
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 3.11
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-wazirabad",
+  "timestamp": "2026-09-23T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-WZB-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 936.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 2.44
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 6.82
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 8.02
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 0.65
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-ito",
+  "timestamp": "2026-09-23T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-ITO-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 84802.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 32.96
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 0.9
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.37
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 11.13
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-okhla",
+  "timestamp": "2026-09-23T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-OKH-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 34401.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 16.2
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 1.45
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.72
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 5.29
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "kanpur",
+  "site_id": "gan-jajmau",
+  "timestamp": "2026-09-23T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-KNP-JAJ-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 7506.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 6.7
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 4.37
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.95
+    },
+    {
+     "parameter": "chromium_total",
+     "unit": "mg/L",
+     "value": 0.11
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "varanasi",
+  "site_id": "gan-assi",
+  "timestamp": "2026-09-23T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-VNS-ASI-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 2787.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 3.62
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 6.35
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 8.79
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "mumbai",
+  "site_id": "mit-dharavi",
+  "timestamp": "2026-09-23T09:00:00Z",
+  "payload": {
+   "device_id": "MPCB-MUM-MIT-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 14606.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 8.52
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 2.43
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 6.95
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 3.24
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-wazirabad",
+  "timestamp": "2026-09-24T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-WZB-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 804.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 2.14
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 7.38
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.04
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 0.55
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-ito",
+  "timestamp": "2026-09-24T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-ITO-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 73034.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 22.18
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 1.08
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.84
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 8.61
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-okhla",
+  "timestamp": "2026-09-24T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-OKH-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 32274.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 12.84
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 1.55
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.07
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 5.71
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "kanpur",
+  "site_id": "gan-jajmau",
+  "timestamp": "2026-09-24T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-KNP-JAJ-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 8024.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 6.94
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 4.37
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.7
+    },
+    {
+     "parameter": "chromium_total",
+     "unit": "mg/L",
+     "value": 0.11
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "varanasi",
+  "site_id": "gan-assi",
+  "timestamp": "2026-09-24T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-VNS-ASI-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 2879.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 3.29
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 5.73
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.59
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "mumbai",
+  "site_id": "mit-dharavi",
+  "timestamp": "2026-09-24T09:00:00Z",
+  "payload": {
+   "device_id": "MPCB-MUM-MIT-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 17083.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 9.55
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 2.71
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 6.37
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 2.96
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-wazirabad",
+  "timestamp": "2026-09-25T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-WZB-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 915.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 2.58
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 6.3
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 8.46
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 0.64
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "PUBLIC_HEALTH",
+  "city": "delhi",
+  "site_id": "yam-wazirabad",
+  "timestamp": "2026-09-25T17:00:00Z",
+  "payload": {
+   "health_agency": "IDSP_District_Surveillance_Unit",
+   "evaluation_period": "week ending 2026-09-25",
+   "cohort": {
+    "group_id": "ward-delhi-north-riverside",
+    "age_range": "0-99",
+    "gender": "all"
+   },
+   "disease_surveillance": [
+    {
+     "condition": "acute_diarrhoeal_disease",
+     "cases": 58,
+     "population_at_risk": 265000,
+     "baseline_rate_per_100k": 24.0
+    },
+    {
+     "condition": "enteric_fever",
+     "cases": 17,
+     "population_at_risk": 265000,
+     "baseline_rate_per_100k": 6.5
+    },
+    {
+     "condition": "viral_hepatitis_a_e",
+     "cases": 8,
+     "population_at_risk": 265000,
+     "baseline_rate_per_100k": 3.2
+    },
+    {
+     "condition": "cholera",
+     "cases": 1,
+     "population_at_risk": 265000,
+     "baseline_rate_per_100k": 0.4
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-ito",
+  "timestamp": "2026-09-25T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-ITO-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 60135.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 19.84
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 1.27
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.77
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 7.51
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "PUBLIC_HEALTH",
+  "city": "delhi",
+  "site_id": "yam-ito",
+  "timestamp": "2026-09-25T17:00:00Z",
+  "payload": {
+   "health_agency": "IDSP_District_Surveillance_Unit",
+   "evaluation_period": "week ending 2026-09-25",
+   "cohort": {
+    "group_id": "ward-delhi-central-riverside",
+    "age_range": "0-99",
+    "gender": "all"
+   },
+   "disease_surveillance": [
+    {
+     "condition": "acute_diarrhoeal_disease",
+     "cases": 119,
+     "population_at_risk": 412000,
+     "baseline_rate_per_100k": 26.66
+    },
+    {
+     "condition": "enteric_fever",
+     "cases": 31,
+     "population_at_risk": 412000,
+     "baseline_rate_per_100k": 7.22
+    },
+    {
+     "condition": "viral_hepatitis_a_e",
+     "cases": 14,
+     "population_at_risk": 412000,
+     "baseline_rate_per_100k": 3.55
+    },
+    {
+     "condition": "cholera",
+     "cases": 2,
+     "population_at_risk": 412000,
+     "baseline_rate_per_100k": 0.44
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-okhla",
+  "timestamp": "2026-09-25T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-OKH-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 33816.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 14.75
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 1.41
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.42
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 6.44
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "PUBLIC_HEALTH",
+  "city": "delhi",
+  "site_id": "yam-okhla",
+  "timestamp": "2026-09-25T17:00:00Z",
+  "payload": {
+   "health_agency": "IDSP_District_Surveillance_Unit",
+   "evaluation_period": "week ending 2026-09-25",
+   "cohort": {
+    "group_id": "ward-delhi-se-riverside",
+    "age_range": "0-99",
+    "gender": "all"
+   },
+   "disease_surveillance": [
+    {
+     "condition": "acute_diarrhoeal_disease",
+     "cases": 109,
+     "population_at_risk": 388000,
+     "baseline_rate_per_100k": 27.26
+    },
+    {
+     "condition": "enteric_fever",
+     "cases": 27,
+     "population_at_risk": 388000,
+     "baseline_rate_per_100k": 7.38
+    },
+    {
+     "condition": "viral_hepatitis_a_e",
+     "cases": 13,
+     "population_at_risk": 388000,
+     "baseline_rate_per_100k": 3.64
+    },
+    {
+     "condition": "cholera",
+     "cases": 2,
+     "population_at_risk": 388000,
+     "baseline_rate_per_100k": 0.45
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "kanpur",
+  "site_id": "gan-jajmau",
+  "timestamp": "2026-09-25T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-KNP-JAJ-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 7561.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 6.41
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 4.08
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 8.37
+    },
+    {
+     "parameter": "chromium_total",
+     "unit": "mg/L",
+     "value": 0.12
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "PUBLIC_HEALTH",
+  "city": "kanpur",
+  "site_id": "gan-jajmau",
+  "timestamp": "2026-09-25T17:00:00Z",
+  "payload": {
+   "health_agency": "IDSP_District_Surveillance_Unit",
+   "evaluation_period": "week ending 2026-09-25",
+   "cohort": {
+    "group_id": "ward-kanpur-jajmau",
+    "age_range": "0-99",
+    "gender": "all"
+   },
+   "disease_surveillance": [
+    {
+     "condition": "acute_diarrhoeal_disease",
+     "cases": 55,
+     "population_at_risk": 198000,
+     "baseline_rate_per_100k": 25.42
+    },
+    {
+     "condition": "enteric_fever",
+     "cases": 15,
+     "population_at_risk": 198000,
+     "baseline_rate_per_100k": 6.89
+    },
+    {
+     "condition": "viral_hepatitis_a_e",
+     "cases": 7,
+     "population_at_risk": 198000,
+     "baseline_rate_per_100k": 3.39
+    },
+    {
+     "condition": "cholera",
+     "cases": 1,
+     "population_at_risk": 198000,
+     "baseline_rate_per_100k": 0.42
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "varanasi",
+  "site_id": "gan-assi",
+  "timestamp": "2026-09-25T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-VNS-ASI-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 2811.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 3.41
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 5.85
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 8.01
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "PUBLIC_HEALTH",
+  "city": "varanasi",
+  "site_id": "gan-assi",
+  "timestamp": "2026-09-25T17:00:00Z",
+  "payload": {
+   "health_agency": "IDSP_District_Surveillance_Unit",
+   "evaluation_period": "week ending 2026-09-25",
+   "cohort": {
+    "group_id": "ward-varanasi-ghats",
+    "age_range": "0-99",
+    "gender": "all"
+   },
+   "disease_surveillance": [
+    {
+     "condition": "acute_diarrhoeal_disease",
+     "cases": 32,
+     "population_at_risk": 142000,
+     "baseline_rate_per_100k": 24.27
+    },
+    {
+     "condition": "enteric_fever",
+     "cases": 9,
+     "population_at_risk": 142000,
+     "baseline_rate_per_100k": 6.57
+    },
+    {
+     "condition": "viral_hepatitis_a_e",
+     "cases": 5,
+     "population_at_risk": 142000,
+     "baseline_rate_per_100k": 3.24
+    },
+    {
+     "condition": "cholera",
+     "cases": 1,
+     "population_at_risk": 142000,
+     "baseline_rate_per_100k": 0.4
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "mumbai",
+  "site_id": "mit-dharavi",
+  "timestamp": "2026-09-25T09:00:00Z",
+  "payload": {
+   "device_id": "MPCB-MUM-MIT-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 14289.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 8.96
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 2.52
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.6
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 2.79
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "PUBLIC_HEALTH",
+  "city": "mumbai",
+  "site_id": "mit-dharavi",
+  "timestamp": "2026-09-25T17:00:00Z",
+  "payload": {
+   "health_agency": "IDSP_District_Surveillance_Unit",
+   "evaluation_period": "week ending 2026-09-25",
+   "cohort": {
+    "group_id": "ward-mumbai-dharavi",
+    "age_range": "0-99",
+    "gender": "all"
+   },
+   "disease_surveillance": [
+    {
+     "condition": "acute_diarrhoeal_disease",
+     "cases": 175,
+     "population_at_risk": 630000,
+     "baseline_rate_per_100k": 26.32
+    },
+    {
+     "condition": "enteric_fever",
+     "cases": 42,
+     "population_at_risk": 630000,
+     "baseline_rate_per_100k": 7.13
+    },
+    {
+     "condition": "viral_hepatitis_a_e",
+     "cases": 24,
+     "population_at_risk": 630000,
+     "baseline_rate_per_100k": 3.51
+    },
+    {
+     "condition": "cholera",
+     "cases": 3,
+     "population_at_risk": 630000,
+     "baseline_rate_per_100k": 0.44
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-wazirabad",
+  "timestamp": "2026-09-26T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-WZB-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 927.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 2.37
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 6.51
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.02
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 0.65
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-ito",
+  "timestamp": "2026-09-26T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-ITO-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 48021.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 16.45
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 1.15
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.68
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 7.43
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-okhla",
+  "timestamp": "2026-09-26T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-OKH-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 30288.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 15.44
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 1.24
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.39
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 5.27
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "kanpur",
+  "site_id": "gan-jajmau",
+  "timestamp": "2026-09-26T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-KNP-JAJ-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 8212.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 6.38
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 4.1
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.05
+    },
+    {
+     "parameter": "chromium_total",
+     "unit": "mg/L",
+     "value": 0.1
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "varanasi",
+  "site_id": "gan-assi",
+  "timestamp": "2026-09-26T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-VNS-ASI-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 3269.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 3.03
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 5.51
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.58
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "mumbai",
+  "site_id": "mit-dharavi",
+  "timestamp": "2026-09-26T09:00:00Z",
+  "payload": {
+   "device_id": "MPCB-MUM-MIT-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 15533.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 9.67
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 2.53
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 6.85
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 2.87
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-wazirabad",
+  "timestamp": "2026-09-27T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-WZB-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 884.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 2.12
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 6.39
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.23
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 0.63
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-ito",
+  "timestamp": "2026-09-27T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-ITO-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 39409.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 17.21
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 1.38
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 6.95
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 6.22
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-okhla",
+  "timestamp": "2026-09-27T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-OKH-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 32527.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 13.57
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 1.45
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.49
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 5.43
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "kanpur",
+  "site_id": "gan-jajmau",
+  "timestamp": "2026-09-27T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-KNP-JAJ-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 7176.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 6.53
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 4.79
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 8.45
+    },
+    {
+     "parameter": "chromium_total",
+     "unit": "mg/L",
+     "value": 0.1
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "varanasi",
+  "site_id": "gan-assi",
+  "timestamp": "2026-09-27T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-VNS-ASI-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 3149.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 3.7
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 5.5
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.46
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "mumbai",
+  "site_id": "mit-dharavi",
+  "timestamp": "2026-09-27T09:00:00Z",
+  "payload": {
+   "device_id": "MPCB-MUM-MIT-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 15995.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 8.66
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 2.73
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.26
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 2.75
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-wazirabad",
+  "timestamp": "2026-09-28T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-WZB-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 1007.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 2.3
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 6.22
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.18
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 0.63
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-ito",
+  "timestamp": "2026-09-28T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-ITO-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 31814.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 15.12
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 1.58
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 8.08
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 5.79
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-okhla",
+  "timestamp": "2026-09-28T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-OKH-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 30125.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 15.37
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 1.36
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 6.82
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 6.22
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "kanpur",
+  "site_id": "gan-jajmau",
+  "timestamp": "2026-09-28T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-KNP-JAJ-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 8440.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 5.49
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 4.66
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 8.57
+    },
+    {
+     "parameter": "chromium_total",
+     "unit": "mg/L",
+     "value": 0.12
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "varanasi",
+  "site_id": "gan-assi",
+  "timestamp": "2026-09-28T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-VNS-ASI-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 3010.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 3.72
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 5.92
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.35
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "mumbai",
+  "site_id": "mit-dharavi",
+  "timestamp": "2026-09-28T09:00:00Z",
+  "payload": {
+   "device_id": "MPCB-MUM-MIT-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 15970.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 9.69
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 2.43
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 6.59
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 3.06
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-wazirabad",
+  "timestamp": "2026-09-29T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-WZB-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 923.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 2.59
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 7.31
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.88
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 0.53
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-ito",
+  "timestamp": "2026-09-29T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-ITO-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 33436.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 11.95
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 1.73
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.36
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 5.08
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-okhla",
+  "timestamp": "2026-09-29T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-OKH-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 32494.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 14.39
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 1.47
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.7
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 6.38
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "kanpur",
+  "site_id": "gan-jajmau",
+  "timestamp": "2026-09-29T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-KNP-JAJ-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 8340.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 5.9
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 4.61
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 8.05
+    },
+    {
+     "parameter": "chromium_total",
+     "unit": "mg/L",
+     "value": 0.11
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "varanasi",
+  "site_id": "gan-assi",
+  "timestamp": "2026-09-29T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-VNS-ASI-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 3435.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 3.28
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 5.36
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.54
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "mumbai",
+  "site_id": "mit-dharavi",
+  "timestamp": "2026-09-29T09:00:00Z",
+  "payload": {
+   "device_id": "MPCB-MUM-MIT-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 14303.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 9.89
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 2.62
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.93
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 2.91
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-wazirabad",
+  "timestamp": "2026-09-30T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-WZB-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 903.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 2.46
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 7.15
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.29
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 0.6
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-ito",
+  "timestamp": "2026-09-30T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-ITO-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 26914.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 11.81
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 1.85
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 8.1
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 4.81
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-okhla",
+  "timestamp": "2026-09-30T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-OKH-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 32307.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 13.28
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 1.54
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 8.04
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 5.41
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "kanpur",
+  "site_id": "gan-jajmau",
+  "timestamp": "2026-09-30T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-KNP-JAJ-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 7617.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 5.51
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 4.56
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 8.64
+    },
+    {
+     "parameter": "chromium_total",
+     "unit": "mg/L",
+     "value": 0.11
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "varanasi",
+  "site_id": "gan-assi",
+  "timestamp": "2026-09-30T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-VNS-ASI-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 3349.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 3.8
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 6.28
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.2
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "mumbai",
+  "site_id": "mit-dharavi",
+  "timestamp": "2026-09-30T09:00:00Z",
+  "payload": {
+   "device_id": "MPCB-MUM-MIT-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 16677.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 8.54
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 2.66
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.16
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 3.45
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-wazirabad",
+  "timestamp": "2026-10-01T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-WZB-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 816.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 2.52
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 7.55
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.77
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 0.65
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-ito",
+  "timestamp": "2026-10-01T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-ITO-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 23432.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 11.6
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 2.0
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.02
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 4.46
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-okhla",
+  "timestamp": "2026-10-01T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-OKH-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 29967.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 15.29
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 1.35
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 6.77
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 6.02
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "kanpur",
+  "site_id": "gan-jajmau",
+  "timestamp": "2026-10-01T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-KNP-JAJ-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 7481.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 5.53
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 4.3
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.25
+    },
+    {
+     "parameter": "chromium_total",
+     "unit": "mg/L",
+     "value": 0.11
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "varanasi",
+  "site_id": "gan-assi",
+  "timestamp": "2026-10-01T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-VNS-ASI-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 3213.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 3.53
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 5.64
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.15
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "mumbai",
+  "site_id": "mit-dharavi",
+  "timestamp": "2026-10-01T09:00:00Z",
+  "payload": {
+   "device_id": "MPCB-MUM-MIT-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 17724.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 8.59
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 2.43
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.91
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 2.96
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-wazirabad",
+  "timestamp": "2026-10-02T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-WZB-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 887.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 2.33
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 6.88
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 6.73
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 0.64
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "PUBLIC_HEALTH",
+  "city": "delhi",
+  "site_id": "yam-wazirabad",
+  "timestamp": "2026-10-02T17:00:00Z",
+  "payload": {
+   "health_agency": "IDSP_District_Surveillance_Unit",
+   "evaluation_period": "week ending 2026-10-02",
+   "cohort": {
+    "group_id": "ward-delhi-north-riverside",
+    "age_range": "0-99",
+    "gender": "all"
+   },
+   "disease_surveillance": [
+    {
+     "condition": "acute_diarrhoeal_disease",
+     "cases": 59,
+     "population_at_risk": 265000,
+     "baseline_rate_per_100k": 24.0
+    },
+    {
+     "condition": "enteric_fever",
+     "cases": 16,
+     "population_at_risk": 265000,
+     "baseline_rate_per_100k": 6.5
+    },
+    {
+     "condition": "viral_hepatitis_a_e",
+     "cases": 8,
+     "population_at_risk": 265000,
+     "baseline_rate_per_100k": 3.2
+    },
+    {
+     "condition": "cholera",
+     "cases": 1,
+     "population_at_risk": 265000,
+     "baseline_rate_per_100k": 0.4
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-ito",
+  "timestamp": "2026-10-02T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-ITO-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 25070.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 12.89
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 1.81
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 6.61
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 4.15
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "PUBLIC_HEALTH",
+  "city": "delhi",
+  "site_id": "yam-ito",
+  "timestamp": "2026-10-02T17:00:00Z",
+  "payload": {
+   "health_agency": "IDSP_District_Surveillance_Unit",
+   "evaluation_period": "week ending 2026-10-02",
+   "cohort": {
+    "group_id": "ward-delhi-central-riverside",
+    "age_range": "0-99",
+    "gender": "all"
+   },
+   "disease_surveillance": [
+    {
+     "condition": "acute_diarrhoeal_disease",
+     "cases": 286,
+     "population_at_risk": 412000,
+     "baseline_rate_per_100k": 26.66
+    },
+    {
+     "condition": "enteric_fever",
+     "cases": 30,
+     "population_at_risk": 412000,
+     "baseline_rate_per_100k": 7.22
+    },
+    {
+     "condition": "viral_hepatitis_a_e",
+     "cases": 15,
+     "population_at_risk": 412000,
+     "baseline_rate_per_100k": 3.55
+    },
+    {
+     "condition": "cholera",
+     "cases": 5,
+     "population_at_risk": 412000,
+     "baseline_rate_per_100k": 0.44
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "delhi",
+  "site_id": "yam-okhla",
+  "timestamp": "2026-10-02T09:00:00Z",
+  "payload": {
+   "device_id": "CPCB-DL-OKH-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 32780.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 13.77
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 1.26
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 7.83
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 5.42
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "PUBLIC_HEALTH",
+  "city": "delhi",
+  "site_id": "yam-okhla",
+  "timestamp": "2026-10-02T17:00:00Z",
+  "payload": {
+   "health_agency": "IDSP_District_Surveillance_Unit",
+   "evaluation_period": "week ending 2026-10-02",
+   "cohort": {
+    "group_id": "ward-delhi-se-riverside",
+    "age_range": "0-99",
+    "gender": "all"
+   },
+   "disease_surveillance": [
+    {
+     "condition": "acute_diarrhoeal_disease",
+     "cases": 102,
+     "population_at_risk": 388000,
+     "baseline_rate_per_100k": 27.26
+    },
+    {
+     "condition": "enteric_fever",
+     "cases": 30,
+     "population_at_risk": 388000,
+     "baseline_rate_per_100k": 7.38
+    },
+    {
+     "condition": "viral_hepatitis_a_e",
+     "cases": 14,
+     "population_at_risk": 388000,
+     "baseline_rate_per_100k": 3.64
+    },
+    {
+     "condition": "cholera",
+     "cases": 2,
+     "population_at_risk": 388000,
+     "baseline_rate_per_100k": 0.45
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "kanpur",
+  "site_id": "gan-jajmau",
+  "timestamp": "2026-10-02T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-KNP-JAJ-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 7911.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 5.46
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 4.9
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 8.57
+    },
+    {
+     "parameter": "chromium_total",
+     "unit": "mg/L",
+     "value": 0.1
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "PUBLIC_HEALTH",
+  "city": "kanpur",
+  "site_id": "gan-jajmau",
+  "timestamp": "2026-10-02T17:00:00Z",
+  "payload": {
+   "health_agency": "IDSP_District_Surveillance_Unit",
+   "evaluation_period": "week ending 2026-10-02",
+   "cohort": {
+    "group_id": "ward-kanpur-jajmau",
+    "age_range": "0-99",
+    "gender": "all"
+   },
+   "disease_surveillance": [
+    {
+     "condition": "acute_diarrhoeal_disease",
+     "cases": 51,
+     "population_at_risk": 198000,
+     "baseline_rate_per_100k": 25.42
+    },
+    {
+     "condition": "enteric_fever",
+     "cases": 12,
+     "population_at_risk": 198000,
+     "baseline_rate_per_100k": 6.89
+    },
+    {
+     "condition": "viral_hepatitis_a_e",
+     "cases": 7,
+     "population_at_risk": 198000,
+     "baseline_rate_per_100k": 3.39
+    },
+    {
+     "condition": "cholera",
+     "cases": 1,
+     "population_at_risk": 198000,
+     "baseline_rate_per_100k": 0.42
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "varanasi",
+  "site_id": "gan-assi",
+  "timestamp": "2026-10-02T09:00:00Z",
+  "payload": {
+   "device_id": "UPPCB-VNS-ASI-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 2748.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 3.07
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 5.75
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 8.84
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "PUBLIC_HEALTH",
+  "city": "varanasi",
+  "site_id": "gan-assi",
+  "timestamp": "2026-10-02T17:00:00Z",
+  "payload": {
+   "health_agency": "IDSP_District_Surveillance_Unit",
+   "evaluation_period": "week ending 2026-10-02",
+   "cohort": {
+    "group_id": "ward-varanasi-ghats",
+    "age_range": "0-99",
+    "gender": "all"
+   },
+   "disease_surveillance": [
+    {
+     "condition": "acute_diarrhoeal_disease",
+     "cases": 36,
+     "population_at_risk": 142000,
+     "baseline_rate_per_100k": 24.27
+    },
+    {
+     "condition": "enteric_fever",
+     "cases": 10,
+     "population_at_risk": 142000,
+     "baseline_rate_per_100k": 6.57
+    },
+    {
+     "condition": "viral_hepatitis_a_e",
+     "cases": 5,
+     "population_at_risk": 142000,
+     "baseline_rate_per_100k": 3.24
+    },
+    {
+     "condition": "cholera",
+     "cases": 1,
+     "population_at_risk": 142000,
+     "baseline_rate_per_100k": 0.4
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "IOT_TELEMETRY",
+  "city": "mumbai",
+  "site_id": "mit-dharavi",
+  "timestamp": "2026-10-02T09:00:00Z",
+  "payload": {
+   "device_id": "MPCB-MUM-MIT-01",
+   "measurements": [
+    {
+     "parameter": "faecal_coliform",
+     "unit": "MPN/100mL",
+     "value": 14695.0
+    },
+    {
+     "parameter": "bod",
+     "unit": "mg/L",
+     "value": 10.17
+    },
+    {
+     "parameter": "dissolved_oxygen",
+     "unit": "mg/L",
+     "value": 2.68
+    },
+    {
+     "parameter": "ph",
+     "unit": "pH",
+     "value": 6.6
+    },
+    {
+     "parameter": "ammoniacal_nitrogen",
+     "unit": "mg/L",
+     "value": 3.16
+    }
+   ]
+  }
+ },
+ {
+  "source_type": "PUBLIC_HEALTH",
+  "city": "mumbai",
+  "site_id": "mit-dharavi",
+  "timestamp": "2026-10-02T17:00:00Z",
+  "payload": {
+   "health_agency": "IDSP_District_Surveillance_Unit",
+   "evaluation_period": "week ending 2026-10-02",
+   "cohort": {
+    "group_id": "ward-mumbai-dharavi",
+    "age_range": "0-99",
+    "gender": "all"
+   },
+   "disease_surveillance": [
+    {
+     "condition": "acute_diarrhoeal_disease",
+     "cases": 157,
+     "population_at_risk": 630000,
+     "baseline_rate_per_100k": 26.32
+    },
+    {
+     "condition": "enteric_fever",
+     "cases": 43,
+     "population_at_risk": 630000,
+     "baseline_rate_per_100k": 7.13
+    },
+    {
+     "condition": "viral_hepatitis_a_e",
+     "cases": 22,
+     "population_at_risk": 630000,
+     "baseline_rate_per_100k": 3.51
+    },
+    {
+     "condition": "cholera",
+     "cases": 3,
+     "population_at_risk": 630000,
+     "baseline_rate_per_100k": 0.44
+    }
+   ]
+  }
+ }
+]

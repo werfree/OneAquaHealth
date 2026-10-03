@@ -1,0 +1,16 @@
+{
+  "event_id": "8f3b12a4-112e-48a1-901c-7a912eef3110",
+  "source_type": "IOT_TELEMETRY",
+  "city": "coimbra",
+  "site_id": "site-c1-mondego",
+  "timestamp": "2026-09-30T10:00:00Z",
+  "received_at": "2026-09-30T10:00:02Z",
+  "payload": {
+    "device_id": "ESP32-SENS-COIMBRA-01",
+    "measurements": [
+      {"parameter": "ph", "unit": "pH", "value": 7.4},
+      {"parameter": "nitrate", "unit": "mg/L", "value": 14.2, "min_value": 11.0, "max_value": 16.5, "avg_value": 14.2},
+      {"parameter": "zinc_dissolved", "unit": "mg/L", "value": 0.05}
+    ]
+  }
+}

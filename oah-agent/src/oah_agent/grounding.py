@@ -136,6 +136,11 @@ def check(answer: str, tool_results: Sequence[object], *, tolerance: float = 0.0
 def format_verdict(verdict: dict) -> str:
     """One line for a terminal, stating the limit as well as the result."""
 
+    if verdict["grounded"] and verdict["figures_checked"] == 0:
+        return (
+            "NO FIGURES TO CHECK - the answer states no numbers, so the numeric check had nothing to verify. "
+            "That is not the same as having been verified."
+        )
     if verdict["grounded"]:
         return (
             f"GROUNDED - all {verdict['figures_checked']} checked figure(s) appear in the retrieved data "

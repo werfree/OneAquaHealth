@@ -7,7 +7,8 @@ from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field, field_validator
 
 
-VALID_PILOT_CITIES = {"coimbra", "oslo", "benevento", "ghent", "toulouse"}
+# One source of truth: duplicating the list here let the two drift apart.
+from .envelope import PILOT_CITIES as VALID_PILOT_CITIES
 
 
 class QuantitativeMeasurement(BaseModel):
@@ -42,12 +43,19 @@ class TelemetryPayload(BaseModel):
         return value.astimezone(timezone.utc)
 
 
+# Parameters where a negative reading is physically meaningful. Everything else
+# -- a concentration, a count, a saturation -- cannot be below zero, so the rule
+# is stated as an allow-list. Naming the *positive* parameters instead meant a
+# negative faecal coliform count passed simply because nobody had listed it.
+MAY_BE_NEGATIVE = {"water_temperature", "temperature", "air_temperature", "redox_potential", "orp"}
+
+
 def _valid_measurement(measurement: QuantitativeMeasurement) -> bool:
     if measurement.parameter == "ph":
         return 0.0 <= measurement.value <= 14.0
-    if measurement.parameter in {"nitrate", "zinc_dissolved", "cadmium_dissolved"}:
-        return measurement.value >= 0.0
-    return True
+    if measurement.parameter in MAY_BE_NEGATIVE:
+        return True
+    return measurement.value >= 0.0
 
 
 class SensorIngestionService:

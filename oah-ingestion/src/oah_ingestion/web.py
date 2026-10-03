@@ -20,10 +20,15 @@ from __future__ import annotations
 
 import json
 import logging
+import os
+import threading
+import time
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
 from fastapi import APIRouter, HTTPException
+from fastapi import Path as PathParam
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 from pydantic import TypeAdapter
@@ -44,13 +49,17 @@ DEMO = Path(__file__).resolve().parents[3] / "demo"
 ENVELOPE = TypeAdapter(IngestionEnvelope)
 
 SAMPLES = {
-    "iot": ("sample_iot_telemetry.json", "IoT telemetry", "Mondego C1 sensor: pH, nitrate with statistics, zinc"),
+    "iot": ("sample_iot_telemetry.json", "CPCB telemetry", "Yamuna at ITO Bridge: coliform with statistics, BOD, dissolved oxygen"),
     "iot-oslo": ("sample_iot_telemetry_oslo.json", "IoT telemetry", "Oslo Akerselva sensor readings"),
     "iot-benevento": ("sample_iot_telemetry_benevento.json", "IoT telemetry", "Benevento Calore sensor readings"),
-    "survey": ("sample_citizen_survey.json", "Citizen survey", "StreamKeepers volunteer at Casa do Sal C6"),
+    "survey": ("sample_citizen_survey.json", "Citizen survey", "Ganga Prahari volunteer at Assi Ghat, Varanasi"),
     "survey-ghent": ("sample_citizen_survey_ghent.json", "Citizen survey", "StreamKeepers volunteer at the Leie in Ghent"),
     "survey-toulouse": ("sample_citizen_survey_toulouse.json", "Citizen survey", "StreamKeepers volunteer at the Garonne in Toulouse"),
-    "health": ("sample_public_health.json", "Public health", "Coimbra observatory, urban catchment T1"),
+    "health": ("sample_public_health.json", "IDSP return", "Central Delhi riverside ward: IDSP disease surveillance"),
+    "health-kanpur": ("sample_public_health_kanpur.json", "IDSP return", "Jajmau ward, Kanpur Nagar"),
+    "iot-coimbra": ("sample_iot_telemetry_coimbra.json", "IoT telemetry", "Mondego C1 sensor: pH, nitrate, zinc"),
+    "survey-coimbra": ("sample_citizen_survey_coimbra.json", "Citizen survey", "Casa do Sal C6 survey"),
+    "health-coimbra": ("sample_public_health_coimbra.json", "Public health", "Coimbra urban catchment T1"),
     "health-mondego": ("sample_public_health_mondego.json", "Public health", "Riverside residents at Mondego C1"),
 }
 
@@ -66,8 +75,6 @@ def dashboard():
 @router.get("/api/info")
 def info():
     """What this gateway is and where its data goes."""
-
-    import os
 
     from .mqtt_worker import mqtt_broker_address
     from .rabbitmq import CITIZEN_SURVEY_QUEUE
@@ -109,6 +116,8 @@ def ingest_demo(key: str):
     alert = assess(envelope)
     resources = envelope_to_fhir(envelope)
     result = process(envelope, envelope_as_message(envelope))
+    if result.get("fhir") == "UPLOADED":
+        invalidate_overview()
 
     observations = [r.model_dump(exclude_none=True) for r in resources if r.resourceType == "Observation"]
     return {
@@ -124,29 +133,83 @@ def ingest_demo(key: str):
     }
 
 
+def _with_site_details(briefing: dict) -> dict:
+    """Fill name/position/city: the FHIR Location first, the gazetteer as fallback."""
+    site = registry().get(briefing["site_id"])
+    if site is not None:
+        briefing["name"] = briefing.get("name") or site.name
+        if briefing.get("latitude") is None or briefing.get("longitude") is None:
+            briefing["latitude"], briefing["longitude"] = site.latitude, site.longitude
+        briefing["city"] = briefing.get("city") or site.city
+    briefing["name"] = briefing.get("name") or briefing["site_id"]
+    return briefing
+
+
+# Each overview costs several FHIR round trips per site. Cache repeated reads.
+_overview_cache: dict = {"at": 0.0, "tag": None, "facts": None}
+_overview_lock = threading.Lock()
+
+
+def _overview_cache_seconds() -> float:
+    return float(os.getenv("OVERVIEW_CACHE_SECONDS", "60"))
+
+
+def invalidate_overview() -> None:
+    with _overview_lock:
+        _overview_cache["facts"] = None
+
+
 @router.get("/api/overview")
-def overview():
-    """Current state of the dataset on the FHIR server, with the cross-domain join."""
+def overview(refresh: bool = False):
+    """Current state of the dataset on the FHIR server, with the cross-domain join.
+
+    Cached for `OVERVIEW_CACHE_SECONDS` (default 60); `?refresh=true` bypasses it.
+    """
 
     try:
         from oah_agent.briefing import dataset_briefing
     except ImportError:
         raise HTTPException(status_code=501, detail="oah-agent is not installed; overview needs its query tools")
 
-    facts = dataset_briefing(dataset_tag=dataset_tag())
-    gazetteer = registry()
+    tag = dataset_tag()
+    with _overview_lock:
+        cached = _overview_cache["facts"]
+        fresh = time.monotonic() - _overview_cache["at"] < _overview_cache_seconds()
+        if cached is not None and fresh and _overview_cache["tag"] == tag and not refresh:
+            return cached
+    facts = dataset_briefing(dataset_tag=tag)
     for briefing in facts["briefings"]:
-        site = gazetteer.get(briefing["site_id"])
-        briefing["name"] = site.name if site else briefing["site_id"]
-        briefing["latitude"] = site.latitude if site else None
-        briefing["longitude"] = site.longitude if site else None
+        _with_site_details(briefing)
     facts["fhir_server"] = base_url()
-    facts["dataset_tag"] = dataset_tag()
+    facts["dataset_tag"] = tag
+    facts["generated_at"] = datetime.now(timezone.utc).isoformat()
+    with _overview_lock:
+        _overview_cache.update(at=time.monotonic(), tag=tag, facts=facts)
     return facts
+
+
+@router.get("/api/sites/{site_id}")
+def site_detail(site_id: str = PathParam(pattern=r"^[A-Za-z0-9.\-]{1,64}$")):
+    """One site's briefing including its summarized Observations, for a station view."""
+    try:
+        from oah_agent.briefing import site_briefing
+        from oah_agent.tools import list_sites
+    except ImportError:
+        raise HTTPException(status_code=501, detail="oah-agent is not installed; site detail needs its query tools")
+    briefing = site_briefing(site_id, dataset_tag=dataset_tag(), include_observations=True)
+    if not briefing["environmental_reading_count"] and not briefing["health_measure_count"]:
+        raise HTTPException(status_code=404, detail=f"No observations for site {site_id!r} in dataset {dataset_tag()!r}")
+    location = next((s for s in list_sites(dataset_tag=dataset_tag()).get("sites", []) if s["site_id"] == site_id), {})
+    briefing.update({k: location.get(k) for k in ("name", "latitude", "longitude")})
+    briefing = _with_site_details(briefing)
+    briefing["fhir_server"] = base_url()
+    briefing["dataset_tag"] = dataset_tag()
+    return briefing
 
 
 class Question(BaseModel):
     question: str = Field(min_length=1, max_length=500)
+    site_id: Optional[str] = Field(default=None, max_length=64, pattern=r"^[A-Za-z0-9.\-]+$")
 
 
 @router.post("/api/ask")
@@ -159,7 +222,10 @@ def ask(body: Question):
         raise HTTPException(status_code=501, detail="oah-agent is not installed")
 
     try:
-        result = run(body.question)
+        question = body.question
+        if body.site_id:
+            question = f"[Context: the user is viewing site_id {body.site_id}.]\n{question}"
+        result = run(question)
     except RuntimeError as exc:  # missing OPENAI_API_KEY, most likely
         raise HTTPException(status_code=503, detail=str(exc))
     except Exception as exc:

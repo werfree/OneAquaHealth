@@ -1,0 +1,19 @@
+{
+  "event_id": "9fc92019-1afb-4e63-83d0-7d67c18a0f31",
+  "source_type": "CITIZEN_SURVEY",
+  "city": "coimbra",
+  "site_id": "site-c6-casa-do-sal",
+  "timestamp": "2026-09-30T10:15:00Z",
+  "received_at": "2026-09-30T10:15:03Z",
+  "payload": {
+    "app_id": "StreamKeepers_Mobile_v2",
+    "volunteer_id": "VOL-COIMBRA-88",
+    "coordinates": {"latitude": 40.2194, "longitude": -8.4377},
+    "observations": [
+      {"indicator": "riparianVegetation", "value_code": "trees_shrubs_dense", "notes": "Dense canopy along left stream bank"},
+      {"indicator": "waterFlow", "value_code": "fast"},
+      {"indicator": "waterAspect", "value_code": "foamy"}
+    ],
+    "photo_urls": ["https://storage.enora-oah.eu/photos/site-c6-photo1.jpg"]
+  }
+}

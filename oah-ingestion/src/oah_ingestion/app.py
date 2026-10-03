@@ -11,20 +11,31 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import Response
 
+# City validation and FHIR transport settings are read when modules import.
+load_dotenv()
+
 from .csv_ingestion import CSV_TEMPLATE_COLUMNS, CsvIngestionError, parse_public_health_csv
 from .envelope import IngestionEnvelope, envelope_as_message
 from .pipeline import process
 from .mqtt_worker import create_mqtt_client, mqtt_broker_address, mqtt_connect_options
 from .rabbitmq_worker import consume_citizen_surveys
+from .officer import router as officer_router
 from .web import router as web_router
-
-load_dotenv()
 
 logger = logging.getLogger("OAH_Ingestion_App")
 
 
+def ingestion_workers_enabled() -> bool:
+    """`INGESTION_WORKERS_ENABLED=false` serves only the HTTP API and dashboard reads."""
+    return os.getenv("INGESTION_WORKERS_ENABLED", "true").strip().lower() not in {"false", "0", "no"}
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    if not ingestion_workers_enabled():
+        logger.info("Ingestion workers disabled; MQTT and RabbitMQ listeners not started")
+        yield
+        return
     client = create_mqtt_client()
     host, port = mqtt_broker_address()
     logger.info("Starting MQTT sensor listener for %s:%d", host, port)
@@ -54,6 +65,7 @@ app = FastAPI(title="OneAquaHealth Ingestion", lifespan=lifespan)
 
 # Live dashboard at "/" plus the /api/* routes it runs on.
 app.include_router(web_router)
+app.include_router(officer_router)
 
 
 @app.get("/health")
