@@ -1,0 +1,16 @@
+{
+  "event_id": "34850a03-e87f-4c26-862a-52946348bfba",
+  "source_type": "IOT_TELEMETRY",
+  "city": "benevento",
+  "site_id": "site-benevento-calore-01",
+  "timestamp": "2026-10-01T11:30:00Z",
+  "received_at": "2026-10-01T11:30:04Z",
+  "payload": {
+    "device_id": "BENEVENTO-WQ-DEVICE-01",
+    "measurements": [
+      {"parameter": "ph", "unit": "pH", "value": 6.9},
+      {"parameter": "nitrate", "unit": "mg/L", "value": 9.6},
+      {"parameter": "cadmium_dissolved", "unit": "mg/L", "value": 0.0007}
+    ]
+  }
+}

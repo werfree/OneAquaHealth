@@ -92,9 +92,27 @@ Open `http://localhost:8000/` (or the configured `APP_PORT`) for the live dashbo
 - `GET /health` — process health.
 - `GET /api/info` — configured channel, FHIR, sample, and threshold information.
 - `POST /ingest` — accept a typed event envelope, including `PUBLIC_HEALTH`.
-- `POST /api/ingest-demo/{key}` — run a bundled sample through validation, screening, mapping, and upload. Sample keys: `iot`, `survey`, `health`, `health-mondego`.
+- `POST /ingest/public-health/csv` — ingest one or more grouped `PUBLIC_HEALTH` events from long-form CSV (`Content-Type: text/csv`). Each row is one `risk_score` or `chemical_summary`; rows with the same `event_id` form one event. See `demo/sample_public_health.csv` for the required columns and format.
+- `GET /ingest/public-health/csv/template` — download an empty CSV template for preparing a public-health batch.
+- `POST /api/ingest-demo/{key}` — run a bundled JSON sample through validation, screening, mapping, and upload. Sample keys: `iot`, `iot-oslo`, `iot-benevento`, `survey`, `survey-ghent`, `survey-toulouse`, `health`, `health-mondego`.
 - `GET /api/overview` — summarize data on the FHIR server; requires the agent package and a reachable server.
 - `POST /api/ask` — ask the assistant about FHIR data; requires `OPENAI_API_KEY`, the agent package, and a reachable server.
+
+Upload the included health CSV from PowerShell with:
+
+```powershell
+curl.exe -X POST "http://localhost:8001/ingest/public-health/csv" `
+  -H "Content-Type: text/csv" `
+  --data-binary "@demo/sample_public_health.csv"
+```
+
+Download the blank template with:
+
+```powershell
+curl.exe -L "http://localhost:8001/ingest/public-health/csv/template" -o "public-health-template.csv"
+```
+
+The CSV endpoint validates the whole file before processing. Rows are grouped by `event_id`; the response reports the result for each grouped event. IoT and citizen-survey sample files remain JSON and use their existing MQTT and RabbitMQ channels (or the JSON `/ingest` route for direct API submissions).
 
 ## Evidence dashboard
 

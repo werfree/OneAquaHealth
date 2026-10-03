@@ -1,0 +1,19 @@
+{
+  "event_id": "636badc5-111a-4494-8d2d-5bcaa1d5d9bb",
+  "source_type": "CITIZEN_SURVEY",
+  "city": "ghent",
+  "site_id": "site-ghent-leie-02",
+  "timestamp": "2026-10-01T13:15:00Z",
+  "received_at": "2026-10-01T13:18:00Z",
+  "payload": {
+    "app_id": "StreamKeepers_Mobile_v2",
+    "volunteer_id": "VOL-GHENT-14",
+    "coordinates": {"latitude": 51.0543, "longitude": 3.7174},
+    "observations": [
+      {"indicator": "riparianVegetation", "value_code": "trees_shrubs_moderate", "notes": "Mixed vegetation along the bank"},
+      {"indicator": "waterFlow", "value_code": "moderate"},
+      {"indicator": "waterAspect", "value_code": "clear"}
+    ],
+    "photo_urls": []
+  }
+}
