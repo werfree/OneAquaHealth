@@ -7,56 +7,75 @@
     "Programme locations on the Yamuna and Ganga. COORDINATES ARE APPROXIMATE",
     "and the readings in demo/timeseries/ are SYNTHETIC - this is demonstration",
     "data shaped to be realistic, not observed measurement. Replace with the",
-    "real CPCB/state-PCB feed before presenting any of it as authoritative."
+    "real CPCB/state-PCB feed before presenting any of it as authoritative.",
+    "flow_km is distance downstream along that river from the first monitored station, APPROXIMATE and for ordering stations in a longitudinal profile. It is not a surveyed chainage."
   ],
   "sites": {
     "yam-wazirabad": {
       "name": "Yamuna at Wazirabad Barrage",
       "city": "delhi",
       "district": "North Delhi",
-      "reach": "Yamuna — upstream of city discharge",
+      "reach": "Yamuna \u2014 upstream of city discharge",
       "latitude": 28.7045,
-      "longitude": 77.2295
+      "longitude": 77.2295,
+      "river": "Yamuna",
+      "flow_km": 0,
+      "position_note": "upstream reference \u2014 above the city's drains"
     },
     "yam-ito": {
       "name": "Yamuna at ITO Bridge",
       "city": "delhi",
       "district": "Central Delhi",
-      "reach": "Yamuna — mid-city, downstream of Najafgarh drain",
-      "latitude": 28.6280,
-      "longitude": 77.2495
+      "reach": "Yamuna \u2014 mid-city, downstream of Najafgarh drain",
+      "latitude": 28.628,
+      "longitude": 77.2495,
+      "river": "Yamuna",
+      "flow_km": 12,
+      "position_note": "below Najafgarh drain"
     },
     "yam-okhla": {
       "name": "Yamuna at Okhla Barrage",
       "city": "delhi",
       "district": "South East Delhi",
-      "reach": "Yamuna — downstream of city discharge",
-      "latitude": 28.5420,
-      "longitude": 77.3080
+      "reach": "Yamuna \u2014 downstream of city discharge",
+      "latitude": 28.542,
+      "longitude": 77.308,
+      "river": "Yamuna",
+      "flow_km": 22,
+      "position_note": "below the city's discharge"
     },
     "gan-jajmau": {
       "name": "Ganga at Jajmau",
       "city": "kanpur",
       "district": "Kanpur Nagar",
-      "reach": "Ganga — downstream of Jajmau tannery cluster",
-      "latitude": 26.4330,
-      "longitude": 80.4120
+      "reach": "Ganga \u2014 downstream of Jajmau tannery cluster",
+      "latitude": 26.433,
+      "longitude": 80.412,
+      "river": "Ganga",
+      "flow_km": 0,
+      "position_note": "below the Jajmau tannery cluster"
     },
     "gan-assi": {
       "name": "Ganga at Assi Ghat",
       "city": "varanasi",
       "district": "Varanasi",
-      "reach": "Ganga — upstream ghat reach",
-      "latitude": 25.2880,
-      "longitude": 83.0070
+      "reach": "Ganga \u2014 upstream ghat reach",
+      "latitude": 25.288,
+      "longitude": 83.007,
+      "river": "Ganga",
+      "flow_km": 330,
+      "position_note": "Varanasi ghat reach, far downstream"
     },
     "mit-dharavi": {
       "name": "Mithi at Dharavi outfall",
       "city": "mumbai",
       "district": "Mumbai Suburban",
-      "reach": "Mithi — tidal reach before Mahim Creek",
-      "latitude": 19.0430,
-      "longitude": 72.8520
+      "reach": "Mithi \u2014 tidal reach before Mahim Creek",
+      "latitude": 19.043,
+      "longitude": 72.852,
+      "river": "Mithi",
+      "flow_km": 0,
+      "position_note": "tidal reach before Mahim Creek"
     }
   }
 }
