@@ -4,10 +4,12 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="OneAquaHealth environmental and public-health evidence dashboard">
-    <meta name="theme-color" content="#f4f3ee" id="browser-theme-color">
+    <meta name="theme-color" content="__DEFAULT_THEME_COLOR__" id="browser-theme-color">
     <link rel="icon" href="data:,">
     <title>OneAquaHealth · Evidence dashboard</title>
+    <style id="initial-theme-tokens">:root { color-scheme: __DEFAULT_COLOR_SCHEME__; __DEFAULT_THEME_TOKENS__ }</style>
     <link rel="stylesheet" href="/static/styles.css">
+    <script id="theme-config" type="application/json">__THEME_CONFIG__</script>
     <script type="module" src="/static/js/app.js"></script>
   </head>
   <body>
@@ -35,10 +37,7 @@
         <label class="theme-control" for="theme-selector">
           <span class="eyebrow">Appearance</span>
           <select id="theme-selector" aria-label="Dashboard theme">
-            <option value="aqua">Aqua</option>
-            <option value="aqua-dark">Aqua dark</option>
-            <option value="white">White</option>
-            <option value="dark">Dark</option>
+            <option>Loading themes…</option>
           </select>
         </label>
         <div class="sidebar-foot">
