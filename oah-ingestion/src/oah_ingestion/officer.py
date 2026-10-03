@@ -95,7 +95,9 @@ def _flatten(obs: dict) -> dict:
 
 
 def _fetch(profile: str, *, site_id=None, indicator=None, since=None, until=None, limit=800) -> List[dict]:
-    params: Dict[str, str] = {"_profile": BASE + profile, "_tag": _tag(), "_count": str(limit), "_sort": "date"}
+    # Descending, so that if anything truncates despite pagination it is the
+    # oldest rows that go, never the newest.
+    params: Dict[str, str] = {"_profile": BASE + profile, "_tag": _tag(), "_count": str(limit), "_sort": "-date"}
     if site_id:
         params["subject"] = f"Location/{site_id}"
     if indicator:
@@ -203,6 +205,23 @@ def trend(
     }
 
 
+# One investigation makes several calls that all need the same screening --
+# rank_wards, show_ranking and show_scatter each rebuilt it from scratch, so a
+# single run issued nine identical heavy queries instead of three. The data
+# cannot change mid-run, so a short TTL is safe and the panel stops stalling.
+_WARDS_CACHE: Dict[int, tuple] = {}
+_WARDS_TTL = 60.0
+
+
+def _cached_wards(days: int):
+    import time
+
+    hit = _WARDS_CACHE.get(days)
+    if hit and (time.time() - hit[0]) < _WARDS_TTL:
+        return hit[1]
+    return None
+
+
 @router.get("/wards")
 def wards(days: int = Query(28, ge=7, le=365)):
     """Triage view: every ward ranked by water exceedance and notification rise.
@@ -210,6 +229,10 @@ def wards(days: int = Query(28, ge=7, le=365)):
     This is the officer's working order -- what to look at first on a Tuesday
     morning -- rather than an alphabetical station list.
     """
+
+    cached = _cached_wards(days)
+    if cached is not None:
+        return cached
 
     until = datetime.now(timezone.utc).date()
     since = (until - timedelta(days=days)).isoformat()
@@ -277,15 +300,19 @@ def wards(days: int = Query(28, ge=7, le=365)):
             }
         )
 
+    import time
+
     rank = {"HIGH": 0, "MODERATE": 1, "LOW": 2}
     out.sort(key=lambda w: (not w["co_located"], rank.get(w["severity"], 3), -(w["add_change_pct"] or 0)))
-    return {
+    result = {
         "window_days": days,
         "since": since,
         "wards": out,
         "priority": [w["site_id"] for w in out if w["co_located"]],
         "fhir_server": base_url(),
     }
+    _WARDS_CACHE[days] = (time.time(), result)
+    return result
 
 
 # ─────────────────────────── exports ───────────────────────────
