@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="320" viewBox="0 0 1200 320" role="img" aria-labelledby="title description">
+  <title id="title">OneAquaHealth</title>
+  <desc id="description">A One Health evidence workspace connecting water, environment, citizen observations and public health through FHIR R4.</desc>
+  <rect width="1200" height="320" rx="18" fill="#102d28"/>
+  <path d="M18 0h1164a18 18 0 0 1 18 18v3H0v-3A18 18 0 0 1 18 0Z" fill="#b5e1d4"/>
+  <g fill="none" stroke="#28584c" stroke-width="2">
+    <circle cx="1075" cy="139" r="125"/>
+    <circle cx="1075" cy="139" r="95"/>
+    <circle cx="1075" cy="139" r="65"/>
+  </g>
+  <g fill="#b5e1d4">
+    <ellipse cx="1072" cy="115" rx="17" ry="35" transform="rotate(42 1072 115)"/>
+    <circle cx="1035" cy="169" r="15"/>
+    <rect x="1070" y="159" width="46" height="20" rx="10"/>
+  </g>
+  <g font-family="Arial, Helvetica, sans-serif">
+    <text x="52" y="69" fill="#b5e1d4" font-size="14" font-weight="bold" letter-spacing="3">ONE HEALTH EVIDENCE WORKSPACE</text>
+    <text x="48" y="139" fill="#ffffff" font-size="60" font-weight="bold">OneAquaHealth</text>
+    <text x="52" y="183" fill="#ffffff" font-size="25">Water. Environment. Public health.</text>
+    <text x="52" y="216" fill="#b7cec6" font-size="18">Connected records for shared investigation and follow-up.</text>
+    <g transform="translate(52 253)">
+      <rect width="104" height="34" rx="7" fill="#244b40"/>
+      <text x="17" y="23" fill="#e2f2eb" font-size="14" font-weight="bold">FHIR R4</text>
+      <rect x="116" width="240" height="34" rx="7" fill="#244b40"/>
+      <text x="133" y="23" fill="#e2f2eb" font-size="14">MQTT · RabbitMQ · HTTP</text>
+      <rect x="368" width="134" height="34" rx="7" fill="#244b40"/>
+      <text x="385" y="23" fill="#e2f2eb" font-size="14">Live evidence</text>
+      <rect x="514" width="178" height="34" rx="7" fill="#244b40"/>
+      <text x="531" y="23" fill="#e2f2eb" font-size="14">Surveillance Studio</text>
+    </g>
+  </g>
+</svg>

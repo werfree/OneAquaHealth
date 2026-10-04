@@ -1,6 +1,6 @@
 # OneAquaHealth evidence dashboard
 
-A compact vanilla HTML/CSS/JavaScript dashboard with a stateful FastAPI mock service. It tells one connected story: choose a station, inspect observations and findings, run an ingestion, inspect screening and FHIR stages, follow evidence relationships, and generate/download a Site One Health Briefing.
+A compact vanilla HTML/CSS/JavaScript dashboard with a FastAPI same-origin proxy and mock service. **Overview**, **Ingestion**, and **Surveillance Studio** share one dashboard UI. Explore station evidence, submit files or source samples, inspect FHIR outcomes, and investigate findings in the integrated Studio. Mock mode also provides local run, relationship and Site One Health Briefing workflows.
 
 ## Design direction and themes
 
@@ -12,21 +12,25 @@ From the repository root:
 
 ```bash
 python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt
 .venv/bin/python -m pip install -e ".[dev]"
-.venv/bin/oah-dashboard
 ```
 
-Copy `.env.example` to `.env` when starting from a fresh checkout. Open `http://127.0.0.1:8090`. The mock server owns run/report transitions; state survives browser refresh and resets when the server restarts. A Data operator can also use **Reset demo state**.
+Copy `.env.example` to `.env` when starting from a fresh checkout; keep an existing `.env` if already configured. Set `OPENAI_API_KEY` for natural-language Studio investigations, then start the complete project:
 
-With the project dependencies installed, `python run.py` starts both the
-gateway and dashboard using the root `.env` and `.venv`. Press Ctrl+C to stop
-both. Use `python run.py --no-brokers` for HTTP ingestion and live Studio
-without MQTT/RabbitMQ consumers, or add `--open` to open the browser.
+```bash
+python run.py --open
+```
+
+The launcher uses the root `.env` and `.venv` and starts the gateway and dashboard together. Open `http://127.0.0.1:8090`; the supplied example configuration uses live mode, gateway port 8001, and disabled MQTT/RabbitMQ consumers. Press Ctrl+C to stop both processes. `python run.py --no-brokers` can explicitly disable consumers for a launch. Studio opens through **Surveillance** in the same dashboard; it does not require a separate Studio launch.
+
+For dashboard-only mock development, `.venv/bin/oah-dashboard` remains available. Choose `?mode=mock` or set `DASHBOARD_DEFAULT_MODE=mock`. In mock mode the server owns run/report transitions; state survives browser refresh and resets when the server restarts. A Data operator can also use **Reset demo state**.
 
 For access from other devices on your LAN, set `DASHBOARD_HOST=0.0.0.0` in
 the root `.env` and restart. Open `http://<your-computer-LAN-IP>:8090` from
 the other device and allow that port through your private-network firewall
-if necessary. The default host is `127.0.0.1` (this computer only).
+if necessary. The code's fallback host is `127.0.0.1` (this computer only);
+the supplied `.env.example` uses `0.0.0.0` for LAN access.
 `OAH_LIVE_BASE_URL` remains the server-side gateway address; it can stay on
 loopback because browser requests use the dashboard's same-origin proxy.
 
@@ -36,15 +40,15 @@ Run tests with:
 .venv/bin/python -m pytest
 ```
 
-## Optional live mode
+## Live and mock modes
 
-Start the existing OneAquaHealth gateway separately, set `OAH_LIVE_BASE_URL` in the root `.env` if it is not on port 8000, then open:
+The supplied `.env.example` selects live mode and points `OAH_LIVE_BASE_URL` at `http://127.0.0.1:8001`. `python run.py` starts both required services. If starting them individually, run `python -m oah_ingestion.app` and `oah-dashboard`, and match `OAH_LIVE_BASE_URL` to the gateway port. An explicit URL mode overrides the environment:
 
 ```text
 http://127.0.0.1:8090/?mode=live
 ```
 
-Live mode connects only the verified existing routes through the same-origin proxy. Overview, supplied-sample execution, and the optional assistant are connected. Durable run history, retry, authorization, graph, and the mock report lifecycle remain visibly unavailable because the existing backend does not implement them. It never treats `202 ACCEPTED` as proof of persistence; full upload success requires `fhir == "UPLOADED"` and zero failed entries.
+Live mode connects the verified gateway routes through the same-origin proxy. Overview, file ingestion, supplied-sample execution, the optional assistant, and integrated Surveillance Studio are connected. Durable run history, retry, authorization, graph, and the mock report lifecycle remain visibly unavailable because the existing backend does not implement them. It never treats `202 ACCEPTED` as proof of persistence; full upload success requires `fhir == "UPLOADED"` and zero failed entries. Use `?mode=mock` for fixture-backed demonstrations.
 
 See [API-MAPPING.md](API-MAPPING.md) for request/response ownership and future backend work.
 
@@ -77,6 +81,8 @@ Open `http://127.0.0.1:8090/studio` with the gateway running and
 `OPENAI_API_KEY` configured on the gateway. In live dashboard mode, the
 **Surveillance** navigation item opens a full page in the dashboard,
 just like Overview. Mobile navigation labels it **Studio**.
+`python run.py` starts the two Python processes this integration needs; the
+Studio UI lives inside the dashboard and uses its same-origin gateway proxy.
 Choose **Current station** or **All stations**, ask a question, and inspect
 streaming tool activity, charts, answers and screening references. The page
 follows the selected theme and preserves results when navigating away and back.

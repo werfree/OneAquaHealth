@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="60" viewBox="0 0 420 60" role="img" aria-labelledby="title">
+  <title id="title">Launch OneAquaHealth Dashboard</title>
+  <rect width="420" height="60" rx="10" fill="#176b5b"/>
+  <text x="24" y="37" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="bold">Launch OneAquaHealth Dashboard</text>
+  <path d="M382 23h12v12M394 23l-16 16" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

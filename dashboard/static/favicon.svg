@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">OneAquaHealth</title>
+  <rect width="64" height="64" rx="16" fill="#176b5b"/>
+  <circle cx="32" cy="32" r="26" fill="none" stroke="#b5d8cf" stroke-width="2"/>
+  <g fill="#ffffff">
+    <ellipse cx="31" cy="23" rx="7" ry="14" transform="rotate(42 31 23)"/>
+    <circle cx="18" cy="43" r="6"/>
+    <rect x="31" y="39" width="18" height="8" rx="4"/>
+  </g>
+</svg>
