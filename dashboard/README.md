@@ -18,6 +18,18 @@ python3 -m venv .venv
 
 Copy `.env.example` to `.env` when starting from a fresh checkout. Open `http://127.0.0.1:8090`. The mock server owns run/report transitions; state survives browser refresh and resets when the server restarts. A Data operator can also use **Reset demo state**.
 
+With the project dependencies installed, `python run.py` starts both the
+gateway and dashboard using the root `.env` and `.venv`. Press Ctrl+C to stop
+both. Use `python run.py --no-brokers` for HTTP ingestion and live Studio
+without MQTT/RabbitMQ consumers, or add `--open` to open the browser.
+
+For access from other devices on your LAN, set `DASHBOARD_HOST=0.0.0.0` in
+the root `.env` and restart. Open `http://<your-computer-LAN-IP>:8090` from
+the other device and allow that port through your private-network firewall
+if necessary. The default host is `127.0.0.1` (this computer only).
+`OAH_LIVE_BASE_URL` remains the server-side gateway address; it can stay on
+loopback because browser requests use the dashboard's same-origin proxy.
+
 Run tests with:
 
 ```bash

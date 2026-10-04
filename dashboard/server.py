@@ -768,7 +768,7 @@ app.mount("/static", StaticFiles(directory=STATIC_ROOT), name="static")
 def main() -> None:
     import uvicorn
 
-    uvicorn.run("dashboard.server:app", host="127.0.0.1", port=int(os.getenv("DASHBOARD_PORT", "8090")), reload=False)
+    uvicorn.run("dashboard.server:app", host=os.getenv("DASHBOARD_HOST", "127.0.0.1"), port=int(os.getenv("DASHBOARD_PORT", "8090")), reload=False)
 
 
 if __name__ == "__main__":

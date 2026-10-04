@@ -1,86 +1,93 @@
 <!doctype html>
-<html lang="en" data-theme="__DEFAULT_THEME__" data-default-theme="__DEFAULT_THEME__" data-default-mode="__DEFAULT_MODE__">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="OneAquaHealth environmental and public-health evidence dashboard">
-    <meta name="theme-color" content="#f4f3ee" id="browser-theme-color">
-    <link rel="icon" href="data:,">
-    <title>OneAquaHealth · Evidence dashboard</title>
-    <link rel="stylesheet" href="/static/styles.css">
-    <link rel="stylesheet" href="/static/studio.css">
-    <script type="module" src="/static/js/app.js"></script>
-  </head>
-  <body>
-    <a class="skip-link" href="#main-content">Skip to dashboard content</a>
-    <div class="app-shell">
-      <aside class="sidebar" aria-label="Primary navigation">
-        <div class="brand">
-          <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
-          <span><strong>OneAquaHealth</strong><small>Evidence workspace</small></span>
-        </div>
-        <nav class="primary-nav">
-          <button class="nav-item is-active" type="button" data-route="overview" aria-current="page">
-            <span class="nav-icon nav-icon-overview" aria-hidden="true"></span>
-            <span>Overview</span>
-          </button>
-          <button class="nav-item" type="button" data-route="ingestion">
+<html lang="en" data-theme="__DEFAULT_THEME__" data-default-theme="__DEFAULT_THEME__"
+  data-default-mode="__DEFAULT_MODE__">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="OneAquaHealth environmental and public-health evidence dashboard">
+  <meta name="theme-color" content="#f4f3ee" id="browser-theme-color">
+  <link rel="icon" href="data:,">
+  <title>OneAquaHealth · Evidence dashboard</title>
+  <link rel="stylesheet" href="/static/styles.css">
+  <link rel="stylesheet" href="/static/studio.css">
+  <script type="module" src="/static/js/app.js"></script>
+</head>
+
+<body>
+  <a class="skip-link" href="#main-content">Skip to dashboard content</a>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Primary navigation">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span><strong>OneAquaHealth</strong><small>Evidence workspace</small></span>
+      </div>
+      <nav class="primary-nav">
+        <button class="nav-item is-active" type="button" data-route="overview" aria-current="page">
+          <span class="nav-icon nav-icon-overview" aria-hidden="true"></span>
+          <span>Overview</span>
+        </button>
+        <!-- <button class="nav-item" type="button" data-route="ingestion">
             <span class="nav-icon nav-icon-ingestion" aria-hidden="true"></span>
             <span>Ingestion</span>
           </button>
           <button class="nav-item" type="button" data-route="reports">
             <span class="nav-icon nav-icon-reports" aria-hidden="true"></span>
             <span>Reports</span>
-          </button>
-          <button class="nav-item" type="button" data-route="studio">
-            <span class="nav-icon" aria-hidden="true">✦</span><span class="nav-label-wide">Surveillance</span><span class="nav-label-small">Studio</span>
-          </button>
-        </nav>
-        <label class="theme-control" for="theme-selector">
-          <span class="eyebrow">Appearance</span>
-          <select id="theme-selector" aria-label="Dashboard theme">
-            <option value="aqua">Aqua</option>
-            <option value="aqua-dark">Aqua dark</option>
-            <option value="white">White</option>
-            <option value="dark">Dark</option>
-          </select>
-        </label>
-        <div class="sidebar-foot">
-          <span class="eyebrow">Track 7 prototype</span>
-          <p>FHIR R4 evidence across water, environment and population health.</p>
-          <button id="about-demo" class="text-button" type="button">About this demo</button>
+          </button> -->
+        <button class="nav-item" type="button" data-route="studio">
+          <span class="nav-icon" aria-hidden="true">✦</span><span class="nav-label-wide">Surveillance</span><span
+            class="nav-label-small">Studio</span>
+        </button>
+      </nav>
+      <label class="theme-control" for="theme-selector">
+        <span class="eyebrow">Appearance</span>
+        <select id="theme-selector" aria-label="Dashboard theme">
+          <option value="aqua">Aqua</option>
+          <option value="aqua-dark">Aqua dark</option>
+          <option value="white">White</option>
+          <option value="dark">Dark</option>
+        </select>
+      </label>
+      <div class="sidebar-foot">
+        <span class="eyebrow">Track 7 prototype</span>
+        <p>FHIR R4 evidence across water, environment and population health.</p>
+        <button id="about-demo" class="text-button" type="button">About this demo</button>
+      </div>
+    </aside>
+
+    <section class="app-area">
+      <header class="topbar">
+        <div class="mobile-brand"><span class="brand-mark"
+            aria-hidden="true"><i></i><i></i><i></i></span><strong>OneAquaHealth</strong></div>
+        <div class="context-controls">
+          <label class="control-label" for="site-selector">Current station</label>
+          <select id="site-selector" aria-label="Current station"></select>
         </div>
-      </aside>
+        <div class="topbar-actions">
+          <div class="mode-indicator" id="mode-indicator"><span></span>Mock dataset</div>
+          <label class="persona-control" for="persona-selector">
+            <span>Demo persona</span>
+            <select id="persona-selector" aria-describedby="persona-note">
+              <option value="analyst">Analyst</option>
+              <option value="viewer">Viewer</option>
+              <option value="operator">Data operator</option>
+            </select>
+          </label>
+        </div>
+      </header>
 
-      <section class="app-area">
-        <header class="topbar">
-          <div class="mobile-brand"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><strong>OneAquaHealth</strong></div>
-          <div class="context-controls">
-            <label class="control-label" for="site-selector">Current station</label>
-            <select id="site-selector" aria-label="Current station"></select>
-          </div>
-          <div class="topbar-actions">
-            <div class="mode-indicator" id="mode-indicator"><span></span>Mock dataset</div>
-            <label class="persona-control" for="persona-selector">
-              <span>Demo persona</span>
-              <select id="persona-selector" aria-describedby="persona-note">
-                <option value="analyst">Analyst</option>
-                <option value="viewer">Viewer</option>
-                <option value="operator">Data operator</option>
-              </select>
-            </label>
-          </div>
-        </header>
+      <main id="main-content" tabindex="-1">
+        <div id="route-content" aria-live="polite"></div>
+        <div id="studio-root" hidden></div>
+      </main>
+    </section>
+  </div>
 
-        <main id="main-content" tabindex="-1">
-          <div id="route-content" aria-live="polite"></div>
-          <div id="studio-root" hidden></div>
-        </main>
-      </section>
-    </div>
+  <div id="drawer-root"></div>
+  <div id="toast-root" class="toast-stack" aria-live="polite" aria-atomic="true"></div>
+  <p id="persona-note" class="sr-only">Persona switching simulates a proposed future authorization policy and is not
+    production authentication.</p>
+</body>
 
-    <div id="drawer-root"></div>
-    <div id="toast-root" class="toast-stack" aria-live="polite" aria-atomic="true"></div>
-    <p id="persona-note" class="sr-only">Persona switching simulates a proposed future authorization policy and is not production authentication.</p>
-  </body>
 </html>

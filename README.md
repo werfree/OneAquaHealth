@@ -77,6 +77,46 @@ Keep credentials out of source control. The public MQTT and HAPI FHIR defaults a
 
 ## Start the services
 
+After installing the dependencies, start the gateway and evidence dashboard
+together from the repository root with one command (Linux, macOS, or Windows):
+
+```powershell
+python run.py
+```
+
+The launcher automatically uses `.venv` when present and reads the root `.env`.
+It preserves environment settings, including ports, live/mock mode and broker
+workers. It checks startup readiness, prints the dashboard/Studio addresses,
+and stops both Python services when you press Ctrl+C. If either service fails,
+the launcher stops its sibling. Occupied ports are reported without taking over
+existing processes.
+
+For the lightweight setup without MQTT/RabbitMQ consumers:
+
+```powershell
+python run.py --no-brokers
+```
+
+Optional flags: `--open` opens the browser after startup; `--rabbitmq` starts
+the included RabbitMQ Docker Compose service and enables broker consumers
+(Docker must be available; configure the MQTT broker separately). RabbitMQ
+remains running after Ctrl+C; stop it with `docker compose stop rabbitmq`.
+`--app-port 8001 --dashboard-port 8090` overrides ports for this launch and
+points the dashboard at the selected local gateway. No data is automatically
+published or seeded. Use `python run.py --help` for all options.
+
+After reinstalling the root package, `oah-run` provides the same launcher;
+`./run-demo.sh all` is also available on systems with Bash. The existing
+separate-service commands below remain supported.
+
+To access the dashboard from other devices on the same network, set
+`DASHBOARD_HOST=0.0.0.0` in `.env` and restart the launcher. On those devices,
+open `http://<your-computer-LAN-IP>:8090` (use your configured dashboard port).
+Find that IP with `ipconfig` on Windows or `hostname -I` on Linux. Allow the
+dashboard port through your firewall on your private network if needed.
+Keep `OAH_LIVE_BASE_URL` pointing to the gateway on this computer: the
+dashboard proxies requests to it, so browsers only need the dashboard port.
+
 Start RabbitMQ and the ingestion gateway in separate PowerShell terminals:
 
 ```powershell
