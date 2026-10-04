@@ -166,7 +166,7 @@ The API also includes the District Surveillance Officer Studio described below.
 
 The evidence workspace is a separate application at port 8090. Its **Overview** shows dataset scope, station comparison, observations, and findings. A selected station has **Context**, **Evidence**, and **Relationships** views. The theme selector offers Aqua, Aqua dark, White, and Dark themes.
 
-In live mode, the overview and station records come from tagged FHIR data through the ingestion gateway. Evidence references are derived from returned observations, screening results, health measures, and cohort references. The live gateway does not currently expose a relationship-graph endpoint, so the graph view is unavailable in live mode.
+In live mode, the overview and station records come from tagged FHIR data through the ingestion gateway. The overview summary renders as soon as it is available while the selected station loads independently. Evidence references are derived from returned observations, screening results, health measures, and cohort references. The live gateway does not currently expose a relationship-graph endpoint, so the graph view is unavailable in live mode.
 
 The workspace also includes an ingestion workbench and Site One Health reports. In live mode, supplied-sample execution is request-scoped; durable run history and retry are not available. The report lifecycle and report downloads are not connected to a live gateway endpoint. The workspace's persona selector demonstrates proposed access scopes and is not production authentication or authorization.
 
@@ -247,76 +247,7 @@ Adding `--ingest` uploads the generated series. `./run-demo.sh seed` also seeds 
 
 Screening references depend on the station's configured city. Indian stations use the configured CPCB and IS 10500 reference rules; European stations retain the existing nitrate-as-N, pH, and zinc conventions. The assistant's threshold lookup uses the same city selection. These screening references are prototype values, not universal safety standards or enforcement limits. New stations need an entry in the site gazetteer to select a city reliably.
 
-<<<<<<< Updated upstream
-The gateway also serves the District Surveillance Officer Studio at
-`http://localhost:8001/api/officer/panel` (use your configured `APP_PORT`).
-The evidence dashboard also integrates Studio natively at
-`http://localhost:8090/studio`. Choose **Surveillance** in the primary navigation
-(**Studio** on mobile). Choose the current station or all stations, enter a question,
-and watch tool activity, charts, and the answer arrive. Navigating away and returning keeps the current results; **Stop** interrupts the browser request,
-and **New** clears the visible investigations. Each question starts a fresh
-investigation rather than a conversation with model memory.
-
-The Studio page follows all four dashboard themes and uses the dashboard's
-origin for streaming and downloads. Executive reports download as HTML; open
-the file and print to save as PDF. Figures are limited to the selected
-investigation. Studio is available to the Analyst demo persona in live mode;
-mock mode offers a link to the live workspace. Both the dashboard and gateway
-must be running. The standalone gateway Studio remains available.
-
-The Studio streams an investigation using server-sent events. The analyst can
-choose data tools and charts: severity matrices, rankings, trends, scatter
-plots, longitudinal river profiles, and exceedance persistence. Analyses are
-computed in Python. Peak offsets are descriptive comparisons, not evidence of
-causation. `OPENAI_API_KEY` is required for investigations and executive prose;
-station data, analysis routes, and exports can be used without it.
-
-| Gateway route | Purpose |
-|---|---|
-| `GET /api/officer/stations` | Station metadata, district, and reach |
-| `GET /api/officer/wards?days=28` | Prioritized screening and change in notified cases |
-| `GET /api/officer/trend?site_id=yam-ito&indicator=bod&days=28` | Chronological series and period comparison |
-| `GET /api/officer/profile?river=Yamuna&indicator=faecal_coliform` | Readings along the river and steps between stations |
-| `GET /api/officer/persistence?days=28` | Days exceeding the criterion and consecutive sampling runs |
-| `GET /api/officer/offset?site_id=yam-ito&days=28` | Offset between water and notified-case peaks |
-| `POST /api/officer/studio/run` with `{question}` | Stream tool calls, chart specifications, and an answer |
-| `GET /api/officer/studio/report/{session}` | Download the investigation transcript as HTML |
-| `POST /api/officer/studio/executive` with `{session, figures?}` | Executive HTML report with charts and print-to-PDF styling |
-| `GET /api/officer/export/readings.csv?days=28` | Environmental readings and screening references |
-| `GET /api/officer/export/surveillance.csv?days=28` | Case counts, rates, and population denominators |
-| `GET /api/officer/export/bundle.json?site_id=yam-ito&days=28` | FHIR collection Bundle containing station observations |
-| `GET /api/officer/report/facts?days=28` | Computed report facts without a model call |
-
-Studio transcripts and sessions live in process memory and expire on restart.
-The Studio's exports are separate from the evidence dashboard's mock report
-lifecycle. Neither interface implements production authentication.
-
-Public-health JSON envelopes additionally accept `disease_surveillance` lines
-with `condition`, `cases`, `population_at_risk`, and optional rate and baseline.
-Rates are derived per 100,000 when omitted. FHIR health observations retain the
-cases, denominator, and baseline as components; existing risk-score envelopes
-and the European CSV input continue to work.
-
-Screening selects the station's city. Indian stations use the incoming CPCB
-and IS 10500 reference rules; European stations retain the existing nitrate-as-N,
-pH, and zinc conventions. The assistant's `get_thresholds(city=...)` tool uses
-the same selection. These are prototype references, not enforcement limits.
-New stations need a gazetteer entry to select a city reliably.
-
-To generate the 28-day synthetic demonstration series without uploading it:
-
-```bash
-.venv/bin/python demo/generate_timeseries.py --days 28
-```
-
-To generate and upload all 192 events (168 water events and 24 weekly health
-returns across six Indian stations), add `--ingest`, or run `./run-demo.sh seed`.
-Seeding uses the root `.env` and runs the pipeline directly, so broker workers
-are unnecessary. The data is synthetic. `?autorun=1` or Shift+D starts the
-Studio's automatic demonstration.
-=======
 The FHIR briefing and dashboard preserve units and chemical basis. Environmental and health records may cover different observation periods. Results describe co-location or association only unless a separate, appropriate study establishes more.
->>>>>>> Stashed changes
 
 ## Tests and examples
 

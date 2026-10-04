@@ -39,6 +39,7 @@ function applyTheme(themeId, { persist = false } = {}) {
 }
 
 function syncChrome() {
+  document.body.classList.toggle("studio-route", state.route === "studio");
   personaSelector.value = state.role;
   if (state.themeConfig) {
     themeSelector.innerHTML = state.themeConfig.themes.map(theme => `<option value="${escapeHtml(theme.id)}">${escapeHtml(theme.label)}${theme.id === state.themeConfig.defaultTheme ? " · Default" : ""}</option>`).join("");
@@ -73,6 +74,7 @@ async function bootstrap() {
       ? state.selectedSiteId
       : summary.sites[0]?.id || null;
     setState({ session, summary, selectedSiteId, loading: false });
+    render();
     if (selectedSiteId) await loadSite(selectedSiteId, false);
     if (state.route === "ingestion") await loadRuns();
     if (state.route === "reports") await loadReports();
@@ -166,7 +168,7 @@ function renderOverview() {
         </table></div></div>
       </section>
       <section class="panel" id="site-workspace">
-        ${current ? renderSiteWorkspace(current) : `<div class="loading"><span class="sr-only">Loading selected station</span></div>`}
+        ${current ? renderSiteWorkspace(current) : state.error ? errorState(state.error, "Selected station") : `<div class="loading"><span class="sr-only">Loading selected station</span></div>`}
       </section>
     </div>
     ${renderAssistant()}`;
