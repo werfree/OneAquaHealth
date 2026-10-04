@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" role="img"
+     aria-label="Boundary card: Co-location is not causation.">
+  <defs>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#1F6FB2"/>
+      <stop offset="1" stop-color="#4FA3D8"/>
+    </linearGradient>
+    <style>
+      .ink   { fill:#16232B; font-family:"Inter","Segoe UI","Helvetica Neue",Arial,sans-serif; }
+      .muted { fill:#5B6B75; font-family:"Inter","Segoe UI","Helvetica Neue",Arial,sans-serif; }
+    </style>
+  </defs>
+
+  <!-- Full-frame statement card (holds alone; kept clear of the caption band at the bottom). -->
+  <rect width="1920" height="1080" fill="#F7F5F0"/>
+  <rect x="0" y="0" width="1920" height="6" fill="url(#accent)"/>
+
+  <rect x="240" y="300" width="1440" height="420" rx="16" fill="#FFFFFF" stroke="#E3DED3"/>
+  <text class="ink" x="320" y="430" font-size="72" font-weight="800">
+    Co-location is not causation.
+  </text>
+  <rect x="324" y="470" width="300" height="5" fill="url(#accent)"/>
+
+  <text class="muted" x="320" y="548" font-size="30">
+    These are co-located synthetic records. A shared Location, a temporal offset, and parallel trends
+  </text>
+  <text class="muted" x="320" y="590" font-size="30">
+    justify investigation — they do not establish that river conditions caused the health pattern.
+  </text>
+  <text class="muted" x="320" y="662" font-size="24" font-style="italic">
+    Prototype screening references — not statutory limits.
+  </text>
+</svg>

@@ -1,0 +1,170 @@
+# vidkit spec — OneAquaHealth demo video (worked example)
+#
+# Reproduces `video/oneaquahealth-demo.mp4` from the running OneAquaHealth
+# services. See ../../../video/README.md (produce/README.md) for the original
+# pipeline this generalises.
+#
+# Run from the repo root, e.g.:
+#   PYTHONPATH=vidkit vidkit doctor vidkit/examples/oneaquahealth/video.yaml
+#   PYTHONPATH=vidkit vidkit build  vidkit/examples/oneaquahealth/video.yaml --out video
+#
+# Requires: gateway on :8000 with OAH_DATASET_TAG=oah-demo-final, dashboard on
+# :8090, ffmpeg, rsvg-convert, playwright (+Chrome), piper (+ a voice model).
+
+project:
+  title: "One river, two kinds of evidence — Yamuna at ITO Bridge"
+  slug: oneaquahealth
+  output: oneaquahealth-demo.mp4
+  size: [1920, 1080]
+  fps: 30
+  min_seconds: 180
+  max_seconds: 300
+
+voice:
+  engine: piper
+  # Relative to this spec's folder. Point this at any piper voice you have.
+  model: ../../../video/_capture/voices/en_US-lessac-medium.onnx
+  length_scale: 1.08          # calm, measured pace -> ~4:19 total
+
+narration:
+  source: narration.md        # scenes "## Scene N — … · mm:ss–mm:ss", spoken lines in **bold**
+
+provider: provider            # provider.py — supplies live data + custom panels
+
+# ---------------------------------------------------------------------------
+# Real screen recordings of the running product (never fabricated UI).
+# Each asserts the mode indicator reads "Live adapter" so a mock frame can never
+# be captured silently.
+# ---------------------------------------------------------------------------
+captures:
+  - name: overview
+    url: "http://127.0.0.1:8090/?mode=live"
+    viewport: [1920, 1080]
+    device_scale: 2
+    actions:
+      - {type: wait, seconds: 2.5}
+      - {type: select, selector: "#site-selector", value: "yam-ito"}
+      - {type: wait, seconds: 4.5}
+      - {type: eval, script: "window.scrollTo(0, 0)"}
+    assert: {selector: "#mode-indicator", contains: "Live adapter"}
+
+  - name: context
+    url: "http://127.0.0.1:8090/?mode=live"
+    viewport: [1920, 1080]
+    device_scale: 2
+    actions:
+      - {type: wait, seconds: 2.5}
+      - {type: select, selector: "#site-selector", value: "yam-ito"}
+      - {type: wait, seconds: 4.5}
+      - {type: scroll, selector: "#site-workspace"}
+      - {type: wait, seconds: 0.8}
+    assert: {selector: "#mode-indicator", contains: "Live adapter"}
+
+  - name: evidence
+    url: "http://127.0.0.1:8090/?mode=live"
+    viewport: [1920, 1080]
+    device_scale: 2
+    actions:
+      - {type: wait, seconds: 2.5}
+      - {type: select, selector: "#site-selector", value: "yam-ito"}
+      - {type: wait, seconds: 4.5}
+      - {type: click, selector: "[data-local-tab=evidence]"}
+      - {type: wait, seconds: 2.0}
+      - {type: scroll, selector: "#site-workspace"}
+    assert: {selector: "#mode-indicator", contains: "Live adapter"}
+
+  - name: drawer
+    url: "http://127.0.0.1:8090/?mode=live"
+    viewport: [1920, 1080]
+    device_scale: 2
+    actions:
+      - {type: wait, seconds: 2.5}
+      - {type: select, selector: "#site-selector", value: "yam-ito"}
+      - {type: wait, seconds: 4.5}
+      - {type: click, selector: "[data-local-tab=evidence]"}
+      - {type: wait, seconds: 2.0}
+      - {type: click, selector: ".evidence-row"}
+      - {type: wait, seconds: 1.5}
+    assert: {selector: "#mode-indicator", contains: "Live adapter"}
+
+  - name: gateway
+    url: "http://127.0.0.1:8000/"
+    viewport: [1920, 1080]
+    device_scale: 2
+    actions:
+      - {type: wait, seconds: 3.0}
+      - {type: eval, script: "window.scrollTo(0, 760)"}
+      - {type: wait, seconds: 0.8}
+
+# ---------------------------------------------------------------------------
+# Data panels drawn from the provider's live values.
+# ---------------------------------------------------------------------------
+charts:
+  - {name: endpoints, kind: endpoints,   dataset: endpoints}
+  - {name: trend,     kind: oah_trend,   dataset: trend}
+  - {name: profile,   kind: oah_profile, dataset: profile}
+  - {name: offset,    kind: oah_offset,  dataset: offset}
+  - {name: ingest,    kind: oah_ingest,  dataset: ingest}
+
+# ---------------------------------------------------------------------------
+# Scene plan. Shot weights split a scene's (measured) narration duration.
+# ---------------------------------------------------------------------------
+scenes:
+  - n: 0
+    title: Title card
+    shots:
+      - {still: assets/00-title.svg, effect: zoom}
+  - n: 1
+    title: Scope and mode
+    shots:
+      - {capture: overview, effect: hold}
+  - n: 2
+    title: Two kinds of evidence
+    shots:
+      - {capture: context, effect: hold, weight: 0.6}
+      - {still: assets/two-streams.svg, effect: zoom, weight: 0.4}
+  - n: 3
+    title: What deserves attention
+    shots:
+      - {capture: drawer, effect: hold}
+  - n: 4
+    title: Boundary card
+    shots:
+      - {still: assets/04-boundary.svg, effect: hold}
+  - n: 5
+    title: Open the Studio (deterministic fallback)
+    shots:
+      - {chart: endpoints, effect: hold}
+  - n: 6
+    title: Watch the work
+    shots:
+      - {chart: trend, effect: hold, weight: 0.55}
+      - {chart: profile, effect: hold, weight: 0.45}
+  - n: 7
+    title: The honest label
+    shots:
+      - {chart: offset, effect: hold}
+  - n: 8
+    title: Where did these records come from
+    shots:
+      - {chart: ingest, effect: hold}
+  - n: 9
+    title: Convergence and close
+    shots:
+      - {still: assets/convergence.svg, effect: zoom, weight: 0.30}
+      - {capture: overview, effect: hold, weight: 0.36}
+      - {still: assets/09-end.svg, effect: zoom, weight: 0.34}
+
+# ---------------------------------------------------------------------------
+# Automated acceptance checks.
+# ---------------------------------------------------------------------------
+guard:
+  banned:
+    - "legal limit"
+    - "identifies the discharge"
+    - "a real event"
+    - "proves a"
+  required:
+    - "synthetic"
+    - "causation"
+  require_live_mode: true

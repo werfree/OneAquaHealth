@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" role="img"
+     aria-label="End card: OneAquaHealth value statement, synthetic-data and prototype-screening disclaimers.">
+  <defs>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#1F6FB2"/>
+      <stop offset="1" stop-color="#4FA3D8"/>
+    </linearGradient>
+    <style>
+      .ink   { fill:#16232B; font-family:"Inter","Segoe UI","Helvetica Neue",Arial,sans-serif; }
+      .muted { fill:#5B6B75; font-family:"Inter","Segoe UI","Helvetica Neue",Arial,sans-serif; }
+      .accenttext { fill:#1F6FB2; font-family:"Inter","Segoe UI","Helvetica Neue",Arial,sans-serif;
+                    letter-spacing:.14em; text-transform:uppercase; }
+      .mono  { font-family:"JetBrains Mono","SFMono-Regular",Menlo,Consolas,monospace; }
+    </style>
+  </defs>
+
+  <rect width="1920" height="1080" fill="#F7F5F0"/>
+  <rect x="0" y="0" width="1920" height="6" fill="url(#accent)"/>
+
+  <text class="accenttext" x="200" y="180" font-size="24" font-weight="700">One river, two kinds of evidence</text>
+
+  <!-- value sentence -->
+  <text class="ink" x="200" y="300" font-size="52" font-weight="800">OneAquaHealth makes heterogeneous environmental</text>
+  <text class="ink" x="200" y="366" font-size="52" font-weight="800">and population-health evidence interoperable,</text>
+  <text class="ink" x="200" y="432" font-size="52" font-weight="800">visible and traceable — while staying honest</text>
+  <text class="ink" x="200" y="498" font-size="52" font-weight="800">about what it cannot establish.</text>
+
+  <rect x="204" y="548" width="300" height="5" fill="url(#accent)"/>
+
+  <!-- the discipline line -->
+  <text class="muted" x="200" y="632" font-size="36" font-style="italic">
+    A signal worth investigating — and the discipline to say only that.
+  </text>
+
+  <!-- disclaimer panel -->
+  <g transform="translate(200,656)">
+    <rect x="0" y="0" width="1520" height="196" rx="12" fill="#FFFFFF" stroke="#E3DED3"/>
+    <text class="ink" x="36" y="52" font-size="26" font-weight="700">Synthetic demonstration data</text>
+    <text class="muted" x="36" y="90" font-size="24">
+      The method is real; the readings are not. Not observed CPCB / IDSP / IHIP / state-board data.
+    </text>
+
+    <text class="ink" x="36" y="140" font-size="26" font-weight="700">Prototype screening references</text>
+    <text class="muted" x="36" y="176" font-size="24">
+      CPCB / IS 10500 screening values quoted in the code — not statutory or enforcement limits.
+    </text>
+  </g>
+
+  <!-- provenance strip -->
+  <text class="mono" x="200" y="862" font-size="22" fill="#5B6B75">
+    dataset-tag: <tspan fill="#1F6FB2" font-weight="700">oah-demo-final</tspan>
+    &#160;&#183;&#160; shared HAPI FHIR sandbox: https://hapi.fhir.org/baseR4
+  </text>
+</svg>
