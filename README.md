@@ -4,6 +4,11 @@ OneAquaHealth brings environmental monitoring, citizen-science observations, and
 
 The intended use is to help environmental and public-health teams find relevant records and coordinate follow-up. A shared location or screening flag indicates an association for investigation; it does not establish causation or a clinical diagnosis.
 
+## Project demo
+
+- [Watch the project demo on YouTube](https://youtu.be/C1mKqq3cQqw?si=Q8Y9dZbK9zy5JwR6)
+- [Open the live dashboard](https://oah.werfree.fun)
+
 ## Architecture and data flow
 
 - [System architecture](docs/system-architecture.md) - production-oriented component view.
