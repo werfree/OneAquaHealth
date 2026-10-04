@@ -1,0 +1,412 @@
+1
+00:00:00,000 --> 00:00:01,650
+One location on the Yamuna.
+
+2
+00:00:01,690 --> 00:00:04,340
+Two completely different kinds of
+evidence.
+
+3
+00:00:04,380 --> 00:00:07,970
+And one question: what does the evidence
+actually support?
+
+4
+00:00:08,010 --> 00:00:09,548
+We're not touring features.
+
+5
+00:00:09,588 --> 00:00:13,407
+This is one investigation of one place —
+the Yamuna at ITO Bridge,
+
+6
+00:00:13,447 --> 00:00:15,745
+in Delhi. The dashboard is in live mode,
+
+7
+00:00:15,785 --> 00:00:19,662
+and everything you're about to see is read
+live from a FHIR server,
+
+8
+00:00:19,702 --> 00:00:21,475
+scoped to a single dataset tag.
+
+9
+00:00:21,515 --> 00:00:25,450
+That tag is how we know these records are
+ours on a server that many
+
+10
+00:00:25,490 --> 00:00:26,210
+people share.
+
+11
+00:00:26,250 --> 00:00:28,388
+Same place, two kinds of evidence.
+
+12
+00:00:28,428 --> 00:00:33,001
+Above the line: water the environment
+agency measured — faecal coliform,
+
+13
+00:00:33,041 --> 00:00:37,037
+BOD, oxygen. Below it: case counts the
+health system notified —
+
+14
+00:00:37,077 --> 00:00:38,638
+acute diarrhoeal disease.
+
+15
+00:00:38,678 --> 00:00:41,393
+Notice they don't arrive on the same
+clock.
+
+16
+00:00:41,433 --> 00:00:45,172
+The water is measured daily; the cases are
+reported weekly.
+
+17
+00:00:45,212 --> 00:00:48,760
+That difference matters in a moment, so
+keep it in mind.
+
+18
+00:00:48,800 --> 00:00:51,522
+The dashboard surfaces what deserves
+attention:
+
+19
+00:00:51,562 --> 00:00:53,755
+a reading above a screening reference.
+
+20
+00:00:53,795 --> 00:00:55,636
+Open it and you get two things —
+
+21
+00:00:55,676 --> 00:00:58,339
+the actual FHIR Observation that was
+measured,
+
+22
+00:00:58,379 --> 00:01:01,865
+and the rule it was screened against, with
+its stated basis.
+
+23
+00:01:01,905 --> 00:01:06,038
+That "live-evidence" reference is a
+dashboard-level link built from the
+
+24
+00:01:06,078 --> 00:01:06,802
+station data;
+
+25
+00:01:06,842 --> 00:01:10,622
+the record underneath really is a FHIR
+Observation on the server.
+
+26
+00:01:10,662 --> 00:01:14,207
+And the "2 500" you see is the CPCB
+bathing-water criterion —
+
+27
+00:01:14,247 --> 00:01:16,910
+quoted from the code, not recalled by a
+model.
+
+28
+00:01:16,950 --> 00:01:20,970
+Before we go further: everything here is
+one shared place.
+
+29
+00:01:21,010 --> 00:01:23,000
+Co-location is not causation.
+
+30
+00:01:23,040 --> 00:01:23,700
+Hold that.
+
+31
+00:01:23,740 --> 00:01:27,219
+Let's ask two questions a surveillance
+officer actually asks.
+
+32
+00:01:27,259 --> 00:01:29,412
+Is this a one-off, or is it sustained?
+
+33
+00:01:29,452 --> 00:01:32,296
+And does it look the same everywhere on
+the river,
+
+34
+00:01:32,336 --> 00:01:34,085
+or is there a pattern along it?
+
+35
+00:01:34,125 --> 00:01:36,450
+I'll investigate ITO over the last month.
+
+36
+00:01:36,490 --> 00:01:37,547
+Watch what it does.
+
+37
+00:01:37,587 --> 00:01:40,724
+It fetches the screening criteria first —
+deliberately,
+
+38
+00:01:40,764 --> 00:01:43,208
+so it never quotes a threshold from
+memory.
+
+39
+00:01:43,248 --> 00:01:46,558
+It ranks the wards, then it draws the
+river in flow order:
+
+40
+00:01:46,598 --> 00:01:48,926
+Wazirabad upstream, then ITO, then Okhla.
+
+41
+00:01:48,966 --> 00:01:51,005
+See the step between the first two —
+
+42
+00:01:51,045 --> 00:01:53,546
+that's where the load appears on this
+reach.
+
+43
+00:01:53,586 --> 00:01:57,358
+And the persistence strip answers "one-off
+or sustained": for ITO,
+
+44
+00:01:57,398 --> 00:01:59,265
+it's sustained across the window.
+
+45
+00:01:59,305 --> 00:02:03,019
+Every figure in that answer is checked
+against the data the tools
+
+46
+00:02:03,059 --> 00:02:06,080
+actually returned, and the receipt is the
+green chip.
+
+47
+00:02:06,120 --> 00:02:08,427
+Here's the part I'd stake the project on.
+
+48
+00:02:08,467 --> 00:02:10,946
+The gap between the two peaks is nine days
+—
+
+49
+00:02:10,986 --> 00:02:12,835
+but look at what it calls itself:
+
+50
+00:02:12,875 --> 00:02:16,213
+a descriptive offset between two maxima,
+not a correlation.
+
+51
+00:02:16,253 --> 00:02:19,362
+In this window there are only four weekly
+case reports.
+
+52
+00:02:19,402 --> 00:02:22,854
+You cannot compute a meaningful
+correlation from four points,
+
+53
+00:02:22,894 --> 00:02:25,544
+and the software says so instead of
+pretending.
+
+54
+00:02:25,584 --> 00:02:27,090
+That is the honesty I mean.
+
+55
+00:02:27,130 --> 00:02:29,606
+So where did those ITO records come from?
+
+56
+00:02:29,646 --> 00:02:32,183
+Let's send one reading down the real path.
+
+57
+00:02:32,223 --> 00:02:36,417
+Watch the stages: the raw payload is
+validated into a typed envelope,
+
+58
+00:02:36,457 --> 00:02:40,405
+screened against the prototype references
+before any conversion —
+
+59
+00:02:40,445 --> 00:02:44,210
+so an exceedance is raised even if the
+server is unreachable —
+
+60
+00:02:44,250 --> 00:02:47,216
+then mapped to FHIR, tagged with the
+dataset tag,
+
+61
+00:02:47,256 --> 00:02:50,039
+wrapped in a transaction Bundle, and
+uploaded.
+
+62
+00:02:50,079 --> 00:02:52,616
+Here the same reading raises a HIGH alert,
+
+63
+00:02:52,656 --> 00:02:56,605
+and you can see the resources it becomes:
+a Device, Observations,
+
+64
+00:02:56,645 --> 00:02:57,893
+Locations, Specimens.
+
+65
+00:02:57,933 --> 00:03:02,250
+That's the identical code path a real
+sensor or a broker message takes.
+
+66
+00:03:02,290 --> 00:03:03,798
+Sensors arrive over MQTT.
+
+67
+00:03:03,838 --> 00:03:06,645
+Volunteer surveys arrive over a message
+queue.
+
+68
+00:03:06,685 --> 00:03:10,731
+Public-health returns arrive over HTTP, as
+JSON or as a CSV batch.
+
+69
+00:03:10,771 --> 00:03:14,445
+Different transports — but once inside,
+the same validation,
+
+70
+00:03:14,485 --> 00:03:18,345
+the same screening, the same FHIR mapping,
+and the same tagged,
+
+71
+00:03:18,385 --> 00:03:19,459
+idempotent upload.
+
+72
+00:03:19,499 --> 00:03:23,421
+That's what makes water evidence and
+health evidence land in one
+
+73
+00:03:23,461 --> 00:03:24,659
+interoperable store.
+
+74
+00:03:24,699 --> 00:03:28,745
+Back where we started — same location,
+same two kinds of evidence,
+
+75
+00:03:28,785 --> 00:03:33,016
+but now we know where every record came
+from and how far the evidence
+
+76
+00:03:33,056 --> 00:03:36,607
+lets us go. Everything you've seen came
+from live records:
+
+77
+00:03:36,647 --> 00:03:39,764
+we used only what still makes sense with
+live data,
+
+78
+00:03:39,804 --> 00:03:43,355
+and left the prototype's mock-only screens
+out of the cut.
+
+79
+00:03:43,395 --> 00:03:47,626
+OneAquaHealth makes heterogeneous
+environmental and population-health
+
+80
+00:03:47,666 --> 00:03:50,535
+evidence interoperable, visible and
+traceable —
+
+81
+00:03:50,575 --> 00:03:53,754
+while staying honest about what it cannot
+establish.
+
+82
+00:03:53,794 --> 00:03:56,664
+Synthetic data, prototype screening
+references,
+
+83
+00:03:56,704 --> 00:04:00,873
+and a shared demo server — the method is
+real, the readings are not.
+
+84
+00:04:00,913 --> 00:04:05,331
+Co-located records, a descriptive pattern,
+a signal worth investigating.
+
+85
+00:04:05,371 --> 00:04:08,673
+Not causation. Confirmatory sampling is
+the next step,
+
+86
+00:04:08,713 --> 00:04:11,211
+and that decision stays with the officer.
+
+87
+00:04:11,251 --> 00:04:13,254
+One river. Two kinds of evidence.
+
+88
+00:04:13,294 --> 00:04:17,402
+A signal worth investigating — and the
+discipline to say only that.
+
+89
+00:04:17,442 --> 00:04:18,640
+Thanks for watching.

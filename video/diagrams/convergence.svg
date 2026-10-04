@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img"
+     aria-label="Three ingestion channels — MQTT telemetry, RabbitMQ citizen surveys, HTTP and CSV public health — converging into one shared pipeline that emits a tagged FHIR transaction Bundle.">
+  <defs>
+    <linearGradient id="acc" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#1F6FB2"/><stop offset="1" stop-color="#4FA3D8"/>
+    </linearGradient>
+    <marker id="arw" markerWidth="11" markerHeight="11" refX="8" refY="5.5" orient="auto">
+      <path d="M0,0 L11,5.5 L0,11 z" fill="#8A99A3"/>
+    </marker>
+    <marker id="arwBlue" markerWidth="11" markerHeight="11" refX="8" refY="5.5" orient="auto">
+      <path d="M0,0 L11,5.5 L0,11 z" fill="#1F6FB2"/>
+    </marker>
+    <style>
+      .ink   { fill:#16232B; font-family:"Inter","Segoe UI","Helvetica Neue",Arial,sans-serif; }
+      .muted { fill:#5B6B75; font-family:"Inter","Segoe UI","Helvetica Neue",Arial,sans-serif; }
+      .mono  { font-family:"JetBrains Mono","SFMono-Regular",Menlo,Consolas,monospace; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="900" fill="#F7F5F0"/>
+  <rect x="0" y="0" width="1600" height="6" fill="url(#acc)"/>
+
+  <text class="ink" x="80" y="92" font-size="40" font-weight="800">Three doors, one pipeline</text>
+  <text class="muted" x="80" y="136" font-size="24">Different transports in — the same validation, screening, mapping and tagged upload out.</text>
+
+  <!-- ===== Three inputs ===== -->
+  <!-- MQTT -->
+  <g transform="translate(80,220)">
+    <rect x="0" y="0" width="400" height="150" rx="14" fill="#FFFFFF" stroke="#E3DED3"/>
+    <text class="ink" x="28" y="52" font-size="27" font-weight="700">IoT telemetry</text>
+    <text class="muted" x="28" y="86" font-size="21">MQTT v5 · QoS 1 · manual ack</text>
+    <text class="mono" x="28" y="120" font-size="19" fill="#1F6FB2">oneaquahealth/sensors/+/+</text>
+  </g>
+  <!-- RabbitMQ -->
+  <g transform="translate(80,410)">
+    <rect x="0" y="0" width="400" height="150" rx="14" fill="#FFFFFF" stroke="#E3DED3"/>
+    <text class="ink" x="28" y="52" font-size="27" font-weight="700">Citizen survey</text>
+    <text class="muted" x="28" y="86" font-size="21">RabbitMQ durable queue</text>
+    <text class="mono" x="28" y="120" font-size="19" fill="#1F6FB2">ingestion.citizen_surveys</text>
+  </g>
+  <!-- HTTP + CSV -->
+  <g transform="translate(80,600)">
+    <rect x="0" y="0" width="400" height="150" rx="14" fill="#FFFFFF" stroke="#E3DED3"/>
+    <text class="ink" x="28" y="52" font-size="27" font-weight="700">Public health</text>
+    <text class="muted" x="28" y="86" font-size="21">HTTP JSON + CSV batch</text>
+    <text class="mono" x="28" y="115" font-size="19" fill="#1F6FB2">POST /ingest</text>
+    <text class="mono" x="28" y="139" font-size="19" fill="#1F6FB2">POST /ingest/public-health/csv</text>
+  </g>
+
+  <!-- arrows to pipeline -->
+  <g fill="none" stroke="#8A99A3" stroke-width="2.5" marker-end="url(#arw)">
+    <path d="M480,295 C600,295 610,430 690,445"/>
+    <path d="M480,485 C600,485 620,460 690,460"/>
+    <path d="M480,675 C600,675 610,500 690,475"/>
+  </g>
+
+  <!-- ===== Shared pipeline ===== -->
+  <g transform="translate(710,300)">
+    <rect x="0" y="0" width="360" height="320" rx="16" fill="#16232B"/>
+    <text x="28" y="50" font-size="22" fill="#8FBEDC" font-weight="700" letter-spacing="1">SHARED PIPELINE</text>
+    <text class="mono" x="28" y="92"  font-size="21" fill="#FFFFFF">1 · validate → envelope</text>
+    <text class="mono" x="28" y="128" font-size="21" fill="#FFFFFF">2 · screen vs references</text>
+    <text class="mono" x="28" y="164" font-size="21" fill="#FFFFFF">3 · map → OAH FHIR</text>
+    <text class="mono" x="28" y="200" font-size="21" fill="#FFFFFF">4 · tag → dataset tag</text>
+    <text class="mono" x="28" y="236" font-size="21" fill="#FFFFFF">5 · to_bundle (PUT)</text>
+    <text class="mono" x="28" y="272" font-size="21" fill="#FFFFFF">6 · upload_bundle</text>
+    <text x="28" y="304" font-size="18" fill="#8FBEDC">screening raises the alert before any upload</text>
+  </g>
+
+  <!-- arrow to output -->
+  <path d="M1070,460 L1180,460" fill="none" stroke="#1F6FB2" stroke-width="3" marker-end="url(#arwBlue)"/>
+
+  <!-- ===== Output bundle ===== -->
+  <g transform="translate(1200,320)">
+    <rect x="0" y="0" width="320" height="280" rx="16" fill="#FFFFFF" stroke="#1F6FB2" stroke-width="2"/>
+    <text x="26" y="48" font-size="22" fill="#1F6FB2" font-weight="700" letter-spacing="1">FHIR TRANSACTION</text>
+    <text x="26" y="86" font-size="34" fill="#16232B" font-weight="800">Bundle</text>
+    <text class="mono" x="26" y="126" font-size="19" fill="#5B6B75">type: transaction</text>
+    <text class="mono" x="26" y="154" font-size="19" fill="#5B6B75">entry: PUT &lt;Type&gt;/&lt;id&gt;</text>
+    <text class="mono" x="26" y="182" font-size="19" fill="#5B6B75">idempotent upsert</text>
+    <line x1="26" y1="206" x2="294" y2="206" stroke="#E3DED3"/>
+    <text class="mono" x="26" y="240" font-size="19" fill="#1F6FB2">meta.tag · oah-demo-final</text>
+  </g>
+
+  <!-- note -->
+  <text class="muted" x="80" y="820" font-size="23">
+    Replaying a reading <tspan font-style="italic">updates</tspan> the same resources instead of duplicating them — which is what
+    lets water and health evidence land in one interoperable store.
+  </text>
+</svg>

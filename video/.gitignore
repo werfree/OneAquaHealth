@@ -1,0 +1,7 @@
+# Large / regenerable intermediates produced by video/produce/*.py
+_build/
+_capture/
+
+# Large rendered media (regenerable; this repo has no Git LFS)
+*.mp4
+*.wav

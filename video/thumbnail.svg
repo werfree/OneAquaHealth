@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img"
+     aria-label="Thumbnail: One river, two kinds of evidence — Yamuna at ITO Bridge — synthetic demonstration dataset.">
+  <defs>
+    <linearGradient id="acc" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#1F6FB2"/><stop offset="1" stop-color="#4FA3D8"/>
+    </linearGradient>
+    <style>
+      .ink   { fill:#16232B; font-family:"Inter","Segoe UI","Helvetica Neue",Arial,sans-serif; }
+      .muted { fill:#5B6B75; font-family:"Inter","Segoe UI","Helvetica Neue",Arial,sans-serif; }
+      .eye   { fill:#1F6FB2; font-family:"Inter","Segoe UI","Helvetica Neue",Arial,sans-serif;
+               letter-spacing:.14em; text-transform:uppercase; }
+    </style>
+  </defs>
+
+  <rect width="1280" height="720" fill="#F7F5F0"/>
+  <rect x="0" y="0" width="1280" height="6" fill="url(#acc)"/>
+
+  <text class="eye" x="72" y="120" font-size="20" font-weight="700">OneAquaHealth · live FHIR demo</text>
+
+  <text class="ink" x="72" y="238" font-size="72" font-weight="800">One river,</text>
+  <text class="ink" x="72" y="316" font-size="72" font-weight="800">two kinds of evidence.</text>
+
+  <rect x="76" y="352" width="260" height="4" fill="url(#acc)"/>
+
+  <text class="ink" x="72" y="428" font-size="34" font-weight="600">Yamuna at ITO Bridge</text>
+  <text class="muted" x="72" y="470" font-size="24">Environmental measurements · Notified population health · HL7 FHIR R4</text>
+
+  <!-- synthetic-data tag -->
+  <g transform="translate(72,530)">
+    <rect x="0" y="0" width="500" height="58" rx="10" fill="#FBEFE6" stroke="#D98D52"/>
+    <text x="22" y="37" font-size="24" fill="#8A4A22" font-weight="700">Synthetic demonstration dataset</text>
+  </g>
+
+  <text class="muted" x="72" y="648" font-size="19" font-style="italic">
+    Dataset tag oah-demo-final · shared HAPI FHIR sandbox — not observed CPCB / IDSP data.
+  </text>
+
+  <!-- right-side stream glyph -->
+  <g transform="translate(880,180)">
+    <rect x="0" y="0" width="330" height="360" rx="16" fill="#FFFFFF" stroke="#E3DED3"/>
+    <text x="26" y="56"  font-size="26" font-weight="700" class="ink">&#128167; Water</text>
+    <text x="26" y="90"  font-size="19" class="muted">daily samples</text>
+    <line x1="26" y1="120" x2="304" y2="120" stroke="#E3DED3"/>
+    <text x="26" y="170" font-size="26" font-weight="700" class="ink">&#127973; Health</text>
+    <text x="26" y="204" font-size="19" class="muted">weekly returns</text>
+    <line x1="26" y1="234" x2="304" y2="234" stroke="#E3DED3"/>
+    <text x="26" y="284" font-size="22" font-weight="700" fill="#1F6FB2">&#8644; One Location</text>
+    <text x="26" y="318" font-size="20" font-family="JetBrains Mono,Menlo,monospace" fill="#16232B">yam-ito</text>
+  </g>
+</svg>

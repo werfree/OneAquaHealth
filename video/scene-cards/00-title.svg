@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" role="img"
+     aria-label="Title card: One river, two kinds of evidence. Yamuna at ITO Bridge — synthetic demonstration dataset.">
+  <defs>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#1F6FB2"/>
+      <stop offset="1" stop-color="#4FA3D8"/>
+    </linearGradient>
+    <style>
+      .ink   { fill:#16232B; font-family:"Inter","Segoe UI","Helvetica Neue",Arial,sans-serif; }
+      .muted { fill:#5B6B75; font-family:"Inter","Segoe UI","Helvetica Neue",Arial,sans-serif; }
+      .accenttext { fill:#1F6FB2; font-family:"Inter","Segoe UI","Helvetica Neue",Arial,sans-serif;
+                    letter-spacing:.14em; text-transform:uppercase; }
+    </style>
+  </defs>
+
+  <rect width="1920" height="1080" fill="#F7F5F0"/>
+  <!-- thin blue accent at top -->
+  <rect x="0" y="0" width="1920" height="6" fill="url(#accent)"/>
+
+  <!-- eyebrow -->
+  <text class="accenttext" x="220" y="360" font-size="26" font-weight="700">OneAquaHealth · Yamuna at ITO Bridge</text>
+
+  <!-- title -->
+  <text class="ink" x="220" y="470" font-size="96" font-weight="800">One river,</text>
+  <text class="ink" x="220" y="580" font-size="96" font-weight="800">two kinds of evidence.</text>
+
+  <!-- accent rule -->
+  <rect x="224" y="632" width="360" height="5" fill="url(#accent)"/>
+
+  <!-- subtitle -->
+  <text class="muted" x="220" y="710" font-size="40" font-weight="500">
+    Yamuna at ITO Bridge — synthetic demonstration dataset
+  </text>
+
+  <!-- three-stream strip -->
+  <g transform="translate(220,730)">
+    <rect x="0" y="0" width="1480" height="96" rx="12" fill="#FFFFFF" stroke="#E3DED3"/>
+    <text class="ink" x="34" y="42" font-size="27" font-weight="700">&#128167; Environmental measurements</text>
+    <text class="muted" x="34" y="76" font-size="22">daily in-situ water-quality samples</text>
+
+    <line x1="500" y1="18" x2="500" y2="78" stroke="#E3DED3"/>
+
+    <text class="ink" x="540" y="42" font-size="27" font-weight="700">&#127973; Notified population health</text>
+    <text class="muted" x="540" y="76" font-size="22">weekly acute-diarrhoeal-disease returns</text>
+
+    <line x1="1000" y1="18" x2="1000" y2="78" stroke="#E3DED3"/>
+
+    <text class="ink" x="1040" y="42" font-size="27" font-weight="700">&#8644; HL7 FHIR R4</text>
+    <text class="muted" x="1040" y="76" font-size="22">one shared, tagged record store</text>
+  </g>
+
+  <!-- footer scope line -->
+  <text class="muted" x="220" y="872" font-size="24">
+    Live view: <tspan font-weight="600" fill="#1F6FB2">http://127.0.0.1:8090/?mode=live</tspan>
+    &#160;&#183;&#160; Dataset tag <tspan font-weight="600">oah-demo-final</tspan>
+  </text>
+  <text class="muted" x="220" y="910" font-size="22" font-style="italic">
+    Synthetic demonstration data — the method is real, the readings are not.
+  </text>
+</svg>
