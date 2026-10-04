@@ -77,6 +77,8 @@ Keep credentials out of source control. The public MQTT and HAPI FHIR defaults a
 
 ## Start the services
 
+For automatic startup on Ubuntu, see the [systemd setup](docs/systemd.md).
+
 After installing the dependencies, start the gateway and evidence dashboard
 together from the repository root with one command (Linux, macOS, or Windows):
 
@@ -155,6 +157,12 @@ The gateway consumes the durable RabbitMQ queue `ingestion.citizen_surveys`. Rab
 ### Public-health indicators
 
 Submit a typed JSON event to `POST /ingest`, or upload a long-form CSV batch to `POST /ingest/public-health/csv`. CSV rows are grouped into events by `event_id`; each row represents a `risk_score` or `chemical_summary`. The sample file `demo/sample_public_health.csv` documents the accepted columns.
+
+The evidence dashboard also supports these files: open **Ingestion** in live
+mode, choose **Data operator**, select a UTF-8 JSON/CSV file (up to 5 MiB),
+preview it and click **Submit file**. A CSV template download is available.
+The page shows validation errors and per-event FHIR upload outcomes, including
+partial failures and upload-disabled results. See [dashboard file ingestion](dashboard/README.md#file-ingestion).
 
 The JSON public-health envelope also supports `disease_surveillance` measures with condition, case count, population at risk, and optional rate/baseline. When a rate is omitted, the pipeline can derive it per 100,000. Existing risk-score and chemical-summary events are supported as well.
 

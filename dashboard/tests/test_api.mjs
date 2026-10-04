@@ -95,3 +95,39 @@ test("mock mode retains persona headers and station endpoint", async () => {
   assert.equal(calls[0].path, `/api/mock/sites/${station.site_id}`);
   assert.equal(calls[0].headers["X-Demo-Role"], "viewer");
 });
+
+test("file adapter sends CSV bytes and JSON text with the appropriate content types", async () => {
+  const { api, calls } = await adapter({ defaultMode: "live" });
+  await api.submitFile("operator", { kind: "csv", text: "event_id,city\r\nexample,coimbra\r\n" });
+  await api.submitFile("operator", { kind: "json", text: '{"source_type":"IOT_TELEMETRY"}' });
+  assert.equal(calls[0].path, "/api/live/ingest/public-health/csv");
+  assert.equal(calls[0].headers["Content-Type"], "text/csv");
+  assert.equal(calls[0].body, "event_id,city\r\nexample,coimbra\r\n");
+  assert.equal(calls[1].path, "/api/live/ingest");
+  assert.equal(calls[1].headers["Content-Type"], "application/json");
+  assert.equal(calls[1].body, '{"source_type":"IOT_TELEMETRY"}');
+  await api.summary("operator", true);
+  assert.equal(calls[2].path, "/api/live/overview?refresh=true");
+});
+
+test("validation and partial-batch errors stay readable and keep their details", async () => {
+  const { api } = await adapter({ defaultMode: "live" });
+  const validation = { detail: [{ loc: ["body", "site_id"], msg: "Field required" }] };
+  globalThis.fetch = async () => ({ ok: false, status: 422, json: async () => validation });
+  await assert.rejects(api.submitFile("operator", { kind: "json", text: "{}" }), error => error.message === "body.site_id: Field required" && error.details === validation);
+  const batch = { detail: { status: "CSV_BATCH_PARTIALLY_FAILED", events: [{ fhir: "UPLOADED" }, { fhir: "UPLOAD_FAILED" }] } };
+  globalThis.fetch = async () => ({ ok: false, status: 502, json: async () => batch });
+  await assert.rejects(api.submitFile("operator", { kind: "csv", text: "example" }), error => error.message === "CSV_BATCH_PARTIALLY_FAILED" && error.details.detail.events.length === 2);
+});
+
+test("mock file submission is disabled and upload clears stale station evidence", async () => {
+  const mock = await adapter();
+  await assert.rejects(mock.api.submitFile(), /live mode/);
+  const { api, calls } = await adapter({ defaultMode: "live", respond: () => station });
+  await api.site("operator", station.site_id);
+  await api.site("operator", station.site_id);
+  assert.equal(calls.length, 1);
+  await api.submitFile("operator", { kind: "json", text: "{}" });
+  await api.site("operator", station.site_id);
+  assert.equal(calls.length, 3);
+});

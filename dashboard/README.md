@@ -48,6 +48,29 @@ Live mode connects only the verified existing routes through the same-origin pro
 
 See [API-MAPPING.md](API-MAPPING.md) for request/response ownership and future backend work.
 
+## File ingestion
+
+In live mode, choose **Ingestion**, select the **Data operator** persona,
+and choose a UTF-8 `.json` or `.csv` file (maximum 5 MiB). Inspect the preview,
+then click **Submit file**. JSON must contain one gateway ingestion envelope
+with `source_type` set to `IOT_TELEMETRY`, `CITIZEN_SURVEY`, or `PUBLIC_HEALTH`.
+CSV supports public-health risk scores and chemical summaries; use **Download
+CSV template** for the required headers or `demo/sample_public_health.csv`
+for populated examples. CSV rows with the same `event_id` form one event.
+
+Validation errors appear beside the file selector. Processed files show each
+event's FHIR outcome, uploaded/failed resource counts, and screening outputs.
+Partial batch failures retain the successful events in the results; those
+events may already be persisted. `BUILT_NOT_SENT` means uploads are disabled,
+and is never shown as uploaded. Overview and station evidence refresh after
+reported writes; a refresh failure does not discard file results.
+
+Uploads and template downloads go through the dashboard's same-origin proxy,
+so LAN browsers only need the dashboard port. No broker or OpenAI key is
+required for HTTP file ingestion. Live results survive dashboard navigation
+but reset on browser refresh or persona change; there is no durable job history.
+File uploads are disabled in mock mode.
+
 ## Native Surveillance Studio
 
 Open `http://127.0.0.1:8090/studio` with the gateway running and

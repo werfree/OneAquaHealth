@@ -11,12 +11,27 @@ The browser uses one service layer in `static/js/api.js`. Mock and live adapters
 | overview | `GET /api/overview` | Existing, may require `oah-agent` and FHIR | 501/502/503 shown as unavailable; no mock fallback |
 | station detail | `GET /api/sites/{site_id}` | Summarized observations and findings from tagged FHIR data | 404 when no observations; invalid site ids return 422 |
 | run supplied sample | `POST /api/ingest-demo/{key}` | Existing, request-scoped | Validation and FHIR outcomes preserved |
-| public ingress | `POST /ingest` | Existing; not called by this dashboard | A `202 ACCEPTED` is not treated as persisted success |
+| file JSON ingestion | `POST /ingest` via `POST /api/live/ingest` | One validated event object | 422 validation details; 500 conversion / 502 upload failure details retained |
+| file CSV ingestion | `POST /ingest/public-health/csv` via `POST /api/live/ingest/public-health/csv` | Public-health batch grouped by event ID | Partial failures retain every event result |
+| CSV template | `GET /ingest/public-health/csv/template` via the matching `/api/live` route | Download required CSV headers | Gateway failures shown without mock fallback |
 | assistant | `POST /api/ask` with `{question, site_id?}` | Existing optional endpoint with station context | 501/502/503 shown as unavailable; no credentials in browser code |
 
 The dashboard server exposes a narrow same-origin proxy under `/api/live/*`. Set `OAH_LIVE_BASE_URL` and open `/?mode=live`, or set `DASHBOARD_DEFAULT_MODE=live` (default `mock`). An explicit `?mode=` wins. Only allow-listed routes are proxied. Site ids match `[A-Za-z0-9.-]{1,64}`; the assistant proxy translates browser `siteId` to gateway `site_id` only for valid ids. `OAH_LIVE_TIMEOUT_SECONDS` defaults to 90 seconds for slow overview queries and assistant tool loops. `GET /api/live/overview?refresh=true` bypasses the gateway overview cache. Overview and station views only read already-uploaded FHIR data.
 
 `GET /api/config` is a public, non-sensitive dashboard configuration route. It exposes the supported theme catalogue, validated `DASHBOARD_DEFAULT_THEME`, and validated `DASHBOARD_DEFAULT_MODE` as `defaultMode`; environment values such as service URLs and credentials are not returned.
+
+File ingestion accepts raw JSON (`application/json`) or CSV (`text/csv` or
+`application/csv`) rather than multipart form data. Fixed proxy routes forward
+file bytes with their content type and preserve gateway status/JSON details.
+Empty files return 422, unsupported content types return 415, and files larger
+than 5 MiB return 413 before reaching the gateway. CSV template bytes download
+as `public-health-template.csv`. The browser prepares a bounded preview and
+retains per-event outcomes in session activity, not durable job storage.
+Only `UPLOADED` with zero failures and positive uploaded counts confirms
+persistence. HTTP ingestion invalidates gateway overview caches after reported
+writes, including partial writes, and the browser refreshes Overview and clears
+station evidence caches. Upload controls use the Data operator demo capability;
+the live gateway remains anonymous as described above.
 
 `GET /studio` serves the native dashboard with live Studio selected (an explicit
 `?mode=` still wins). The **Surveillance** primary navigation item selects

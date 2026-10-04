@@ -25,6 +25,9 @@ export const state = {
   reports: null,
   report: null,
   assistant: null,
+  upload: null,
+  uploadError: null,
+  uploadBusy: false,
   loading: true,
   error: null,
 };
@@ -55,6 +58,8 @@ export function changeRole(role) {
     reports: null,
     report: null,
     assistant: null,
+    upload: null,
+    uploadError: null,
     loading: true,
     error: null,
   });
