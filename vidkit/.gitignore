@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+# scratch render target used by the end-to-end run
+.out/
+_build/
+_capture/
