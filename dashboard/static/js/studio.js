@@ -9,37 +9,42 @@ const md = text => esc(text).split(/\n{2,}/).map(block => `<p>${block
 
 export function initStudio() {
   const root = document.querySelector("#studio-root");
-  root.innerHTML = `<section class="studio-shell" id="surveillance-studio" aria-labelledby="studio-title">
-    <header class="studio-head"><h1 id="studio-title">Surveillance Studio</h1>
-      <div class="studio-actions"><button class="button small" type="button" data-studio-new>New</button>
-      </div></header>
-    <div class="studio-scope"><label for="studio-scope">Investigate</label><select id="studio-scope"><option value="station">Current station</option><option value="all">All stations</option></select>
-      <span id="studio-station"></span></div>
+  root.innerHTML = `<section class="studio-shell" id="surveillance-studio" aria-label="Surveillance Studio">
     <div class="studio-notice" id="studio-notice"></div>
-    <div class="studio-feed" tabindex="0" aria-label="Investigation results">
-      <div class="studio-welcome"><span aria-hidden="true">✦</span><h3>What do you want to investigate?</h3><p>Explore water quality and population health together. Answers show retrieved evidence, charts, and screening references.</p><p>Each question starts a new investigation. Results stay here while you navigate.</p></div>
-    </div>
-    <form class="studio-composer"><label class="sr-only" for="studio-question">Investigation question</label>
-      <textarea id="studio-question" maxlength="4000" rows="2" placeholder="What needs attention at this station?" required></textarea>
-      <div class="studio-controls">
-      <div class="studio-prompt-chips"><button type="button" class="question-chip" data-studio-prompt="What needs attention? Show the evidence and screening criteria.">What needs attention?</button>
-      <button type="button" class="question-chip" data-studio-prompt="Show water quality and disease notification trends over the last 28 days.">Show trends</button>
-      <button type="button" class="question-chip" data-studio-prompt="Show a severity matrix and rank the wards requiring attention." data-studio-all>Compare wards</button>
-      <button type="button" class="question-chip" data-studio-prompt="Show whether faecal coliform exceedances are persistent over 28 days." data-studio-all>Persistence</button></div>
-      <span class="studio-status" data-state="ready" aria-live="polite">Live</span><button class="button small" type="button" data-studio-stop hidden>Stop</button><button class="button primary" type="submit">Investigate</button></div>
-    </form><div class="studio-tooltip" aria-hidden="true"></div></section>`;
+    <div class="studio-body">
+      <div class="studio-ask-wrap">
+        <div class="studio-feed" tabindex="0" aria-label="Investigation results">
+          <div class="studio-welcome"><span aria-hidden="true">✦</span><h3>What do you want to investigate?</h3><p>Explore water quality and population health together. Answers show retrieved evidence, charts, and screening references.</p><p>Each question starts a new investigation. Results stay here while you navigate.</p></div>
+        </div>
+        <div class="studio-prompt-chips" aria-label="Suggested investigations"><button type="button" class="question-chip" data-studio-prompt="What needs attention? Show the evidence and screening criteria.">What needs attention?</button>
+        <button type="button" class="question-chip" data-studio-prompt="Show water quality and disease notification trends over the last 28 days.">Show trends</button>
+        <button type="button" class="question-chip" data-studio-prompt="Show a severity matrix and rank the wards requiring attention." data-studio-all>Compare wards</button>
+        <button type="button" class="question-chip" data-studio-prompt="Show whether faecal coliform exceedances are persistent over 28 days." data-studio-all>Persistence</button></div>
+        <form class="studio-composer"><label class="sr-only" for="studio-question">Investigation question</label>
+          <textarea id="studio-question" maxlength="4000" rows="2" placeholder="What needs attention at this station?" required></textarea>
+          <div class="studio-controls">
+            <div class="studio-scope"><label class="sr-only" for="studio-scope">Investigate</label><select id="studio-scope"><option value="station">Current station</option><option value="all">All stations</option></select>
+            <span id="studio-station"></span></div>
+            <div class="studio-actions"><button class="button small" type="button" data-studio-new>New</button></div>
+            <button class="button small" type="button" data-studio-stop hidden>Stop</button><button class="button primary" type="submit">Investigate</button></div>
+        </form>
+      </div>
+    </div><div class="studio-tooltip" aria-hidden="true"></div></section>`;
   const feed = root.querySelector(".studio-feed");
+  const wrap = root.querySelector(".studio-ask-wrap");
+  const chips = root.querySelector(".studio-prompt-chips");
   const question = root.querySelector("textarea"), scope = root.querySelector("select");
-  const form = root.querySelector("form"), status = root.querySelector(".studio-status");
+  const form = root.querySelector("form");
   const tip = root.querySelector(".studio-tooltip");
-  const setStatus = (stateName, label) => { status.dataset.state = stateName; status.textContent = label; };
   let controller = null, previousRole = state.role;
   const allowed = () => apiMode === "live" && state.role === "analyst";
-  const add = (target, html) => {
+  const add = (target, html, before = null) => {
     const container = document.createElement("div"); container.innerHTML = html;
-    const node = container.firstElementChild; target.append(node);
+    const node = container.firstElementChild;
+    if (before?.parentNode === target) target.insertBefore(node, before); else target.append(node);
     feed.scrollTop = feed.scrollHeight; return node;
   };
+  const welcome = () => add(feed, `<div class="studio-welcome"><span aria-hidden="true">✦</span><h3>What do you want to investigate?</h3><p>Explore water quality and population health together. Answers show retrieved evidence, charts, and screening references.</p><p>Each question starts a new investigation. Results stay here while you navigate.</p></div>`);
   function sync() {
     const site = state.summary?.sites?.find(item => item.id === state.selectedSiteId);
     root.querySelector("#studio-station").textContent = scope.value === "all" ? "District-wide comparison" : site?.name || state.selectedSiteId || "Select a station";
@@ -63,7 +68,7 @@ export function initStudio() {
     add(runNode, `<div class="studio-ask"><small>${esc(stationName)}</small><p>${esc(text)}</p></div>`);
     const activity = add(runNode, '<div class="studio-working">Starting investigation…</div>');
     const draw = createChartRenderer({ add: html => add(runNode, html), tip });
-    question.value = ""; controller = new AbortController(); setStatus("running", "Investigating"); sync();
+    question.value = ""; controller = new AbortController(); wrap.dataset.state = "running"; sync();
     let session = null, finished = false;
     try {
       const response = await studioRequest("run", { body: { question: text, siteId }, signal: controller.signal });
@@ -96,11 +101,11 @@ export function initStudio() {
         }
       });
       if (!finished) throw new Error("The investigation ended before completion. Please retry.");
-      setStatus("complete", "Live");
+      wrap.dataset.state = "done";
     } catch (error) {
       const message = error.name === "AbortError" ? "Investigation stopped. You can start another question." : error.message;
       add(runNode, `<div class="notice error">${esc(message)}</div>`);
-      setStatus("error", "Error");
+      wrap.dataset.state = "error";
     } finally {
       activity.remove(); controller = null; sync();
       if (state.route === "studio" && !question.disabled) question.focus();
@@ -130,7 +135,7 @@ export function initStudio() {
   }
   root.addEventListener("click", event => {
     if (event.target.closest("[data-studio-stop]")) controller?.abort();
-    if (event.target.closest("[data-studio-new]") && !controller) { feed.replaceChildren(); setStatus("ready", "Live"); question.focus(); }
+    if (event.target.closest("[data-studio-new]") && !controller) { feed.replaceChildren(); wrap.dataset.state = "ready"; welcome(); question.focus(); }
     const prompt = event.target.closest("[data-studio-prompt]");
     if (prompt) { if (prompt.hasAttribute("data-studio-all")) scope.value = "all"; question.value = prompt.dataset.studioPrompt; sync(); question.focus(); }
     const report = event.target.closest("[data-studio-executive]"); if (report) executive(report);
@@ -138,6 +143,7 @@ export function initStudio() {
   form.addEventListener("submit", event => { event.preventDefault(); run(); });
   question.addEventListener("keydown", event => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); run(); } });
   scope.addEventListener("change", sync);
+  feed.addEventListener("scroll", () => { chips.classList.toggle("scrolled", feed.scrollTop > 4); });
   subscribe(() => {
     if (previousRole !== state.role) { controller?.abort(); feed.replaceChildren(); previousRole = state.role; }
     if (state.route !== "studio") tip.classList.remove("on");
