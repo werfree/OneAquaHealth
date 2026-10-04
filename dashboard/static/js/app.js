@@ -41,6 +41,7 @@ function applyTheme(themeId, { persist = false } = {}) {
 }
 
 function syncChrome() {
+  document.body.classList.toggle("studio-route", state.route === "studio");
   personaSelector.value = state.role;
   personaSelector.disabled = state.uploadBusy;
   if (state.themeConfig) {
@@ -49,6 +50,7 @@ function syncChrome() {
   }
   modeIndicator.innerHTML = `<span></span>${apiMode === "mock" ? "Mock dataset" : "Live adapter"}`;
   document.querySelectorAll("[data-route]").forEach(button => {
+    if (button.dataset.route === "studio") button.hidden = !state.session?.capabilities.canQueryAssistant;
     const active = button.dataset.route === state.route;
     button.classList.toggle("is-active", active);
     if (active) button.setAttribute("aria-current", "page"); else button.removeAttribute("aria-current");
@@ -78,6 +80,7 @@ async function bootstrap() {
       ? state.selectedSiteId
       : summary.sites[0]?.id || null;
     setState({ session, summary, selectedSiteId, loading: false });
+    render();
     if (selectedSiteId) await loadSite(selectedSiteId, false);
     if (state.route === "ingestion" && !state.runs) await loadRuns();
     if (state.route === "reports") await loadReports();
@@ -172,7 +175,7 @@ function renderOverview() {
         </table></div></div>
       </section>
       <section class="panel" id="site-workspace">
-        ${current ? renderSiteWorkspace(current) : `<div class="loading"><span class="sr-only">Loading selected station</span></div>`}
+        ${current ? renderSiteWorkspace(current) : state.error ? errorState(state.error, "Selected station") : `<div class="loading"><span class="sr-only">Loading selected station</span></div>`}
       </section>
     </div>
     ${renderAssistant()}`;
@@ -249,8 +252,8 @@ function renderGraphTab() {
 function renderAssistant() {
   const canAsk = state.session?.capabilities.canQueryAssistant;
   return `<section class="panel assistant-panel">
-    <div class="panel-head"><div><span class="eyebrow">Observable assistance</span><h2>Ask about this site</h2><p>Answers cite returned records and expose tool/evidence steps—not hidden reasoning.</p>${apiMode === "live" ? `<button class="button small" type="button" data-route="studio">Open Surveillance Studio</button>` : ""}</div>${canAsk ? statusPill("observed", apiMode === "mock" ? "Deterministic demo" : "Existing API") : statusPill("unavailable")}</div>
-    ${canAsk ? `<div class="assistant-layout"><div class="assistant-main"><form id="assistant-form"><input id="assistant-question" name="question" maxlength="500" required aria-label="Question about selected site" placeholder="Ask about findings, evidence, or source timing"><button class="button primary" type="submit">Ask</button></form><div class="question-chips"><button class="question-chip" type="button" data-question="What needs attention at ${escapeHtml(state.site?.site.shortName || "this site")}?">What needs attention?</button><button class="question-chip" type="button" data-question="What evidence supports the co-location finding?">Show supporting evidence</button><button class="question-chip" type="button" data-question="Are the environmental and health observations contemporaneous?">Are the source periods aligned?</button></div>${state.assistant ? `<div class="assistant-answer"><span class="eyebrow">Grounded response</span><p>${escapeHtml(state.assistant.answer)}</p></div>` : ""}</div><div class="trace-list"><span class="eyebrow">Execution trace</span>${state.assistant ? `<ol>${(state.assistant.trace || []).map(step => `<li><strong>${escapeHtml(step.label || step.tool || step.kind)}</strong><br>${escapeHtml(step.kind || "TOOL")} · ${escapeHtml(step.status || "completed")}</li>`).join("")}</ol><p class="station-meta">${escapeHtml(state.assistant.grounding?.notCovered || state.assistant.grounding?.not_covered || "Grounding checks are limited.")}</p>` : `<p style="margin-top:10px;color:var(--ink-3)">Run a suggested question to see evidence retrieval and grounding steps.</p>`}</div></div>` : emptyState("Assistant unavailable", "This persona cannot query scoped evidence, or the optional live assistant endpoint is unavailable.")}
+    <div class="panel-head"><div><span class="eyebrow">Observable assistance</span><h2>Ask about this site</h2><p>Answers cite returned records and expose tool/evidence steps—not hidden reasoning.</p>${apiMode === "live" && canAsk ? `<button class="button small" type="button" data-route="studio">Open Surveillance Studio</button>` : ""}</div>${canAsk ? statusPill("observed", apiMode === "mock" ? "Deterministic demo" : "Existing API") : statusPill("unavailable")}</div>
+    ${canAsk ? `<div class="assistant-layout"><div class="assistant-main"><form id="assistant-form"><input id="assistant-question" name="question" maxlength="500" required aria-label="Question about selected site" placeholder="Ask about findings, evidence, or source timing"><button class="button primary" type="submit">Ask</button></form><div class="question-chips"><button class="question-chip" type="button" data-question="What needs attention at ${escapeHtml(state.site?.site.shortName || "this site")}?">What needs attention?</button><button class="question-chip" type="button" data-question="What evidence supports the co-location finding?">Show supporting evidence</button><button class="question-chip" type="button" data-question="Are the environmental and health observations contemporaneous?">Are the source periods aligned?</button></div>${state.assistant ? `<div class="assistant-answer"><span class="eyebrow">Grounded response</span><p>${escapeHtml(state.assistant.answer)}</p></div>` : ""}</div><div class="trace-list"><span class="eyebrow">Execution trace</span>${state.assistant ? `<ol>${(state.assistant.trace || []).map(step => `<li><strong>${escapeHtml(step.label || step.tool || step.kind)}</strong><br>${escapeHtml(step.kind || "TOOL")} · ${escapeHtml(step.status || "completed")}</li>`).join("")}</ol><p class="station-meta">${escapeHtml(state.assistant.grounding?.notCovered || state.assistant.grounding?.not_covered || "Grounding checks are limited.")}</p>` : `<p style="margin-top:10px;color:var(--ink-3)">Run a suggested question to see evidence retrieval and grounding steps.</p>`}</div></div>` : emptyState("Analyst persona required for assistant access", "To access the assistant and query this site’s evidence, select Analyst from the Demo persona dropdown at the top of the page.")}
   </section>`;
 }
 

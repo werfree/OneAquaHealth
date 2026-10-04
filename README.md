@@ -215,7 +215,7 @@ The API also includes the District Surveillance Officer Studio described below.
 
 The evidence workspace is a separate application at port 8090. Its **Overview** shows dataset scope, station comparison, observations, and findings. A selected station has **Context**, **Evidence**, and **Relationships** views. The theme selector offers Aqua, Aqua dark, White, and Dark themes.
 
-In live mode, the overview and station records come from tagged FHIR data through the ingestion gateway. Evidence references are derived from returned observations, screening results, health measures, and cohort references. The live gateway does not currently expose a relationship-graph endpoint, so the graph view is unavailable in live mode.
+In live mode, the overview and station records come from tagged FHIR data through the ingestion gateway. The overview summary renders as soon as it is available while the selected station loads independently. Evidence references are derived from returned observations, screening results, health measures, and cohort references. The live gateway does not currently expose a relationship-graph endpoint, so the graph view is unavailable in live mode.
 
 The workspace also includes an ingestion workbench and Site One Health reports. In live mode, supplied-sample execution is request-scoped; durable run history and retry are not available. The report lifecycle and report downloads are not connected to a live gateway endpoint. The workspace's persona selector demonstrates proposed access scopes and is not production authentication or authorization.
 
