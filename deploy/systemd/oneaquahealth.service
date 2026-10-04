@@ -1,0 +1,23 @@
+# Update User, WorkingDirectory and ExecStart for the Ubuntu machine.
+[Unit]
+Description=OneAquaHealth gateway and evidence dashboard
+Wants=network-online.target
+After=network-online.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+User=werfree
+WorkingDirectory=/home/werfree/Projects/OneAquaHealth
+ExecStart=/home/werfree/Projects/OneAquaHealth/.venv/bin/python /home/werfree/Projects/OneAquaHealth/run.py
+Environment=PYTHONUNBUFFERED=1
+Restart=on-failure
+RestartSec=5s
+# Let the launcher stop its children gracefully; kill any leftovers on timeout.
+KillMode=mixed
+TimeoutStopSec=30s
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

@@ -21,6 +21,7 @@ dev = [
 
 [project.scripts]
 oah-dashboard = "dashboard.server:main"
+oah-run = "dashboard.launcher:main"
 
 [tool.setuptools.packages.find]
 include = ["dashboard*"]

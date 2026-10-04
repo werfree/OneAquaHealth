@@ -9,6 +9,7 @@ The intended use is to help environmental and public-health teams find relevant 
 - [System architecture](docs/system-architecture.md) - production-oriented component view.
 - [Data-flow diagram](docs/data-flow-diagram.md) - Level 1 flow from operational sources through FHIR storage and dashboard queries.
 - [Architecture diagram image](docs/OneAquaHealth%20Data-2026-10-03-211553.png)
+- [Data-flow diagram image](docs/OneAquaHealth%20Data-2026-10-03-212126.png)
 
 The end-to-end data path is:
 
@@ -76,6 +77,48 @@ Keep credentials out of source control. The public MQTT and HAPI FHIR defaults a
 
 ## Start the services
 
+For automatic startup on Ubuntu, see the [systemd setup](docs/systemd.md).
+
+After installing the dependencies, start the gateway and evidence dashboard
+together from the repository root with one command (Linux, macOS, or Windows):
+
+```powershell
+python run.py
+```
+
+The launcher automatically uses `.venv` when present and reads the root `.env`.
+It preserves environment settings, including ports, live/mock mode and broker
+workers. It checks startup readiness, prints the dashboard/Studio addresses,
+and stops both Python services when you press Ctrl+C. If either service fails,
+the launcher stops its sibling. Occupied ports are reported without taking over
+existing processes.
+
+For the lightweight setup without MQTT/RabbitMQ consumers:
+
+```powershell
+python run.py --no-brokers
+```
+
+Optional flags: `--open` opens the browser after startup; `--rabbitmq` starts
+the included RabbitMQ Docker Compose service and enables broker consumers
+(Docker must be available; configure the MQTT broker separately). RabbitMQ
+remains running after Ctrl+C; stop it with `docker compose stop rabbitmq`.
+`--app-port 8001 --dashboard-port 8090` overrides ports for this launch and
+points the dashboard at the selected local gateway. No data is automatically
+published or seeded. Use `python run.py --help` for all options.
+
+After reinstalling the root package, `oah-run` provides the same launcher;
+`./run-demo.sh all` is also available on systems with Bash. The existing
+separate-service commands below remain supported.
+
+To access the dashboard from other devices on the same network, set
+`DASHBOARD_HOST=0.0.0.0` in `.env` and restart the launcher. On those devices,
+open `http://<your-computer-LAN-IP>:8090` (use your configured dashboard port).
+Find that IP with `ipconfig` on Windows or `hostname -I` on Linux. Allow the
+dashboard port through your firewall on your private network if needed.
+Keep `OAH_LIVE_BASE_URL` pointing to the gateway on this computer: the
+dashboard proxies requests to it, so browsers only need the dashboard port.
+
 Start RabbitMQ and the ingestion gateway in separate PowerShell terminals:
 
 ```powershell
@@ -114,6 +157,12 @@ The gateway consumes the durable RabbitMQ queue `ingestion.citizen_surveys`. Rab
 ### Public-health indicators
 
 Submit a typed JSON event to `POST /ingest`, or upload a long-form CSV batch to `POST /ingest/public-health/csv`. CSV rows are grouped into events by `event_id`; each row represents a `risk_score` or `chemical_summary`. The sample file `demo/sample_public_health.csv` documents the accepted columns.
+
+The evidence dashboard also supports these files: open **Ingestion** in live
+mode, choose **Data operator**, select a UTF-8 JSON/CSV file (up to 5 MiB),
+preview it and click **Submit file**. A CSV template download is available.
+The page shows validation errors and per-event FHIR upload outcomes, including
+partial failures and upload-disabled results. See [dashboard file ingestion](dashboard/README.md#file-ingestion).
 
 The JSON public-health envelope also supports `disease_surveillance` measures with condition, case count, population at risk, and optional rate/baseline. When a rate is omitted, the pipeline can derive it per 100,000. Existing risk-score and chemical-summary events are supported as well.
 
@@ -172,11 +221,15 @@ The workspace also includes an ingestion workbench and Site One Health reports. 
 
 In its standalone mode, the workspace provides local demonstration workflows for runs, relationships, personas, and reports. State survives browser refresh and resets when the dashboard server restarts. These workflows are separate from live FHIR data and are not durable production services.
 
-## District Surveillance Officer Studio
+## Surveillance Studio
 
-The gateway serves the Studio at `http://127.0.0.1:8000/api/officer/panel` (replace the port with the configured `APP_PORT`). It provides station-oriented surveillance views, streamed investigations, charts, and exports. The live evidence workspace links to it with **Open Surveillance Studio**.
+The District Surveillance Officer Studio supports station-oriented investigations, charts, and exports. With both Python services running, open `http://127.0.0.1:8090/studio` while the evidence workspace is in live mode. The **Surveillance** navigation item opens the Studio inside the evidence workspace; on small screens it is labeled **Studio**. The gateway also serves the standalone panel at `http://127.0.0.1:8000/api/officer/panel` (replace the port with the configured `APP_PORT`).
 
-Analyses are computed in Python. Peak offsets are descriptive comparisons, not evidence of causation. `OPENAI_API_KEY` is required for natural-language investigations and executive prose; station data, analysis routes, and exports can be used without it.
+Choose **Current station** or **All stations**, enter a question, and inspect streaming tool activity, charts, answers, and screening references. **Stop** interrupts an investigation; **New** clears the visible results. Each question starts a separate investigation, without conversation memory. Completed investigations can provide a transcript, environmental and health CSV exports, and a station-scoped FHIR Bundle. Executive reports download as HTML and can be printed to PDF. Results follow the selected dashboard theme.
+
+The Studio is available to the Analyst demo persona in live mode. Persona selection demonstrates proposed access policy and does not authenticate the user. Mock mode provides a link to the live workspace. Both the evidence dashboard and ingestion gateway must be running for the integrated Studio. Analyses are computed in Python; peak offsets are descriptive comparisons, not evidence of causation. `OPENAI_API_KEY` is required for natural-language investigations and executive prose. Station data, analysis routes, and exports can be used without a model call when the FHIR service is reachable.
+
+Available visual analyses include severity matrices, rankings, trends, scatter plots, longitudinal river profiles, and exceedance persistence. Executive report figures are limited to the selected investigation.
 
 | Gateway route | Purpose |
 | --- | --- |
@@ -194,7 +247,7 @@ Analyses are computed in Python. Peak offsets are descriptive comparisons, not e
 | `GET /api/officer/export/bundle.json?site_id=yam-ito&days=28` | FHIR collection Bundle containing station observations. |
 | `GET /api/officer/report/facts?days=28` | Computed report facts without a model call. |
 
-Studio sessions and transcripts are held in process memory and expire when the process restarts. Neither dashboard currently implements production authentication.
+Studio sessions and transcripts are held in process memory and expire when the gateway process restarts. Neither dashboard currently implements production authentication.
 
 ## Configuration reference
 

@@ -18,6 +18,18 @@ python3 -m venv .venv
 
 Copy `.env.example` to `.env` when starting from a fresh checkout. Open `http://127.0.0.1:8090`. The mock server owns run/report transitions; state survives browser refresh and resets when the server restarts. A Data operator can also use **Reset demo state**.
 
+With the project dependencies installed, `python run.py` starts both the
+gateway and dashboard using the root `.env` and `.venv`. Press Ctrl+C to stop
+both. Use `python run.py --no-brokers` for HTTP ingestion and live Studio
+without MQTT/RabbitMQ consumers, or add `--open` to open the browser.
+
+For access from other devices on your LAN, set `DASHBOARD_HOST=0.0.0.0` in
+the root `.env` and restart. Open `http://<your-computer-LAN-IP>:8090` from
+the other device and allow that port through your private-network firewall
+if necessary. The default host is `127.0.0.1` (this computer only).
+`OAH_LIVE_BASE_URL` remains the server-side gateway address; it can stay on
+loopback because browser requests use the dashboard's same-origin proxy.
+
 Run tests with:
 
 ```bash
@@ -35,6 +47,29 @@ http://127.0.0.1:8090/?mode=live
 Live mode connects only the verified existing routes through the same-origin proxy. Overview, supplied-sample execution, and the optional assistant are connected. Durable run history, retry, authorization, graph, and the mock report lifecycle remain visibly unavailable because the existing backend does not implement them. It never treats `202 ACCEPTED` as proof of persistence; full upload success requires `fhir == "UPLOADED"` and zero failed entries.
 
 See [API-MAPPING.md](API-MAPPING.md) for request/response ownership and future backend work.
+
+## File ingestion
+
+In live mode, choose **Ingestion**, select the **Data operator** persona,
+and choose a UTF-8 `.json` or `.csv` file (maximum 5 MiB). Inspect the preview,
+then click **Submit file**. JSON must contain one gateway ingestion envelope
+with `source_type` set to `IOT_TELEMETRY`, `CITIZEN_SURVEY`, or `PUBLIC_HEALTH`.
+CSV supports public-health risk scores and chemical summaries; use **Download
+CSV template** for the required headers or `demo/sample_public_health.csv`
+for populated examples. CSV rows with the same `event_id` form one event.
+
+Validation errors appear beside the file selector. Processed files show each
+event's FHIR outcome, uploaded/failed resource counts, and screening outputs.
+Partial batch failures retain the successful events in the results; those
+events may already be persisted. `BUILT_NOT_SENT` means uploads are disabled,
+and is never shown as uploaded. Overview and station evidence refresh after
+reported writes; a refresh failure does not discard file results.
+
+Uploads and template downloads go through the dashboard's same-origin proxy,
+so LAN browsers only need the dashboard port. No broker or OpenAI key is
+required for HTTP file ingestion. Live results survive dashboard navigation
+but reset on browser refresh or persona change; there is no durable job history.
+File uploads are disabled in mock mode.
 
 ## Native Surveillance Studio
 

@@ -1,6 +1,7 @@
 import { api, apiMode, ApiError } from "./api.js";
 import { state, setState, changeRole, routeFromLocation } from "./state.js";
 import { initStudio } from "./studio.js";
+import { prepareUpload, fileRun } from "./ingestion.js";
 import {
   copyButton, downloadBlob, emptyState, errorState, escapeHtml, formatDate,
   humanBytes, jsonBlock, statusPill, toast, valueDisplay,
@@ -14,6 +15,7 @@ const modeIndicator = document.querySelector("#mode-indicator");
 const themeSelector = document.querySelector("#theme-selector");
 const browserThemeColor = document.querySelector("#browser-theme-color");
 let pollTimer = null;
+let fileSelection = 0;
 initStudio();
 
 function clearPoll() {
@@ -41,6 +43,7 @@ function applyTheme(themeId, { persist = false } = {}) {
 function syncChrome() {
   document.body.classList.toggle("studio-route", state.route === "studio");
   personaSelector.value = state.role;
+  personaSelector.disabled = state.uploadBusy;
   if (state.themeConfig) {
     themeSelector.innerHTML = state.themeConfig.themes.map(theme => `<option value="${escapeHtml(theme.id)}">${escapeHtml(theme.label)}${theme.id === state.themeConfig.defaultTheme ? " · Default" : ""}</option>`).join("");
     themeSelector.value = state.theme;
@@ -65,18 +68,20 @@ async function bootstrap() {
   setState({ loading: true, error: null });
   render();
   try {
-    const [themeConfig, session, summary] = await Promise.all([api.config(), api.session(state.role), api.summary(state.role)]);
+    const [themeConfig, session] = await Promise.all([api.config(), api.session(state.role)]);
     const savedTheme = localStorage.getItem("oah-theme");
     const theme = themeConfig.themes.some(item => item.id === savedTheme) ? savedTheme : themeConfig.defaultTheme;
-    setState({ themeConfig, theme });
+    setState({ themeConfig, theme, session });
     applyTheme(theme);
+    if (state.route === "ingestion" && !state.runs) await loadRuns();
+    const summary = await api.summary(state.role);
     const selectedSiteId = summary.sites.some(site => site.id === state.selectedSiteId)
       ? state.selectedSiteId
       : summary.sites[0]?.id || null;
     setState({ session, summary, selectedSiteId, loading: false });
     render();
     if (selectedSiteId) await loadSite(selectedSiteId, false);
-    if (state.route === "ingestion") await loadRuns();
+    if (state.route === "ingestion" && !state.runs) await loadRuns();
     if (state.route === "reports") await loadReports();
   } catch (error) {
     setState({ loading: false, error });
@@ -123,6 +128,7 @@ function render() {
   routeContent.hidden = state.route === "studio";
   studioRoot.hidden = state.route !== "studio";
   if (state.route === "studio") return;
+  if (state.route === "ingestion" && state.session) return renderIngestion();
   if (state.loading && !state.summary) {
     routeContent.innerHTML = `<div class="loading"><span class="sr-only">Loading dashboard</span></div>`;
     return;
@@ -254,6 +260,7 @@ async function loadRuns() {
   clearPoll();
   try {
     const runs = await api.runs(state.role);
+    if (apiMode === "live" && state.runs?.runs) runs.runs = state.runs.runs;
     const selectedRunId = runs.runs.some(run => run.id === state.selectedRunId) ? state.selectedRunId : runs.runs[0]?.id || null;
     setState({ runs, selectedRunId, error: null });
     if (!state.selectedSampleKey || !runs.samples.some(sample => sample.key === state.selectedSampleKey)) setState({ selectedSampleKey: runs.samples[0]?.key || null });
@@ -273,12 +280,31 @@ function renderIngestion() {
   const canStart = state.session?.capabilities.canStartRuns;
   const runsData = state.runs;
   routeContent.innerHTML = `
-    <header class="route-header"><div><span class="eyebrow">Source to FHIR</span><h1>Ingestion workbench</h1><p>Run a supplied source sample, inspect each processing artifact, and keep screening findings distinct from processing failures.</p></div><div class="route-actions">${apiMode === "mock" && canStart ? `<button class="button" type="button" data-reset-demo>Reset demo state</button>` : ""}</div></header>
-    ${!canTrack && apiMode === "mock" ? emptyState("Operational controls are restricted", `${state.session?.persona.label || "This persona"} does not have ingestion-run access. Switch to Data operator in the demo control to inspect payloads and run samples.`) : runsData?.error ? (apiMode === "live" && canStart ? renderLiveRunOnly(runsData.error) : errorState(runsData.error, "Ingestion history")) : !runsData ? `<div class="loading"><span class="sr-only">Loading ingestion workbench</span></div>` : renderIngestionWorkspace(runsData, canStart)}`;
+    <header class="route-header"><div><span class="eyebrow">Source to FHIR</span><h1>Ingestion workbench</h1><p>Submit a source file or run a supplied sample, then inspect validation, screening and FHIR outcomes.</p></div><div class="route-actions">${apiMode === "mock" && canStart ? `<button class="button" type="button" data-reset-demo>Reset demo state</button>` : ""}</div></header>
+    ${apiMode === "live" ? `<div class="notice info" role="note" aria-label="Demo ingestion information" style="margin-bottom:18px"><strong>Demo ingestion interface.</strong> This page demonstrates file and sample ingestion. The live system also supports sensor data through MQTT and citizen surveys through RabbitMQ. Both channels are already integrated and can receive data when configured and enabled.</div>` : ""}
+    ${renderFileUpload(canStart)}
+    ${!canTrack && apiMode === "mock" ? emptyState("Operational controls are restricted", `${state.session?.persona.label || "This persona"} does not have ingestion-run access. Switch to Data operator in the demo control to inspect payloads and run samples.`) : runsData?.error ? (apiMode === "live" && canStart ? renderLiveRunOnly(runsData.error) : errorState(runsData.error, "Ingestion history")) : !runsData ? `<div class="loading"><span class="sr-only">Loading ingestion workbench</span></div>` : renderIngestionWorkspace(runsData, canStart && !state.uploadBusy)}`;
+}
+
+function renderFileUpload(canStart) {
+  if (apiMode !== "live") return `<div class="notice neutral">File uploads use the live ingestion gateway. <a href="?mode=live#ingestion">Open live Ingestion</a>.</div>`;
+  const upload = state.upload;
+  return `<section class="panel file-upload" aria-busy="${state.uploadBusy}">
+    <div class="panel-head"><div><span class="eyebrow">Your data</span><h2>Upload a source file</h2><p>JSON: one IoT, citizen-survey or public-health event. CSV: public-health risk scores and chemical summaries.</p></div><button class="button small" type="button" data-csv-template>Download CSV template</button></div>
+    <div class="panel-body">
+      <label class="upload-label" for="ingestion-file">Choose a UTF-8 JSON or CSV file (up to 5 MiB)</label>
+      <input id="ingestion-file" type="file" accept=".json,.csv,application/json,text/csv" ${!canStart || state.uploadBusy ? "disabled" : ""}>
+      ${!canStart ? `<div class="notice neutral">Select the Data operator persona to submit files.</div>` : ""}
+      ${upload ? `<div class="upload-preview"><p><strong>${escapeHtml(upload.name)}</strong> · ${humanBytes(upload.size)} · ${escapeHtml(upload.sourceType)}</p><details><summary>Preview file${upload.truncated ? " (first 4,000 characters)" : ""}</summary><pre tabindex="0">${escapeHtml(upload.preview)}</pre></details></div>` : ""}
+      ${state.uploadError ? `<div class="notice error" role="alert"><strong>File ingestion failed.</strong> ${escapeHtml(state.uploadError.message)}${state.uploadError.details ? `<details><summary>Validation / response details</summary>${jsonBlock(state.uploadError.details)}</details>` : ""}</div>` : ""}
+      <div class="sample-action"><button class="button primary" type="button" data-submit-file ${!canStart || !upload || state.uploadBusy ? "disabled" : ""}>${state.uploadBusy ? "Ingesting…" : "Submit file"}</button>${upload && !state.uploadBusy ? `<button class="button" type="button" data-clear-file>Clear file</button>` : ""}</div>
+      <p class="station-meta">The gateway validates the complete file before processing. Results below last for this browser session; uploads follow the gateway's FHIR settings.</p>
+    </div>
+  </section>`;
 }
 
 function renderLiveRunOnly(error) {
-  return `<div class="notice"><strong>Live history unavailable.</strong> ${escapeHtml(error.message)} The existing service can still execute request-scoped demo samples for Data operator.</div>`;
+  return `<div class="notice"><strong>Sample list unavailable.</strong> ${escapeHtml(error.message)} You can still submit a source file above.</div>`;
 }
 
 function renderIngestionWorkspace(data, canStart) {
@@ -287,10 +313,60 @@ function renderIngestionWorkspace(data, canStart) {
   return `<div class="ingestion-layout">
     <div>
       <section class="panel"><div class="panel-head"><div><span class="eyebrow">Step 1</span><h2>Choose a source sample</h2><p>Supplied examples cover all three source types.</p></div></div><div class="panel-body"><div class="sample-list">${data.samples.map(sample => `<button class="sample-card ${sample.key === selectedSample?.key ? "is-selected" : ""}" type="button" data-sample-key="${escapeHtml(sample.key)}"><span><strong>${escapeHtml(sample.label || sample.channel || sample.key)}</strong><small>${escapeHtml(sample.description || sample.detail || "Supplied demo sample")}</small></span><span class="source-tag">${escapeHtml(sample.sourceType || sample.key)}</span></button>`).join("")}</div><div class="sample-action"><button class="button primary" type="button" data-start-run ${!canStart || !selectedSample ? "disabled" : ""}>${apiMode === "mock" ? "Start ingestion" : "Run live request"}</button></div>${!canStart ? `<div class="notice neutral" style="margin-top:12px">This persona may inspect summaries but cannot submit source samples.</div>` : ""}</div></section>
-      <section class="panel run-list"><div class="panel-head"><div><span class="eyebrow">Recent activity</span><h2>Demo runs</h2><p>${escapeHtml(data.stateNotice)}</p></div></div><div class="table-wrap"><table><thead><tr><th>Run</th><th>Execution</th><th>FHIR outcome</th></tr></thead><tbody>${data.runs.length ? data.runs.map(item => `<tr class="run-row ${item.id === state.selectedRunId ? "is-selected" : ""}" data-run-id="${escapeHtml(item.id)}" tabindex="0"><td><span class="run-id">${escapeHtml(item.id)}</span><span class="station-meta">${escapeHtml(item.sampleLabel || item.sampleKey)} · attempt ${escapeHtml(item.attempt || 1)}</span>${item.retryOf ? `<span class="run-link">retry of ${escapeHtml(item.retryOf)}</span>` : ""}</td><td>${statusPill(item.executionStatus)}</td><td>${item.fhirOutcome ? statusPill(item.fhirOutcome) : `<span class="station-meta">Awaiting outcome</span>`}</td></tr>`).join("") : `<tr><td colspan="3">No durable live history is available.</td></tr>`}</tbody></table></div></section>
+      <section class="panel run-list"><div class="panel-head"><div><span class="eyebrow">Recent activity</span><h2>${apiMode === "live" ? "Session results" : "Demo runs"}</h2><p>${escapeHtml(data.stateNotice)}</p></div></div><div class="table-wrap"><table><thead><tr><th>Run</th><th>Execution</th><th>FHIR outcome</th></tr></thead><tbody>${data.runs.length ? data.runs.map(item => `<tr class="run-row ${item.id === state.selectedRunId ? "is-selected" : ""}" data-run-id="${escapeHtml(item.id)}" tabindex="0"><td><span class="run-id">${escapeHtml(item.id)}</span><span class="station-meta">${escapeHtml(item.sampleLabel || item.sampleKey)} · attempt ${escapeHtml(item.attempt || 1)}</span>${item.retryOf ? `<span class="run-link">retry of ${escapeHtml(item.retryOf)}</span>` : ""}</td><td>${statusPill(item.executionStatus)}</td><td>${item.fhirOutcome ? statusPill(item.fhirOutcome) : `<span class="station-meta">Awaiting outcome</span>`}</td></tr>`).join("") : `<tr><td colspan="3">No durable live history is available.</td></tr>`}</tbody></table></div></section>
     </div>
-    <section class="panel">${run ? renderPipeline(run) : emptyState("Select or start a run", "Stage inputs, outputs, warnings and transaction evidence will appear here.")}</section>
+    <section class="panel">${run ? `${run.events ? renderFileResults(run) : ""}${renderPipeline(run)}` : emptyState("Select or start a run", "Stage inputs, outputs, warnings and transaction evidence will appear here.")}</section>
   </div>`;
+}
+
+function renderFileResults(run) {
+  return `<div class="panel-head"><div><h2>File results</h2><p>${run.events.length} event(s) · ${run.persisted ? "All resources uploaded" : run.fhirOutcome === "BUILT_NOT_SENT" ? "Built but not sent: FHIR upload is disabled" : "Inspect event outcomes below"}</p></div></div>
+    <div class="table-wrap"><table><thead><tr><th>Event / site</th><th>FHIR outcome</th><th>Uploaded</th><th>Failed</th></tr></thead><tbody>${run.events.map(event => `<tr><td><span class="run-id">${escapeHtml(event.event_id)}</span><span class="station-meta">${escapeHtml(event.site_id || "Site not returned")}</span></td><td>${statusPill(event.fhir)}</td><td>${escapeHtml(event.uploaded ?? "—")}</td><td>${escapeHtml(event.failed ?? "—")}</td></tr>`).join("")}</tbody></table></div>`;
+}
+
+async function chooseFile(file) {
+  const selection = ++fileSelection;
+  setState({ upload: null, uploadError: null });
+  if (!file) return render();
+  try {
+    const upload = await prepareUpload(file);
+    if (selection === fileSelection) setState({ upload });
+  } catch (error) {
+    if (selection === fileSelection) setState({ uploadError: error });
+  }
+  render();
+}
+
+async function submitFile() {
+  if (apiMode !== "live" || !state.session?.capabilities.canStartRuns || !state.upload || state.uploadBusy) return;
+  const upload = state.upload;
+  setState({ uploadBusy: true, uploadError: null });
+  render();
+  let run;
+  try {
+    run = fileRun(upload, await api.submitFile(state.role, upload));
+  } catch (error) {
+    const detail = error.details?.detail;
+    if (detail?.events || detail?.fhir) run = fileRun(upload, error.details, true);
+    setState({ uploadError: error });
+  }
+  if (run) {
+    const existing = state.runs?.runs ? state.runs : { runs: [], samples: [], stateNotice: "Results are retained on this page until refresh; the gateway does not store run history." };
+    existing.runs = [run, ...existing.runs];
+    setState({ runs: existing, selectedRunId: run.id, selectedStageId: "upsert" });
+    toast(run.persisted ? "File uploaded to FHIR" : run.fhirOutcome === "BUILT_NOT_SENT" ? "File processed; FHIR upload is disabled" : "File processing has failed outcomes", run.executionStatus === "failed" ? "error" : "info");
+  }
+  setState({ uploadBusy: false });
+  render();
+  if (run?.hasWrites) {
+    try {
+      const summary = await api.summary(state.role, true);
+      const selectedSiteId = summary.sites.some(site => site.id === state.selectedSiteId) ? state.selectedSiteId : summary.sites[0]?.id || null;
+      setState({ summary, selectedSiteId });
+      if (selectedSiteId) await loadSite(selectedSiteId, false);
+    } catch (error) { toast(`File results retained; Overview refresh failed: ${error.message}`, "error"); }
+    render();
+  }
 }
 
 function renderPipeline(run) {
@@ -303,7 +379,7 @@ function renderPipeline(run) {
 }
 
 async function startRun() {
-  if (!state.selectedSampleKey) return;
+  if (!state.selectedSampleKey || state.uploadBusy) return;
   try {
     const run = await api.startRun(state.role, state.selectedSampleKey);
     if (apiMode === "live") {
@@ -470,6 +546,13 @@ document.addEventListener("click", async event => {
   const sample = event.target.closest("[data-sample-key]");
   if (sample) { setState({ selectedSampleKey: sample.dataset.sampleKey }); return render(); }
   if (event.target.closest("[data-start-run]")) return startRun();
+  if (event.target.closest("[data-submit-file]")) return submitFile();
+  if (event.target.closest("[data-clear-file]")) { ++fileSelection; setState({ upload: null, uploadError: null }); return render(); }
+  if (event.target.closest("[data-csv-template]")) {
+    try { downloadBlob(await api.csvTemplate(), "public-health-template.csv"); }
+    catch (error) { toast(error.message, "error"); }
+    return;
+  }
   const runRow = event.target.closest("[data-run-id]");
   if (runRow) { setState({ selectedRunId: runRow.dataset.runId, selectedStageId: "received" }); return render(); }
   const stageButton = event.target.closest("[data-stage-id]");
@@ -508,6 +591,10 @@ document.addEventListener("submit", async event => {
   } catch (error) { toast(error.message, "error"); input.disabled = false; }
 });
 
+document.addEventListener("change", event => {
+  if (event.target.id === "ingestion-file") chooseFile(event.target.files[0]);
+});
+
 document.addEventListener("keydown", event => {
   if (event.key === "Escape") closeDrawer();
   const row = event.target.closest?.("[data-site-row], [data-run-id]");
@@ -515,7 +602,7 @@ document.addEventListener("keydown", event => {
 });
 
 siteSelector.addEventListener("change", () => loadSite(siteSelector.value));
-personaSelector.addEventListener("change", () => { changeRole(personaSelector.value); bootstrap(); });
+personaSelector.addEventListener("change", () => { ++fileSelection; changeRole(personaSelector.value); bootstrap(); });
 themeSelector.addEventListener("change", () => { applyTheme(themeSelector.value, { persist: true }); toast(`${themeSelector.selectedOptions[0].text.replace(" · Default", "")} theme selected`); });
 window.addEventListener("beforeunload", clearPoll);
 window.addEventListener("popstate", () => navigate(routeFromLocation(), false));

@@ -3,6 +3,7 @@
 #
 #   ./run-demo.sh stack     start RabbitMQ (needs colima/docker running)
 #   ./run-demo.sh app       run the ingestion app in the foreground (PANE 1)
+#   ./run-demo.sh all       run the gateway and dashboard together
 #   ./run-demo.sh publish   send one sample down each of the three channels
 #   ./run-demo.sh verify    read the resources back off the FHIR server
 #   ./run-demo.sh ask "…"   put a question to the assistant
@@ -25,6 +26,7 @@ case "${1:-}" in
     echo ' ready'
     ;;
   app)     exec python3 -m oah_ingestion.app ;;
+  all)     shift; exec python3 run.py "$@" ;;
   seed)    exec python3 demo/generate_timeseries.py --days 28 --ingest ;;
   publish) exec python3 -m oah_demo_publishers ;;
   verify)  exec python3 - <<'PY'

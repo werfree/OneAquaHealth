@@ -73,19 +73,26 @@ export class ApiError extends Error {
   }
 }
 
-async function request(path, { method = "GET", body, role = "analyst", responseType = "json" } = {}) {
+function errorMessage(details, status) {
+  const detail = details?.detail;
+  if (typeof detail === "string") return detail;
+  if (Array.isArray(detail)) return detail.map(item => `${(item.loc || []).join(".")}: ${item.msg || "Invalid value"}`).join("; ");
+  return detail?.status || `Request failed (${status})`;
+}
+
+async function request(path, { method = "GET", body, rawBody, contentType = "application/json", role = "analyst", responseType = "json" } = {}) {
   const response = await fetch(path, {
     method,
     headers: {
-      "Content-Type": "application/json",
+      "Content-Type": contentType,
       "X-Demo-Role": role,
     },
-    body: body === undefined ? undefined : JSON.stringify(body),
+    body: rawBody !== undefined ? rawBody : body === undefined ? undefined : JSON.stringify(body),
   });
   if (!response.ok) {
     let details;
     try { details = await response.json(); } catch { details = { detail: response.statusText }; }
-    throw new ApiError(details.detail || `Request failed (${response.status})`, response.status, details);
+    throw new ApiError(errorMessage(details, response.status), response.status, details);
   }
   if (responseType === "blob") return response.blob();
   return response.json();
@@ -105,6 +112,8 @@ const mockAdapter = {
   startRun: (role, sampleKey) => request("/api/mock/runs", { method: "POST", role, body: { sampleKey } }),
   retryRun: (role, runId) => request(`/api/mock/runs/${encodeURIComponent(runId)}/retry`, { method: "POST", role }),
   reset: role => request("/api/mock/reset", { method: "POST", role }),
+  submitFile: async () => { throw new ApiError("File ingestion requires live mode", 501); },
+  csvTemplate: async () => { throw new ApiError("CSV templates require live mode", 501); },
   reports: role => request("/api/mock/reports", { role }),
   report: (role, reportId) => request(`/api/mock/reports/${encodeURIComponent(reportId)}`, { role }),
   createReport: (role, siteId) => request("/api/mock/reports", { method: "POST", role, body: { siteId } }),
@@ -286,8 +295,8 @@ const liveAdapter = {
   mode: "live",
   config: () => request("/api/config"),
   session: async role => liveSession(role),
-  summary: async () => {
-    const data = await request("/api/live/overview");
+  summary: async (_role, refresh = false) => {
+    const data = await request(`/api/live/overview${refresh ? "?refresh=true" : ""}`);
     const sites = (data.briefings || []).map(normalizeLiveSite);
     // The gateway reports lists of site ids, not counts.
     const countOf = value => Array.isArray(value) ? value.length : Number(value || 0);
@@ -336,6 +345,14 @@ const liveAdapter = {
       ],
     };
   },
+  submitFile: async (role, upload) => {
+    try {
+      return await request(upload.kind === "csv" ? "/api/live/ingest/public-health/csv" : "/api/live/ingest", {
+        method: "POST", role, rawBody: upload.text, contentType: upload.kind === "csv" ? "text/csv" : "application/json",
+      });
+    } finally { liveStationCache.clear(); }
+  },
+  csvTemplate: () => request("/api/live/ingest/public-health/csv/template", { responseType: "blob" }),
   retryRun: async () => { throw new ApiError("The live backend has no retry endpoint", 501); },
   reset: async () => { throw new ApiError("The live backend has no reset endpoint", 501); },
   reports: async () => { throw new ApiError("Reports are a proposed capability and are unavailable in live mode", 501); },

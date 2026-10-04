@@ -16,10 +16,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from fastapi import Body, FastAPI, Header, HTTPException, Query, Response
+from fastapi import Body, FastAPI, Header, HTTPException, Query, Request, Response
 from fastapi import Path as PathParam
 from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 from starlette.background import BackgroundTask
+from starlette.concurrency import run_in_threadpool
 from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 
@@ -33,6 +34,7 @@ STATIC_ROOT = ROOT / "static"
 LIVE_BASE_URL = os.getenv("OAH_LIVE_BASE_URL", "http://127.0.0.1:8000").rstrip("/")
 # Overview queries and the assistant's multi-round loop need a longer timeout.
 LIVE_TIMEOUT_SECONDS = float(os.getenv("OAH_LIVE_TIMEOUT_SECONDS", "90"))
+MAX_INGEST_BYTES = 5 * 1024 * 1024
 MODES = {"mock", "live"}
 DEFAULT_MODE = os.getenv("DASHBOARD_DEFAULT_MODE", "mock").strip().lower()
 if DEFAULT_MODE not in MODES:
@@ -607,11 +609,16 @@ def download_report(report_id: str, format_name: str, x_demo_role: str | None = 
     return Response(content, media_type=media_type, headers={"Content-Disposition": f'attachment; filename="{slug}-one-health-briefing.{format_name}"'})
 
 
-def proxy_live(path: str, method: str = "GET", payload: dict[str, Any] | None = None) -> JSONResponse:
-    body = json.dumps(payload).encode("utf-8") if payload is not None else None
-    request = urllib.request.Request(f"{LIVE_BASE_URL}{path}", data=body, method=method, headers={"Content-Type": "application/json"})
+def proxy_live(path: str, method: str = "GET", payload: dict[str, Any] | None = None,
+               *, raw_body: bytes | None = None, content_type: str = "application/json",
+               csv_template: bool = False) -> Response:
+    body = raw_body if raw_body is not None else json.dumps(payload).encode("utf-8") if payload is not None else None
+    request = urllib.request.Request(f"{LIVE_BASE_URL}{path}", data=body, method=method, headers={"Content-Type": content_type})
     try:
         with urllib.request.urlopen(request, timeout=LIVE_TIMEOUT_SECONDS) as result:
+            if csv_template:
+                return Response(result.read(), status_code=result.status, media_type="text/csv",
+                                headers={"Content-Disposition": 'attachment; filename="public-health-template.csv"'})
             return JSONResponse(json.loads(result.read().decode("utf-8")), status_code=result.status)
     except urllib.error.HTTPError as exc:
         try:
@@ -648,6 +655,35 @@ def live_ingest_demo(key: str) -> JSONResponse:
     if key not in {"iot", "iot-oslo", "iot-benevento", "iot-coimbra", "survey", "survey-ghent", "survey-toulouse", "survey-coimbra", "health", "health-coimbra", "health-mondego", "health-kanpur"}:
         raise HTTPException(status_code=404, detail="Unknown live sample")
     return proxy_live(f"/api/ingest-demo/{key}", method="POST")
+
+
+async def proxy_ingestion_file(request: Request, path: str, accepted_types: set[str]) -> Response:
+    content_type = request.headers.get("content-type", "").split(";", 1)[0].strip().lower()
+    if content_type not in accepted_types:
+        raise HTTPException(status_code=415, detail=f"Content-Type must be {' or '.join(sorted(accepted_types))}")
+    body = bytearray()
+    async for chunk in request.stream():
+        if len(body) + len(chunk) > MAX_INGEST_BYTES:
+            raise HTTPException(status_code=413, detail="File exceeds the 5 MiB upload limit")
+        body.extend(chunk)
+    if not body:
+        raise HTTPException(status_code=422, detail="File is empty")
+    return await run_in_threadpool(proxy_live, path, method="POST", raw_body=bytes(body), content_type=content_type)
+
+
+@app.post("/api/live/ingest")
+async def live_ingest_file(request: Request) -> Response:
+    return await proxy_ingestion_file(request, "/ingest", {"application/json"})
+
+
+@app.post("/api/live/ingest/public-health/csv")
+async def live_ingest_csv(request: Request) -> Response:
+    return await proxy_ingestion_file(request, "/ingest/public-health/csv", {"text/csv", "application/csv"})
+
+
+@app.get("/api/live/ingest/public-health/csv/template")
+def live_ingest_csv_template() -> Response:
+    return proxy_live("/ingest/public-health/csv/template", csv_template=True)
 
 
 @app.post("/api/live/ask")
@@ -768,7 +804,7 @@ app.mount("/static", StaticFiles(directory=STATIC_ROOT), name="static")
 def main() -> None:
     import uvicorn
 
-    uvicorn.run("dashboard.server:app", host="127.0.0.1", port=int(os.getenv("DASHBOARD_PORT", "8090")), reload=False)
+    uvicorn.run("dashboard.server:app", host=os.getenv("DASHBOARD_HOST", "127.0.0.1"), port=int(os.getenv("DASHBOARD_PORT", "8090")), reload=False)
 
 
 if __name__ == "__main__":

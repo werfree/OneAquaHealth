@@ -20,7 +20,7 @@ from .pipeline import process
 from .mqtt_worker import create_mqtt_client, mqtt_broker_address, mqtt_connect_options
 from .rabbitmq_worker import consume_citizen_surveys
 from .officer import router as officer_router
-from .web import router as web_router
+from .web import invalidate_overview, router as web_router
 
 logger = logging.getLogger("OAH_Ingestion_App")
 
@@ -78,21 +78,24 @@ def ingest_event(envelope: IngestionEnvelope):
     """Validate, normalize and print one event for the downstream handoff."""
     message = envelope_as_message(envelope)
     result = process(envelope, message)
+    if result.get("uploaded", 0) > 0:
+        invalidate_overview()
     if result.get("fhir") == "UPLOAD_FAILED":
         raise HTTPException(
             status_code=502,
-            detail={"status": "FHIR_UPLOAD_FAILED", "event_id": str(message["event_id"]), **result},
+            detail={"status": "FHIR_UPLOAD_FAILED", "event_id": str(message["event_id"]), "site_id": envelope.site_id, "source_type": envelope.source_type, **result},
         )
     if result.get("fhir") == "CONVERSION_FAILED":
         raise HTTPException(
             status_code=500,
-            detail={"status": "FHIR_CONVERSION_FAILED", "event_id": str(message["event_id"]), **result},
+            detail={"status": "FHIR_CONVERSION_FAILED", "event_id": str(message["event_id"]), "site_id": envelope.site_id, "source_type": envelope.source_type, **result},
         )
     logger.info("Normalized API event %s (%s)", message["event_id"], message["source_type"])
     return {
         "status": "ACCEPTED",
         "event_id": str(message["event_id"]),
         "source_type": message["source_type"],
+        "site_id": envelope.site_id,
         **result,
     }
 
@@ -116,7 +119,9 @@ async def ingest_public_health_csv(request: Request):
     for envelope in envelopes:
         message = envelope_as_message(envelope)
         result = process(envelope, message)
-        results.append({"event_id": message["event_id"], "source_type": "PUBLIC_HEALTH", **result})
+        if result.get("uploaded", 0) > 0:
+            invalidate_overview()
+        results.append({"event_id": message["event_id"], "site_id": envelope.site_id, "source_type": "PUBLIC_HEALTH", **result})
 
     failed = [item for item in results if item.get("fhir") in {"UPLOAD_FAILED", "CONVERSION_FAILED"}]
     if any(item.get("fhir") == "CONVERSION_FAILED" for item in failed):
