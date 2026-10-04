@@ -4,7 +4,7 @@
 
 **Environmental and public-health evidence, connected through FHIR R4.**
 
-[Launch the dashboard](https://oah.werfree.fun) · [Watch the demo](https://youtu.be/C1mKqq3cQqw?si=Q8Y9dZbK9zy5JwR6) · [Run locally](#quick-start) · [Explore the architecture](#architecture-and-data-flow)
+<a href="https://oah.werfree.fun" target="_blank" rel="noopener noreferrer">Launch the dashboard</a> · <a href="https://youtu.be/C1mKqq3cQqw?si=Q8Y9dZbK9zy5JwR6" target="_blank" rel="noopener noreferrer">Watch the demo</a> · [Run locally](#quick-start) · [Explore the architecture](#architecture-and-data-flow)
 
 OneAquaHealth brings environmental monitoring, citizen-science observations, and public-health indicators into a shared, location-aware FHIR R4 workflow. It validates and normalizes incoming records, applies screening rules, maps them to OAH FHIR profiles, and makes tagged records available for One Health summaries and analysis.
 
@@ -12,17 +12,23 @@ The intended use is to help environmental and public-health teams find relevant 
 
 ## Project demo
 
-[![Launch OneAquaHealth Dashboard](docs/assets/launch-dashboard.svg)](https://oah.werfree.fun)
+<a href="https://oah.werfree.fun" target="_blank" rel="noopener noreferrer">
+  <img src="docs/assets/launch-dashboard.svg" alt="Launch OneAquaHealth Dashboard" width="420">
+</a>
 
 **Try the live app:** explore station evidence, upload source files, and investigate findings in Surveillance Studio.
 
-Dashboard address: [oah.werfree.fun](https://oah.werfree.fun)
+Dashboard address: <a href="https://oah.werfree.fun" target="_blank" rel="noopener noreferrer">oah.werfree.fun</a>
 
-[![Watch the OneAquaHealth project demo on YouTube](https://img.youtube.com/vi/C1mKqq3cQqw/hqdefault.jpg)](https://www.youtube.com/watch?v=C1mKqq3cQqw)
+<a href="https://www.youtube.com/watch?v=C1mKqq3cQqw" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.youtube.com/vi/C1mKqq3cQqw/hqdefault.jpg" alt="Watch the OneAquaHealth project demo on YouTube" width="480">
+</a>
 
 Click the video preview to watch the demo on YouTube.
 
-- [Watch the project demo on YouTube](https://youtu.be/C1mKqq3cQqw?si=Q8Y9dZbK9zy5JwR6)
+- <a href="https://youtu.be/C1mKqq3cQqw?si=Q8Y9dZbK9zy5JwR6" target="_blank" rel="noopener noreferrer">Watch the project demo on YouTube</a>
+
+On GitHub, **Ctrl-click** (Windows/Linux) or **Cmd-click** (macOS) opens the dashboard or video in a new tab. GitHub removes the new-tab attributes from README links.
 
 ### Explore the demo
 
@@ -114,18 +120,21 @@ flowchart LR
 - [Architecture diagram image](docs/OneAquaHealth%20Data-2026-10-03-211553.png)
 - [Data-flow diagram image](docs/OneAquaHealth%20Data-2026-10-03-212126.png)
 
-<details>
-<summary><strong>View the detailed architecture diagrams</strong></summary>
-
 ### System architecture
 
-![OneAquaHealth system architecture](docs/OneAquaHealth%20Data-2026-10-03-211553.png)
+The component view shows the source systems, integration channels, shared ingestion pipeline, FHIR repository, and evidence services.
+
+[![OneAquaHealth system architecture](docs/OneAquaHealth%20Data-2026-10-03-211553.png)](docs/OneAquaHealth%20Data-2026-10-03-211553.png)
+
+[Open the full-size system architecture diagram](docs/OneAquaHealth%20Data-2026-10-03-211553.png) · [Read the architecture guide](docs/system-architecture.md)
 
 ### Data-flow diagram
 
-![OneAquaHealth data-flow diagram](docs/OneAquaHealth%20Data-2026-10-03-212126.png)
+The data-flow view follows records from collection through validation, screening, FHIR storage, and dashboard queries.
 
-</details>
+[![OneAquaHealth data-flow diagram](docs/OneAquaHealth%20Data-2026-10-03-212126.png)](docs/OneAquaHealth%20Data-2026-10-03-212126.png)
+
+[Open the full-size data-flow diagram](docs/OneAquaHealth%20Data-2026-10-03-212126.png) · [Read the data-flow guide](docs/data-flow-diagram.md)
 
 The end-to-end data path is:
 
