@@ -276,6 +276,7 @@ h1, h2, h3, h4, p { margin-top: 0; }
   cursor: pointer;
   text-align: left;
 }
+.nav-item[hidden] { display: none; }
 .nav-item:hover { color: #fff; background: rgba(255, 255, 255, 0.045); }
 .nav-item.is-active { color: white; border-color: rgba(205, 232, 222, 0.12); background: var(--nav-2); }
 .nav-icon { position: relative; width: 17px; height: 17px; flex: 0 0 17px; opacity: 0.9; }
