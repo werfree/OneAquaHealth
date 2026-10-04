@@ -1,587 +1,669 @@
-# Task: Build the OneAquaHealth demo-video story from the implementation on `feature/dashboard-theme-update-2`
+# Task: Regenerate the OneAquaHealth demo plan and final-video production prompt
 
-Work only from this repository:
+Work only in this repository:
 
 `/home/anindyasundar-bera/Projects/OneAquaHealth`
 
-Work only on this Git branch:
+Your job is to produce two updated planning artifacts, in this order:
 
-`feature/dashboard-theme-update-2`
+1. `oneaquahealth-demo-video-plan.md` — the evidence-backed story, storyboard, narration, and recording runbook.
+2. `oneaquahealth-video-generation-prompt.md` — a self-contained production prompt that another coding-model session can use to record, assemble, verify, and deliver the final video from the approved plan.
 
-Expected baseline when this prompt was prepared:
+Do not create or rebuild the final video in this task. Do not modify application code, configuration, fixtures, source data, or existing media. The only files you are authorized to replace are the two planning artifacts above.
 
-`c57157d6618065b13bde00c79018ca36ac805153`
+The final production prompt must be usable as the next step without requiring the operator to reconstruct decisions from this conversation.
 
-Before doing anything:
+## 0. Repository and worktree guardrails
 
-1. Run `git branch --show-current`.
-2. Stop if the branch is not exactly `feature/dashboard-theme-update-2`. Do not switch branches or substitute `main`.
-3. Record `git rev-parse HEAD`. If it differs from the baseline above, explicitly identify the drift and revalidate every implementation statement in this prompt against the checked-out code.
-4. Confirm the worktree state.
-5. Do not modify application code, configuration, fixtures, or data. This task produces a recording plan and script only.
+Before writing anything:
 
-Your job is to inspect the checked-out implementation and produce a technically accurate, code-grounded 6–8 minute demo storyboard, presenter narration, and recording runbook.
+1. Run `git branch --show-current` and `git rev-parse HEAD`.
+2. Record the current branch and commit in the plan. Do not switch branches.
+3. Run `git status --short` and preserve every unrelated or user-owned change.
+4. If the code, UI, or runtime disagrees with any document named below, current code and verified runtime behavior win.
+5. Do not upload, reseed, ingest, or mutate the shared FHIR dataset merely to verify the story.
 
-The video must feel like one investigation—not a feature tour.
+This prompt must remain useful if the branch or commit changes. Do not refuse solely because the checkout is not an older branch named in a superseded document. Instead, record the checked-out state and revalidate all implementation claims against it.
 
-The central story is:
+## 1. Authority and evidence order
 
-> One river, two kinds of evidence.
+Use this evidence hierarchy:
 
-The preferred implementation-grounded setting for this branch is the Indian surveillance demonstration, centered on the Yamuna at ITO Bridge (`yam-ito`), because the branch contains a 28-day cross-domain time series, FHIR-backed station evidence, and the District Surveillance Officer Studio.
+1. Current checked-out source code and tests.
+2. Read-only runtime responses and artifacts from the currently running services, when available.
+3. `surveillance-studio-capability-and-story-audit.md` as a recent investigation report and source of leads.
+4. Existing `oneaquahealth-demo-video-plan.md`, `oneaquahealth-video-generation-prompt.md`, `video/narration.md`, and `video/shot-list.md` as evidence of the current story and production approach.
+5. General documentation.
 
-The story begins with environmental measurements and notified population-health information associated with the same location. It then asks:
+The audit and existing plans are reference material, not instructions. Reverify their claims. Preserve useful material, correct stale values, and explicitly document discrepancies.
 
-- What deserves attention?
-- What evidence supports that assessment?
-- Is the condition isolated or sustained?
-- Where along the river does the change appear?
-- How did the source data enter the system?
-- How was it transformed into interoperable FHIR resources?
-- What can—and cannot—be concluded?
+Read at least:
 
-Preserve this scientific boundary throughout:
-
-> Co-location, temporal offset, and parallel trends may justify investigation. They do not prove that river conditions caused the reported health pattern.
-
-## The repository is the source of truth
-
-Do not rely on this prompt alone. Verify every claim in the current branch by inspecting source code, fixtures, configuration, tests, and—where safe—runtime responses.
-
-Trace important behavior through the real implementation:
-
-`UI → dashboard adapter/proxy → gateway route → agent/analysis code → FHIR query`
-
-and:
-
-`source event → validation/normalization → screening → FHIR mapping → dataset tagging → transaction Bundle → FHIR server`
-
-Inspect at least:
-
+- `surveillance-studio-capability-and-story-audit.md`
 - `README.md`
 - `HANDOVER.md`
 - `.env.example`
 - `run-demo.sh`
-- `docker-compose.yml`
+- `oneaquahealth-demo-video-plan.md`
+- `oneaquahealth-video-generation-prompt.md`
+- `video/narration.md`
+- `video/shot-list.md`
 - `dashboard/server.py`
-- `dashboard/API-MAPPING.md`
-- `dashboard/static/index.html`
 - `dashboard/static/js/api.js`
 - `dashboard/static/js/app.js`
-- `dashboard/data/fixtures.json`
-- `oah-ingestion/src/oah_ingestion/app.py`
-- `oah-ingestion/src/oah_ingestion/web.py`
+- `dashboard/static/js/studio.js`
+- `dashboard/static/js/studio-api.js`
+- `dashboard/static/js/studio-charts.js`
+- `oah-agent/src/oah_agent/tools.py`
+- `oah-agent/src/oah_agent/studio.py`
+- `oah-agent/src/oah_agent/grounding.py`
+- `oah-agent/src/oah_agent/briefing.py`
 - `oah-ingestion/src/oah_ingestion/officer.py`
+- `oah-ingestion/src/oah_ingestion/web.py`
 - `oah-ingestion/src/oah_ingestion/pipeline.py`
 - `oah-ingestion/src/oah_ingestion/fhir_adapter.py`
 - `oah-ingestion/src/oah_ingestion/fhir_client.py`
 - `oah-ingestion/src/oah_ingestion/thresholds.py`
 - `oah-ingestion/src/oah_ingestion/mqtt_worker.py`
 - `oah-ingestion/src/oah_ingestion/rabbitmq_worker.py`
-- `oah-agent/src/oah_agent/briefing.py`
-- `oah-agent/src/oah_agent/studio.py`
-- `oah-agent/src/oah_agent/grounding.py`
-- `oah-agent/src/oah_agent/tools.py`
 - `oah-pydantic-models/src/oah_models/fhir/`
-- `oah-demo-publishers/src/oah_demo_publishers/cli.py`
 - `demo/sites.json`
 - `demo/generate_timeseries.py`
-- `demo/timeseries/events.json`
-- the supplied JSON and CSV samples
-- the relevant automated tests
+- relevant tests under `oah-agent/tests/`, `oah-ingestion/tests/`, and `dashboard/tests/`
 
-Search the repository rather than relying only on documentation.
+Search the repository for connected symbols, routes, proxy mappings, response headers, UI labels, download behavior, and tests. Use structural code navigation or the repository knowledge graph when available.
 
-## Known branch-specific implementation baseline to verify
+Trace important flows end to end:
 
-Treat the following as leads that must be confirmed, not as permission to skip inspection.
+`officer question`
 
-### Applications and interfaces
+→ `Studio scope and prompt`
 
-This branch appears to contain three related experiences:
+→ `dashboard proxy`
 
-1. The ingestion gateway and live ingestion dashboard, normally served from `APP_PORT`, defaulting to `8000`.
-2. The separate evidence dashboard, normally served from `DASHBOARD_PORT`, defaulting to `8090`, with explicit mock and live modes.
-3. The District Surveillance Officer Studio at `/api/officer/panel`, linked from the live evidence dashboard as “Open Surveillance Studio.”
+→ `streamed agent run`
 
-The evidence dashboard currently appears to expose:
+→ `typed data/analysis/visualization tools`
 
-- Overview
-- Ingestion
-- Reports
-- a station workspace with Context, Evidence, and Relationships tabs
-- an assistant panel
-- persona and theme selectors
-- a visible mock/live indicator
+→ `FHIR queries or deterministic Python computations`
 
-Verify the exact current labels before using them in the storyboard.
+→ `browser-rendered charts`
 
-### Indian surveillance dataset
+→ `answer and numeric grounding verdict`
 
-The repository contains a synthetic 28-day demonstration series spanning six Indian stations:
+→ `transcript / executive report / CSV / FHIR handoffs`
 
-- `yam-wazirabad`
-- `yam-ito`
-- `yam-okhla`
-- `gan-jajmau`
-- `gan-assi`
-- `mit-dharavi`
+Also preserve the shorter provenance trace:
 
-The generator currently describes 192 events:
+`source event`
 
-- 168 water events
-- 24 weekly health-surveillance events
+→ `validation and normalization`
 
-The data is synthetic demonstration data. Station coordinates and river-distance values may be approximate. Never present it as observed CPCB, IDSP, IHIP, or state-board data.
+→ `prototype screening`
 
-The generator deliberately shapes an event at ITO in which:
+→ `FHIR mapping`
 
-- faecal coliform rises,
-- dissolved oxygen falls,
-- other water measures change,
-- and a later synthetic rise appears in acute diarrhoeal disease notifications.
+→ `dataset tagging`
 
-This pattern is a designed demonstration scenario. It is not empirical evidence of exposure, correlation, or causation.
-
-### Surveillance Studio
-
-Verify the implementation of these live, FHIR-backed capabilities:
-
-- station listing
-- ward prioritization
-- station trends
-- river longitudinal profiles
-- exceedance persistence
-- descriptive peak offsets
-- streamed investigations
-- tool and FHIR-query traces
-- grounding checks for numeric claims
-- downloadable investigation transcripts
-- executive reports
-- readings, surveillance, and FHIR Bundle exports
-
-Likely gateway routes include:
-
-- `GET /api/officer/stations`
-- `GET /api/officer/wards`
-- `GET /api/officer/trend`
-- `GET /api/officer/profile`
-- `GET /api/officer/persistence`
-- `GET /api/officer/offset`
-- `POST /api/officer/studio/run`
-- `GET /api/officer/studio/report/{session_id}`
-- `POST /api/officer/studio/executive`
-- `GET /api/officer/export/readings.csv`
-- `GET /api/officer/export/surveillance.csv`
-- `GET /api/officer/export/bundle.json`
-- `GET /api/officer/report/facts`
-
-Determine which capabilities require `OPENAI_API_KEY` and which work deterministically without it.
-
-Do not describe the Studio’s descriptive peak offset as a correlation. Verify and preserve its own caveat about the small number of weekly health observations.
-
-### Evidence dashboard truth boundary
-
-Verify the mock/live boundary carefully.
-
-The expected current behavior is:
-
-- Live overview and station views read tagged FHIR data through the ingestion gateway.
-- Live findings are constructed from returned exceedances, elevated health records, and co-location state.
-- IDs beginning with `live-evidence-...` are stable dashboard-level references derived from gateway station data.
-- They are not stored FHIR `Evidence` resources.
-- Their underlying records may be FHIR `Observation` and `Group` resources.
-- Live mode does not currently have a backend graph endpoint.
-- The richer Relationships graph is mock-only.
-- Live mode does not provide durable ingestion-run history, run retry, or the evidence dashboard’s report lifecycle.
-- The evidence dashboard’s persona controls demonstrate intended policy but do not constitute production authentication against the live gateway.
-
-If still accurate, explain the live evidence model in plain language:
-
-> The dashboard constructs the evidence view from station data returned by the gateway. The underlying records are stored in FHIR; the `live-evidence-...` link is a dashboard-level reference, not a separate FHIR Evidence resource.
-
-Never present mock graph edges, mock reports, simulated role enforcement, or mock run history as live backend behavior.
-
-### Ingestion and FHIR pipeline
-
-Verify the three implemented source channels:
-
-- IoT telemetry over MQTT
-- citizen/community survey events through RabbitMQ
-- public-health submissions over HTTP, including the CSV batch endpoint
-
-Verify that all three reach the shared processing pipeline.
-
-The real pipeline should be traced through:
-
-`incoming payload`
-
-→ `typed envelope validation and normalization`
-
-→ `prototype threshold screening`
-
-→ `FHIR resource mapping`
-
-→ `meta.tag dataset scoping`
-
-→ `transaction Bundle with deterministic PUT requests`
-
-→ `FHIR upload`
-
-→ `FHIR transaction response`
+→ `transaction Bundle and upload`
 
 → `live FHIR queries`
 
-Do not claim that citizen surveys become `QuestionnaireResponse` resources unless the current mapper actually does so. This branch appears to map survey answers into OAH-profiled `Observation` resources, with supporting resources such as `Location`, `Specimen`, and `Practitioner`.
+## 2. Story objective
 
-Confirm the actual resource types generated for each channel. Likely types include:
+The new video must show that Surveillance Studio is not merely a chat box or a dashboard. It is an auditable investigation workflow:
 
-- `Location`
-- `Specimen`
-- `Observation`
-- `Device`
-- `Practitioner`
-- `Organization`
-- `Group`
+> One officer asks one operational question. The agent chooses which evidence, computation, and visual form answer it. The Studio shows its work, checks the figures in its conclusion, and turns the same investigation into handoffs for auditors, leaders, analysts, and interoperable systems.
 
-Do not invent resource types.
+Retain the strongest existing motif:
 
-Explain `oah-demo` accurately: it is a `meta.tag` value used to scope a prototype dataset on a shared FHIR server. It is not a risk classification, regulatory category, or analytical result.
+> One river, two kinds of evidence.
 
-### Screening rules
+But change the payoff from “the data entered one pipeline” to:
 
-Confirm the city-specific threshold selection.
+> One investigation, five usable handoffs.
 
-The branch appears to use:
+The handoffs to verify and make visible are:
 
-- Indian prototype screening references for Indian cities, based on named CPCB and IS 10500 criteria.
-- Separate retained European pilot conventions for measurements such as nitrate-as-N, pH, and dissolved zinc.
+1. **Investigation transcript** — how the conclusion was reached.
+2. **Executive situation report** — what leaders need to decide, with findings, actions, limitations, verification, evidence queries, and the run's actual figures.
+3. **Environmental readings CSV** — readings with their criterion, basis, exceedance factor, and source Observation id.
+4. **Health-surveillance CSV** — cases, population denominators, rates, baselines, and source Observation id.
+5. **Tagged FHIR R4 collection Bundle** — station evidence packaged for an interoperable system without retyping.
 
-The software itself states that these are prototype screening references, not statutory enforcement limits. Always show the stated basis beside a threshold and preserve that limitation in narration.
+The narrative must remain a single bounded investigation, not become a download-button tour. Tie each artifact to a recipient and a job:
 
-### Operational limitations to verify
+- auditor or incident record → transcript
+- District Surveillance Officer / Chief Medical Officer → executive report
+- analyst → purpose-specific CSVs
+- ABDM-aligned or FHIR-capable system → FHIR Bundle
 
-Explicitly investigate and classify:
+## 3. Runtime and format
 
-- dependence on a reachable FHIR server
-- the default shared HAPI FHIR sandbox
-- cache behavior for overview data
-- FHIR pagination and result limits
-- deterministic resource IDs and replay/upsert behavior
-- duplicate-data and shared-server contamination risks
-- generated time-series dates being relative to execution time
-- in-memory Studio sessions expiring on restart
-- external MQTT connectivity
-- local RabbitMQ requirements
-- asynchronous delivery timing
-- the need for a stable MQTT client ID for session resumption
-- optional OpenAI model access
-- anonymous live gateway access
-- unavailable production authentication
-- browser refresh requirements after ingestion
-- mock/live confusion
-- full Bundle JSON not being returned by the evidence dashboard’s live sample adapter
-- the difference between an ingestion alert and a processing/upload failure
+Design a main video between **3:00 and 5:00**, targeting approximately **4:30**. The hard ceiling is **5:00**.
 
-## Choose the strongest truthful story
+If all useful capabilities cannot fit, prioritize the investigation and handoff loop. Move secondary capabilities into an optional **60–90 second appendix**, rather than silently lengthening the main cut.
 
-Prefer a primary narrative centered on:
+Recommended main-cut emphasis:
 
-> Yamuna at ITO Bridge: environmental screening evidence and population-health surveillance viewed through a shared FHIR Location.
+- approximately 20–25%: live context and evidence boundary
+- approximately 35–40%: real streamed Studio investigation, tool choice, charts, and grounding
+- approximately 30–35%: transcript, executive report, CSVs, and FHIR Bundle
+- approximately 10%: concise provenance bridge and close
 
-A strong candidate progression is:
+Do not spend the largest block of runtime on terminal output. The product UI and the produced artifacts should carry the story.
 
-1. Open the live evidence dashboard.
-2. Establish that the view is scoped by the `oah-demo` dataset tag.
-3. Select `yam-ito`.
-4. Show environmental and health records associated with the same Location.
-5. Open supporting evidence and distinguish source FHIR resources from dashboard-derived evidence links.
-6. Ask whether the pattern is isolated, sustained, or visible elsewhere along the river.
-7. Open Surveillance Studio and run a focused ITO or Yamuna investigation.
-8. Show the real FHIR queries, computed trend/persistence/profile view, and grounding result.
-9. State clearly that the scenario is synthetic and the apparent offset is descriptive only.
-10. Move backward from evidence consumption to ingestion.
-11. Run a supplied live sample or show one event arriving through its real channel.
-12. Follow validation, screening, FHIR mapping, transaction upload, and response.
-13. Briefly show how MQTT, RabbitMQ, and HTTP converge on the common pipeline.
-14. Return to the live evidence view after the appropriate refresh or cache invalidation.
-15. Close with interoperability, provenance, and scientific restraint.
+## 4. Primary demonstration setting
 
-Use the Mondego C1 material only if it provides a clearer bounded insert—for example, demonstrating the mock/live boundary or the original European pilot. Do not let it displace the stronger Indian implementation unless repository or runtime inspection shows that the Indian flow cannot be recorded reliably.
+Prefer the synthetic Indian surveillance demonstration centered on Yamuna at ITO Bridge (`yam-ito`) if the current repository and runtime still support it.
 
-Do not force every interface into the video. Include a capability only when it advances the investigation.
+Verify rather than assume:
 
-## Scientific and public-health language
+- the current dataset tag
+- the FHIR base URL
+- the station name and id
+- the available environmental and health observations
+- the configured observation window
+- current values, changes, thresholds, persistence, river-profile step, and peak offset
+- the number of weekly health observations in the offset calculation
+- the exact current UI labels
 
-The narration must distinguish:
+The time-series data and live aggregation can drift by date, window, or reseeding. Never copy a value from an older plan without querying it again immediately before finalizing the plan and again before recording.
 
-- environmental measurements,
-- prototype screening flags,
-- notified case counts or rates,
-- cohort/location association,
-- descriptive temporal offset,
-- statistical association,
-- and causation.
+The recent audit reported a specific river-profile discrepancy between the older plan and a later live response. Investigate it. The plan must explain which `days` window produced each number and prohibit reusing stale values.
 
-Never say or imply:
+## 5. Complete capability surface to verify
 
-- the river caused illness,
-- a downstream step identifies a specific discharge,
-- a peak offset proves a lagged effect,
-- a screening threshold is a legal determination,
-- the synthetic data represents a real event,
-- or the assistant independently establishes scientific truth.
+The following are leads, not permission to skip inspection.
 
-Safe language includes:
+### 5.1 Typed FHIR retrieval and context tools
 
-- “a signal worth investigating”
-- “co-located records”
-- “a descriptive pattern”
-- “screened against the prototype reference”
-- “the largest change appears between these monitored stations”
-- “this narrows where confirmatory sampling may be useful”
-- “the available evidence does not establish attribution or causation”
+Verify the schemas and behavior of:
 
-## Implementation classification
+- `get_thresholds`
+- `list_sites`
+- `search_observations`
+- `get_site_profile`
+- `get_cohort`
 
-Create an implementation map before designing the story. Classify each relevant capability as:
+The story should clearly explain the most important safety property: the model selects a typed tool, while application code constructs the FHIR query. Do not imply that the model freely invents FHIR URLs.
 
-- `LIVE`
+### 5.2 Deterministic analytical tools
+
+Verify:
+
+- station trends and period comparisons
+- ward prioritization
+- river longitudinal profiles and largest monitored step
+- exceedance persistence
+- descriptive peak offset
+- deterministic report facts
+
+Establish precisely what each calculation means. For example, verify whether a “change” compares two halves of a window, two weeks, or another period. Do not narrate a stronger interpretation than the code computes.
+
+### 5.3 Agent orchestration and visible work
+
+Verify and plan to show:
+
+- current-station versus all-stations scope
+- model-selected data, analytical, and visualization tools
+- server-sent streaming of start/planning, tool calls, results, renders, answer, completion, and errors
+- visible tool arguments
+- auditable FHIR evidence links
+- the maximum tool-call round behavior
+- session creation and in-memory lifetime
+
+The real streamed Studio run is the centrepiece. A deterministic terminal fallback must never be edited to look as if it were the agent. If a model key is unavailable at production time, the production session must stop and report the blocker or use a clearly labelled alternate cut approved in the plan.
+
+### 5.4 Visualization tools
+
+Inventory and verify every render type, including:
+
+- headline statistics
+- station × indicator matrix
+- ward ranking
+- aligned environmental/health trend
+- ward scatter comparison
+- river profile
+- persistence strip
+
+The model's selection of a chart form is itself part of the product story. Prefer two or three meaningful visualizations over a montage of every chart.
+
+### 5.5 Numeric grounding and auditability
+
+Verify exactly how `grounding.check()` works and what is included in its evidence set.
+
+The main cut must visibly show:
+
+- the grounding chip or verdict
+- how many figures were checked, if the run produces figures
+- its `not_covered` or equivalent limitation text
+
+Do not overstate grounding. If current code still behaves as reported, explain that it checks whether numeric literals are present in retrieved evidence; it does not prove that a supported number is used in the correct sentence, and it does not check number-free claims.
+
+### 5.6 Investigation transcript
+
+Inspect the actual artifact, not merely its button. Verify:
+
+- source session requirements
+- MIME type and filename
+- question, streamed reasoning/narration, tool steps, arguments, evidence queries, returned figures, conclusion, and grounding verdict
+- behavior after a process restart
+
+Present the transcript as the audit trail: **how we reached the conclusion**.
+
+### 5.7 Executive situation report
+
+Inspect the actual artifact and verify:
+
+- whether a model call is required
+- how the transcript and captured chart SVGs are supplied
+- report sections and grounding behavior
+- evidence-query appendix
+- response MIME type and download/open behavior
+- print styling and browser Save as PDF
+
+Do not call it a native PDF if the implementation returns print-ready HTML. Present it as the decision handoff: **what leaders need to decide**.
+
+### 5.8 CSV and FHIR exports
+
+Inspect actual response headers and contents for:
+
+- readings CSV
+- health-surveillance CSV
+- station FHIR Bundle
+
+Verify scope, time window, filenames, MIME types, columns, row counts, required parameters, resource types, Bundle type, dataset tag, and whether the output is deterministic.
+
+Explain why the outputs are different:
+
+- readings CSV retains measurements, screening basis, exceedance information, and source ids
+- health CSV retains case counts, denominators, rates, and baselines
+- FHIR export is a tagged `collection` Bundle of evidence, not a transaction Bundle and not a newly created FHIR `Evidence` resource
+
+Present these as: **what analysts and systems can reuse**.
+
+### 5.9 Ingestion and provenance
+
+Verify MQTT, RabbitMQ, HTTP JSON, and HTTP CSV inputs and their shared pipeline. Retain this only as a concise provenance bridge in the main cut unless timing proves it earns more space.
+
+The full ingestion walkthrough, source-channel comparison, deterministic resource ids, replay/upsert behavior, and transaction upload are strong candidates for the optional appendix.
+
+Do not perform a write to a shared FHIR server solely for the video. If a recording needs a live write, require an isolated FHIR server or an explicitly approved, uniquely scoped dataset tag.
+
+## 6. Required implementation classification
+
+Classify every material capability using exactly one of:
+
+- `LIVE — deterministic`
+- `LIVE — model required`
+- `LIVE — session-dependent`
 - `LIVE WITH LIMITATIONS`
 - `MOCK / SIMULATED`
 - `NOT IMPLEMENTED`
+- `UNVERIFIED`
 
-At minimum, classify:
+For every capability, record:
 
-- live FHIR overview and station detail
-- dashboard-derived live evidence references
-- relationship graph
-- ingestion sample execution
-- durable run history
-- retry workflow
-- mock report generation
-- Studio investigation
-- Studio charts and computed analyses
-- Studio transcript export
-- executive report generation
+- user value
+- UI entry point
+- route/proxy/function chain
+- data source
+- model-key dependency
+- FHIR/dataset dependency
+- read/write behavior
+- station or district scope
+- process/session lifetime
+- visible limitation
+- suitability for the main cut, appendix, or exclusion
+
+At minimum classify:
+
+- live overview and station detail
+- dashboard-derived evidence references
+- typed FHIR tools
+- each deterministic officer analysis
+- every chart/render type
+- streamed Studio investigation
+- current-station and all-stations scope
 - numeric grounding
+- Studio transcript
+- executive situation report
+- deterministic report facts
+- readings CSV
+- health-surveillance CSV
+- FHIR Bundle export
+- ingestion sample execution
+- MQTT, RabbitMQ, HTTP JSON, and HTTP CSV ingestion
+- FHIR mapping, transaction Bundle generation, upload, and tagging
+- relationship graph
+- mock report lifecycle
+- durable run history and retry
 - persona authorization
-- MQTT ingestion
-- RabbitMQ ingestion
-- HTTP JSON ingestion
-- HTTP CSV ingestion
-- threshold screening
-- transaction Bundle generation
-- FHIR upload
-- dataset tagging
-- automatic dashboard refresh after ingestion
 - production authentication
 - causal or epidemiological inference
 
-Do not silently turn a limitation or simulation into a live feature.
+## 7. Truth boundaries that must survive every rewrite
 
-## Required deliverable
+### 7.1 Scientific boundary
 
-Produce the following sections.
+The dataset is synthetic demonstration data. Never present it as observed CPCB, IDSP, IHIP, hospital, municipal, or state-board data.
 
-### 1. Branch and Implementation Baseline
+Always preserve:
+
+> Co-location, parallel movement, and a descriptive peak offset can identify a signal worth investigating. They do not establish attribution, exposure, correlation, or causation.
+
+Never say or imply:
+
+- the river caused illness
+- the largest monitored step identifies a specific discharge
+- the peak offset proves a lagged effect
+- a screening reference is a legal determination
+- the agent independently establishes scientific truth
+
+Use language such as:
+
+- “screened against the prototype reference”
+- “the largest change appears between these monitored stations”
+- “this narrows where confirmatory sampling may be useful”
+- “a descriptive offset between maxima”
+- “the available evidence does not establish attribution or causation”
+
+### 7.2 FHIR and evidence boundary
+
+Verify and preserve:
+
+- dataset tags scope records on a shared FHIR server; they are not risk classes
+- dashboard `live-evidence-*` identifiers are dashboard-level references unless current code proves otherwise
+- underlying records may be FHIR `Observation`, `Group`, `Location`, and related resources
+- the exported FHIR Bundle packages station evidence; it does not create a separate FHIR `Evidence` resource
+- a collection Bundle is not a transaction Bundle
+
+### 7.3 Live versus mock boundary
+
+Never present these as live unless the current implementation has changed and runtime verification proves it:
+
+- relationship graph
+- mock dashboard report lifecycle
+- durable ingestion-run history or retry
+- persona UI as production authorization
+- mock report downloads
+
+Keep the live Studio transcript and executive report distinct from the mock dashboard's report feature.
+
+### 7.4 Security and operational boundary
+
+Verify and disclose relevant limitations:
+
+- live gateway authentication status
+- use of a shared HAPI FHIR sandbox
+- FHIR availability and pagination limits
+- overview and browser caching
+- external broker dependencies
+- Studio sessions held in memory and lost on restart
+- model dependency for investigations and executive prose
+- deterministic exports versus model-produced prose
+
+## 8. Required narrative structure
+
+Use this as the default main-cut spine and adjust only when verified implementation evidence supports a stronger version:
+
+1. **Promise:** one river, two kinds of evidence, one operational question.
+2. **Scope:** live mode, current dataset tag, Yamuna at ITO Bridge.
+3. **Evidence:** environmental and health records associated with the same FHIR Location; screening basis visible.
+4. **Question:** open Surveillance Studio in current-station scope and ask a focused operational question.
+5. **Agent at work:** show streamed planning, tool calls, one expanded FHIR query, and two or three model-chosen charts.
+6. **Honest answer:** show the numeric grounding verdict and its limitation; preserve the descriptive-offset caveat.
+7. **Audit handoff:** open the transcript — “how we reached it.”
+8. **Decision handoff:** open the executive report — “what leaders need to decide.”
+9. **Reuse handoff:** distinguish readings CSV from health CSV — “what analysts can reuse.”
+10. **Interoperability handoff:** open the tagged FHIR collection Bundle — “what systems can reuse.”
+11. **Provenance bridge:** briefly connect these records to the shared ingestion/FHIR pipeline, or move the full walkthrough to the appendix.
+12. **Close:** same investigation, no retyping, provenance retained, no causal overclaim.
+
+The story must make the output artifacts visible. A row of download buttons is not sufficient: open the transcript, report, CSV headers, and key Bundle fields on screen.
+
+The story must also make the agent visible. Terminal output from deterministic endpoints is a fallback or appendix, not a substitute for the Studio run.
+
+## 9. Output A — `oneaquahealth-demo-video-plan.md`
+
+Replace the existing plan with a complete, self-contained document containing these sections.
+
+### 9.1 Verified baseline
 
 State:
 
-- verified branch
-- inspected commit
-- worktree status
-- principal applications
-- chosen primary demo location
-- chosen dataset
-- required external dependencies
-- whether runtime verification was performed
+- branch, commit, and worktree status
+- inspection date
+- principal applications and ports
+- FHIR base URL and dataset tag, if runtime-verified
+- selected station and time window
+- model availability as observed by the gateway, without exposing secrets
+- whether runtime checks were read-only
+- files and tests used as evidence
 
-Keep this concise.
+### 9.2 Executive narrative decision
 
-### 2. Implementation Map
+Explain:
 
-Use a table:
+- the audience promise
+- why this is one investigation rather than a feature tour
+- why the handoff is the payoff
+- what moved to the appendix and why
 
-| Capability | Status | Actual Implementation | Limitation / Recording Implication | Code or Data Evidence |
-|---|---|---|---|---|
-
-Reference exact repository paths, functions, routes, fixtures, or configuration.
-
-### 3. Narrative Decision
-
-In a short paragraph, explain why the selected story is the strongest truthful story available on this branch.
-
-### 4. Detailed 6–8 Minute Storyboard
+### 9.3 Implementation and truth map
 
 Use:
 
-| Time | Scene | Screen / Visual | Presenter Action | Narration | Technical Event | Live/Mock Status | Evidence / Code Source |
+| Capability | Classification | User value | Actual implementation path | Dependencies | Limitations | Main cut / appendix / exclude | Evidence |
 |---|---|---|---|---|---|---|---|
 
-Every scene must specify what is physically visible:
+### 9.4 Verified values and artifact contracts
 
-- exact browser URL or route
-- selected station
-- selected tab
-- button or prompt
-- terminal window
-- command or request
-- expected response
-- JSON or FHIR fields to highlight
-- mode indicator
-- any title card, zoom, arrow, or callout
+Record values with:
 
-Use actual labels and commands from the repository.
+- route and exact parameters
+- retrieval timestamp
+- result
+- whether safe to hard-code or must be refreshed before recording
 
-### 5. Complete Presenter Script
+Also record artifact MIME type, filename, key columns/fields, scope, and session behavior. Do not freeze transient row counts or calculated values into narration unless they are rechecked during production.
 
-Write the full spoken narration.
-
-Requirements:
-
-- conversational
-- suitable for a mixed technical and nontechnical audience
-- minimal buzzwords
-- technically precise
-- clear transitions
-- explicit mock/live distinctions
-- explicit synthetic-data disclosure
-- explicit association-versus-causation boundary
-- consistent “one river, two kinds of evidence” theme
-
-The script should progress naturally through:
-
-`What is happening?`
-
-→ `What evidence do we have?`
-
-→ `What supports the assessment?`
-
-→ `Is it isolated or sustained?`
-
-→ `Where does the change appear?`
-
-→ `Where did the records come from?`
-
-→ `How did different inputs become FHIR data?`
-
-→ `How does that evidence return to the user?`
-
-### 6. Recording Runbook
-
-Give an exact, repository-grounded sequence containing:
-
-- environment preparation
-- required `.env` values without exposing secrets
-- dependency installation assumptions
-- RabbitMQ startup
-- ingestion gateway startup
-- evidence dashboard startup
-- FHIR prerequisites
-- time-series generation and seeding strategy
-- whether to use a controlled FHIR server instead of the shared sandbox
-- whether ingestion workers should be enabled
-- browser URLs
-- mode query parameters
-- station selection
-- exact Studio prompt
-- exact sample to run
-- terminal arrangement
-- expected logs and response states
-- refresh/cache handling
-- transcript/report download steps, if used
-- reset and recovery steps
-
-Use real commands from `README.md`, `run-demo.sh`, package entry points, and current configuration. Resolve any port inconsistency rather than copying commands blindly.
-
-Avoid uploading or reseeding the shared HAPI sandbox merely to validate the storyboard. If recording requires writes, recommend an isolated FHIR server or a uniquely scoped dataset tag.
-
-### 7. Demo Risk Checklist
+### 9.5 Detailed main-cut storyboard
 
 Use:
 
-| Risk | Why It Matters | Preflight Check | Mitigation / Fallback |
+| Time | Scene | Screen / visual | Presenter action | Narration purpose | Technical event | Classification | Evidence |
+|---|---|---|---|---|---|---|---|
+
+Target approximately 4:30 and prove the total is below 5:00.
+
+Every scene must name:
+
+- exact URL or page
+- selected station and scope
+- tab/button/prompt
+- expected visible UI state
+- fields, chart, chip, query, or artifact section to highlight
+- live/model/deterministic/session dependency
+- fallback and whether it is allowed in the main cut
+
+### 9.6 Optional appendix storyboard
+
+Provide a separate 60–90 second appendix for valuable material that does not fit, such as:
+
+- full ingestion provenance
+- matrix/ranking/scatter comparison
+- deterministic report facts
+- model-free endpoint verification
+
+Do not include the appendix in the main runtime total.
+
+### 9.7 Complete presenter script
+
+Write the full narration, scene by scene.
+
+It must be:
+
+- conversational and suitable for mixed technical/nontechnical viewers
+- precise about typed tools, deterministic analyses, and model-produced prose
+- explicit about synthetic data and association-not-causation
+- clear about the different recipients for transcript, report, CSVs, and FHIR Bundle
+- restrained enough to fit the timed scenes
+
+Include concise language equivalent to:
+
+- **Transcript:** “how we reached it.”
+- **Executive report:** “what leaders need to decide.”
+- **CSVs and FHIR:** “what analysts and systems can reuse.”
+
+Do not copy changing numeric values into narration unless the plan marks them verified for production.
+
+### 9.8 Recording runbook
+
+Give an exact, repository-grounded sequence covering:
+
+- service and dependency preflight
+- verifying the gateway's effective model access, not merely the interactive shell environment
+- read-only FHIR checks
+- browser URLs and mode
+- exact Studio scope and prompt
+- how to obtain a run that visibly selects the intended tools without fabricating a result
+- immediate transcript and report capture before session loss
+- opening the two CSVs and FHIR Bundle cleanly on camera
+- cache and refresh behavior
+- terminal layout only where necessary
+- media capture order
+- reset/recovery steps
+- when production must stop rather than substitute a misleading fallback
+
+### 9.9 Demo risk checklist
+
+Use:
+
+| Risk | Why it matters | Preflight check | Mitigation / approved fallback |
 |---|---|---|---|
 
 Cover at least:
 
-- FHIR availability
+- model unavailable or nondeterministic tool choice
+- Studio session loss
+- executive-report failure
+- FHIR availability and tag mismatch
+- live value drift
+- stale overview/browser cache
 - shared-server contamination
-- dataset-tag mismatch
-- stale overview cache
-- browser-side live station caching
-- time-relative generated dates
-- duplicate/replayed data
-- MQTT internet access
-- RabbitMQ readiness
-- asynchronous timing
-- OpenAI key/model availability
-- Studio session loss after restart
 - mock/live confusion
-- graph/report limitations
+- artifact download/open behavior
+- row-count drift
 - missing observations
-- nondeterministic external responses
 - accidental causal overstatement
+- total-runtime overflow
 
-### 8. Visual Enhancement Plan
+### 9.10 Visual and editorial plan
 
-Recommend a restrained set of:
+Keep product interfaces and real artifacts central. Specify only the minimum supporting graphics needed, such as:
 
-- opening title card
-- “two evidence streams” diagram
-- shared Location callout
-- FHIR-query highlight
-- threshold-basis callout
-- timeline or river-profile zoom
-- ingestion-channel convergence animation
-- selected Bundle-field highlights
-- final loop-back visual
+- opening title
+- a restrained recipient/handoff overlay
+- concise provenance bridge
+- boundary/end card
 
-Keep the product interfaces central.
+Do not generate fake product UI or fake reports. Use real recordings and actual downloaded artifacts.
 
-### 9. Demo Truth Matrix
+### 9.11 Demo truth matrix
 
-Finish with:
+Use:
 
-| Demo Claim | Implementation Status | Code/Data Evidence | Safe Narration |
-|---|---|---|---|
+| Demo claim | Classification | Code/runtime evidence | Safe narration | On-screen proof |
+|---|---|---|---|---|
 
-Include every material claim in the presenter script.
+Include every material narration claim.
 
-Use only:
+### 9.12 Acceptance criteria
 
-- `LIVE`
-- `LIVE WITH LIMITATIONS`
-- `MOCK`
-- `NOT IMPLEMENTED`
+Define pass/fail checks for:
 
-## Quality bar
+- runtime between 3:00 and 5:00
+- real live Studio run shown
+- at least one tool's arguments and FHIR evidence URL shown
+- at least two model-selected visual forms shown
+- grounding verdict and limitation visible
+- transcript opened
+- executive report opened with actual run figures
+- readings CSV and health CSV visibly distinguished
+- FHIR `Bundle`, `type: collection`, and dataset tag visible
+- no mock-only capability presented as live
+- synthetic-data and scientific boundaries spoken and visible
+- no stale number used
+- no generated product UI
 
-The final video must not feel like:
+## 10. Output B — `oneaquahealth-video-generation-prompt.md`
 
-> Here are the features we built.
+After the plan is complete, replace the existing production prompt with a self-contained prompt for a new coding-model session that will create the final video.
 
-It should feel like a single, bounded investigation:
+The production prompt must:
 
-We begin with one river location.
+1. Name `oneaquahealth-demo-video-plan.md` as the authoritative editorial plan while still requiring code/runtime revalidation.
+2. Re-state all scientific, FHIR, live/mock, and model-dependency boundaries needed for safe production.
+3. Require a read-only preflight before any media is generated.
+4. Require a real streamed Studio session in the main cut. If model access is unavailable, stop and report rather than silently replacing the agent with terminal output.
+5. Require transcript and executive-report capture before the gateway restarts because the session is in memory.
+6. Require actual inspection and recording of both CSVs and the FHIR Bundle.
+7. Require current live values to be re-derived immediately before recording.
+8. Restrict writes to production assets under `video/` or the existing approved video-production workspace. Do not modify application code, source data, fixtures, or configuration.
+9. Preserve user-owned existing media; replace only the outputs explicitly named in the production plan.
+10. Require real screen recordings for product UI, charts, transcript, report, CSV, terminal, and FHIR views. Generated graphics may be used only for title cards, boundary cards, the concise provenance bridge, and the end card.
+11. Produce captions and narration synchronized to the final edit.
+12. Verify the assembled video visually and technically before delivery.
 
-We see two kinds of evidence associated with it.
+At minimum, the production prompt must request these deliverables:
 
-We identify a signal that deserves attention.
+- final narration source
+- timed subtitle file
+- final shot/recording checklist
+- any required title, boundary, provenance, handoff, and end-card assets
+- recorded/captured scene media or explicit placeholders when capture is impossible
+- assembly project/script using the repository's established video tooling
+- final video file
+- thumbnail
+- a verification report containing exact duration, resolution, audio/caption status, scene provenance, live/model/deterministic classification, and any deviation from the plan
 
-We inspect the source records and screening basis.
+The production prompt must include hard stop conditions:
 
-We ask whether the pattern is sustained and where it appears along the river.
+- wrong dataset tag or missing story station
+- no usable environmental/health data for the selected window
+- unavailable model access for the real Studio scene
+- Studio run without a session id
+- transcript/report no longer accessible
+- grounding failure or unsupported figures that would appear in narration
+- artifact response does not match the expected MIME/schema
+- mock mode visible in a scene presented as live
+- final runtime above 5:00
 
-We trace one source event backward through the ingestion pipeline.
+It must also require proportional fallbacks:
 
-We see multiple source interfaces converge into tagged, interoperable FHIR resources.
+- retry or recapture a nondeterministic Studio run using the same truthful question
+- use deterministic routes only for verification, appendix material, or an explicitly labelled alternate shot
+- re-record after refreshing stale data
+- omit a capability rather than inventing a successful result
 
-We return to the evidence view.
+## 11. Final consistency pass
 
-We end with a precise statement of value:
+Before returning:
 
-> OneAquaHealth makes heterogeneous environmental and population-health evidence interoperable, visible, and traceable—while remaining honest about what that evidence cannot establish.
+1. Compare the plan and production prompt side by side.
+2. Confirm their scene order, runtime, URLs, prompts, station, artifact names, boundaries, and acceptance criteria agree.
+3. Confirm neither document instructs the production session to show mock-only behavior as live.
+4. Confirm the production prompt can be pasted into a fresh coding-model session and executed without this conversation.
+5. Confirm only the two authorized files changed.
 
-Do not invent commands, routes, values, resources, successful runtime behavior, or scientific conclusions. When the code and runtime disagree, report the discrepancy and build the storyboard around what can be demonstrated reliably on `feature/dashboard-theme-update-2`.
+Return:
+
+- a concise summary of the redesigned story
+- links to both updated files
+- the verified branch and commit
+- the target main-cut runtime
+- any unresolved discrepancy that the production session must recheck
+
+Do not begin final-video production in this task.

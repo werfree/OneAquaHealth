@@ -1,201 +1,323 @@
-# Video generation prompt — OneAquaHealth, "One river, two kinds of evidence"
+# Video generation prompt — OneAquaHealth, "One investigation, five usable handoffs"
 
 > **How to use this file.** Open a new chat session whose working directory is this repository
 > (`/home/anindyasundar-bera/Projects/OneAquaHealth`). Copy **everything from the line that begins
-> `You are a video-production agent…` down to the very end of this file**, and paste it as your first message.
-> Everything below the `---` divider on the next lines is the prompt; the divider itself is not.
-> The prompt is self-contained — it tells the new session to read `oneaquahealth-demo-video-plan.md` and the
-> repository, then produce the video production kit.
+> `You are a video-production agent…` down to the end of this file**, and paste it as your first message.
+> Everything below the `---` divider is the prompt; the divider itself is not.
+>
+> `oneaquahealth-demo-video-plan.md` (in the same repository) is the **authoritative editorial plan**. This
+> prompt is self-contained, but it points to the plan for the full storyboard, presenter script, runbook, risk
+> table and truth matrix. Read the plan first, then revalidate everything against the checked-out code and the
+> running services before you record.
 
 ---
 
 You are a video-production agent working inside the **OneAquaHealth** repository. Your job is to turn an
-existing, approved plan into a finished **3–5 minute** demo video (and the assets needed to assemble it).
+existing, approved plan into a finished **3–5 minute** demo video (plus the caption, narration and card assets
+needed to assemble it), recording real behaviour of the running product.
 
-Do not re-invent the story. The authoritative plan is:
+The authoritative editorial plan is:
 
 `oneaquahealth-demo-video-plan.md`
 
-Read it first, in full, and treat it as the source of truth. Then read the code and fixtures it cites so that
-every on-screen value you emit is real and current. Where the plan and the live code disagree, **report the
-discrepancy to me and build around what the code actually does** — never paper over it.
+Read it first, in full. Treat it as the source of truth for the story, scene order, runbook and acceptance
+criteria. Then **revalidate every implementation claim it makes against the checked-out source and the running
+services** — current code and verified runtime behaviour win over any document, including the plan. Where the
+plan and the live code disagree, **report the discrepancy to me and build around what the code actually does**;
+never paper over it, and never invent a result to match the plan.
+
+This prompt may be executed on a branch or commit other than the one the plan records. Do not refuse merely
+because the checkout differs — record the branch/commit you actually used, and revalidate the plan's claims
+against it.
 
 ## 0. Non-negotiable constraints
 
-1. **Live-data test (governing rule).** A capability may appear in the video **only if it still makes sense
-   when every record comes from the live FHIR server.** Do not use, screenshot, or narrate anything that
-   exists only in the dashboard's mock fixtures: no `?mode=mock`, no relationship graph, no mock report
-   lifecycle, no mock run history/retry, no simulated persona authorization. (The plan still *classifies*
-   those as `MOCK` / `NOT IMPLEMENTED` — that classification is documentation, not a demo asset.)
-2. **No mock content on screen.** The evidence dashboard stays at `http://127.0.0.1:8090/?mode=live`
-   throughout. If any frame shows the mock deck, the video is wrong.
-3. **Runtime: 3–5 minutes, hard ceiling.** Target ≈ 4 min 30 s. Never exceed 5:00.
-4. **Synthetic-data disclosure is mandatory.** The dataset is synthetic demonstration data. State this on
-   screen and in narration. Never present it as observed CPCB / IDSP / IHIP / state-board data.
-5. **Scientific boundary is mandatory.** Co-location, a temporal offset, and parallel trends justify
-   *investigation*; they do **not** prove that river conditions caused the health pattern. Never say or imply
-   "caused", "proves a causal lag", "identifies a specific discharge", "legal limit", or "a real event". Safe
-   phrases: "a signal worth investigating", "co-located records", "a descriptive pattern", "screened against
-   the prototype reference", "the largest change appears between these monitored stations", "the available
-   evidence does not establish attribution or causation".
-6. **Do not modify application code, configuration, fixtures, or data.** You may only add production files
-   (scripts, captions, SVGs, audio, assembly scripts, a production folder). If a scene cannot be recorded
-   reliably, say so and use the plan's deterministic live fallback instead.
-7. **Never invent commands, routes, values, resources, or runtime behavior.** If something is not verified in
-   the repo or the running services, do not put it on screen.
+1. **Live-data test (governing rule).** A capability may appear in the video **only if it still makes sense when
+   every record comes from the live FHIR server.** Do not use, screenshot, or narrate anything that exists only
+   in the dashboard's mock fixtures: no `?mode=mock`, no relationship graph, no mock report lifecycle, no mock
+   run history/retry, no simulated persona authorization. (The plan still *classifies* those as `MOCK /
+   SIMULATED` or `NOT IMPLEMENTED`; that classification is documentation, not a demo asset, and those screens are
+   never opened on camera.)
+2. **No mock content on screen.** The evidence dashboard stays at `http://127.0.0.1:8090/?mode=live` throughout,
+   and the mode indicator must read **Live adapter** in every frame. If any frame shows the mock deck, the video
+   is wrong.
+3. **Runtime: 3:00–5:00, hard ceiling.** Target ≈ **4:30** for the main cut. Never exceed **5:00.** Any extra
+   material goes into a **separate 60–90 s appendix** (assembled separately; do not add it to the main runtime).
+4. **Real streamed Studio session is mandatory in the main cut.** The centrepiece is the real, streamed
+   `POST /api/officer/studio/run` investigation: reasoning, tool calls, at least one expanded tool with its
+   arguments and FHIR query URL, at least two model-selected chart forms, the answer, and the grounding verdict.
+   **A deterministic terminal route standing in for the agent is forbidden in the main cut.** If model access is
+   unavailable at production time, stop and report (§10) rather than silently substituting terminal output.
+   **The Studio is offered only to the Analyst persona** — the composer is disabled otherwise (`studio.js
+   allowed()` gates on `apiMode === "live" && state.role === "analyst"`), so select **Analyst** in the
+   dashboard's persona control before any Studio scene.
+5. **Synthetic-data disclosure is mandatory.** The dataset is synthetic demonstration data. State this on screen
+   and in narration. Never present it as observed CPCB, IDSP, IHIP, hospital, municipal, or state-board data.
+6. **Scientific boundary is mandatory.** Co-location, a temporal offset, and parallel trends justify
+   *investigation*; they do **not** establish attribution, exposure, correlation, or causation. Never say or
+   imply "caused", "proves a lagged effect", "identifies a specific discharge", "legal limit", or "a real
+   event". Safe phrases: "screened against the prototype reference", "co-located records", "a descriptive offset
+   between maxima", "the largest change appears between these monitored stations", "this narrows where
+   confirmatory sampling may be useful", "the available evidence does not establish attribution or causation".
+7. **FHIR / evidence boundary is mandatory.** Dataset tags scope records on a shared server; they are **not** risk
+   classes. Dashboard `live-evidence-*` identifiers are **dashboard-level references** (the underlying record is
+   a FHIR `Observation`). The exported FHIR file is a **tagged `collection` Bundle of station evidence** — not a
+   transaction Bundle, and it creates **no** new FHIR `Evidence` resource. The executive report is **print-ready
+   HTML**, not a native PDF. The screenings are **prototype screening references**, not statutory enforcement
+   limits.
+8. **Write restrictions.** You may add or replace production assets **only** under `video/` (this repository's
+   approved video-production workspace) — and, where the repo's existing tooling already uses them, existing
+   production subfolders under `vidkit/` or the established `video/produce/` scripts. Do **not** modify
+   application code, configuration, fixtures, source data, `demo/`, or existing user-owned media. If a scene
+   cannot be recorded reliably, say so and use the plan's approved fallback; do not edit the product to make a
+   shot work.
 
-## 1. Preflight (do this before generating anything)
+## 1. Read before doing anything
 
-Confirm the environment the video depends on. All read-only.
+1. `oneaquahealth-demo-video-plan.md` — authoritative. Its §9.1 baseline, §9.3 truth map, §9.4 verified values,
+   §9.5 storyboard, §9.7 script, §9.8 runbook, §9.9 risks, §9.11 truth matrix and §9.12 acceptance criteria
+   govern this production.
+2. `surveillance-studio-capability-and-story-audit.md` — recent investigation report; **leads, not
+   instructions**; re-verify its claims.
+3. The code the plan cites: `oah-agent/src/oah_agent/{studio,tools,grounding}.py`;
+   `oah-ingestion/src/oah_ingestion/{officer,web,thresholds,pipeline}.py`;
+   `oah-pydantic-models/src/oah_models/fhir/bundle.py`; `dashboard/server.py`;
+   `dashboard/static/js/{api,app,studio,studio-api,studio-charts}.js`; `demo/sites.json`; and the tests under
+   `oah-agent/tests/`, `oah-ingestion/tests/`, `dashboard/tests/`.
+4. `video/{narration.md,shot-list.md,assemble.sh}` and `vidkit/README.md` — the repository's existing video
+   tooling and conventions. Reuse them where they still apply; they may record the *old* story, so correct them
+   to match this plan.
+
+Record the branch and commit you work from:
 
 ```bash
-# services up?
-curl -s -m 5 http://127.0.0.1:8000/health          # {"status":"ok"}
-curl -s -m 5 http://127.0.0.1:8090/health          # {"status":"ok", ...}
+git branch --show-current && git rev-parse HEAD && git status --short
+```
 
-# dataset tag MUST be oah-demo-final (the seeded Indian series). If not, stop and tell me.
+Preserve every unrelated or user-owned change in the worktree.
+
+## 2. Preflight (read-only — do this before generating any asset)
+
+```bash
+# services
+curl -s -m 5  http://127.0.0.1:8000/health            # {"status":"ok"}
+curl -s -m 5  http://127.0.0.1:8090/health            # {"status":"ok", ...}
+
+# dataset tag MUST be oah-demo-final (the seeded Indian series). If not, STOP and report — do not re-seed.
 curl -s -m 20 http://127.0.0.1:8000/api/info | grep -o '"dataset_tag": *"[^"]*"'
 
-# the story station must resolve (28 points). If it returns 0, the tag drifted — tell me, do not re-seed.
-curl -s -m 60 "http://127.0.0.1:8000/api/officer/trend?site_id=yam-ito&indicator=faecal_coliform&days=28"
+# the story station MUST resolve (28 points). If it returns 0, the tag drifted — report, do not re-seed.
+curl -s -m 60 "http://127.0.0.1:8000/api/officer/trend?site_id=yam-ito&indicator=faecal_coliform&days=28" \
+  | .venv/bin/python -c "import sys,json;d=json.load(sys.stdin);print('points',d['points'],'latest',d['latest'])"
 
-# dashboard live station must be 200
+# dashboard live station MUST be 200
 curl -s -m 60 -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8090/api/live/sites/yam-ito
 
-# optional: model access for the Studio narration scene
-[ -n "${OPENAI_API_KEY:-}" ] && echo "key: set" || echo "key: NOT set -> use the deterministic fallback"
+# verify the GATEWAY's effective model access (not the shell's) by running a short investigation:
+curl -s -N -m 240 -X POST http://127.0.0.1:8000/api/officer/studio/run \
+  -H 'Content-Type: application/json' \
+  -d '{"question":"What needs attention at station yam-ito? Show the trend and the river profile."}' | head -c 4000
+# expect SSE: start / tool_start / tool_done / render / ... / answer / done
 ```
 
-If the dataset tag is not `oah-demo-final`, or `yam-ito` returns 0 points, **stop and report** before generating.
-If `OPENAI_API_KEY` is not set, generate the video using the **deterministic live routes** for the Studio
-scenes (see §4, "Studio fallback") exactly as the plan specifies — do not film a stuck "Investigating" panel.
+If the dataset tag is not `oah-demo-final`, or `yam-ito` returns 0 points, **stop and report before generating.**
+If services are down, start them together with `python run.py` (loads the root `.env`) — if `.env` has the
+credential, that is what the gateway will use.
 
-## 2. The story (do not change it)
+**Stop conditions (report, do not proceed):** wrong dataset tag or missing story station; no usable
+environmental/health data for the selected window; model access unavailable for the Studio scene (see §10);
+any export whose response does not match the expected MIME/schema.
 
-**One river, two kinds of evidence.** The Yamuna at ITO Bridge (`yam-ito`): environmental screening evidence
-and notified population-health surveillance, both viewed through the **same FHIR `Location`**. The video is a
-single bounded investigation, not a feature tour.
+## 3. The story (do not change it)
 
-Narrative beats, in order:
+**One investigation, five usable handoffs.** One District Surveillance Officer asks one operational question
+about the Yamuna at ITO Bridge (`yam-ito`); a reasoning agent chooses the evidence, the computation, and the
+chart that answer it; the Studio shows its work, checks the figures in its conclusion, and turns the **same**
+investigation into five handoffs.
 
-`What is happening?` → `What evidence do we have?` → `What supports the assessment?` → `Is it isolated or
-sustained?` → `Where does the change appear?` → `Where did the records come from?` → `How did different inputs
-become FHIR data?` → `How does that evidence return to the user?`
+Keep the strongest existing motif — *"one river, two kinds of evidence"* — but change the payoff from "the data
+entered one pipeline" to **"one investigation, five usable handoffs":**
 
-## 3. Scene plan (re-verify against the plan, then lock timing)
+1. **Investigation transcript** (HTML) — for the auditor / incident record: **"how we reached it."**
+2. **Executive situation report** (print-ready HTML) — for the District Surveillance Officer / Chief Medical
+   Officer: **"what leaders need to decide."**
+3. **Environmental readings CSV** — for the analyst: readings with criterion, basis, exceedance factor, source
+   Observation id.
+4. **Health-surveillance CSV** — for the analyst: cases, population denominators, rates, baselines.
+5. **Tagged FHIR R4 collection Bundle** — for an ABDM-aligned / FHIR-capable system: station evidence packaged
+   without retyping.
 
-| # | Time | Scene | Screen / action | Must be live |
+The narrative must remain a **single bounded investigation**, not a download-button tour. Open the transcript,
+report, CSV headers and key Bundle fields on screen, and name each artifact's recipient and job.
+
+**Scene order and timing (main cut ≈ 4:30; hard ceiling 5:00):**
+
+| # | Time | Scene | Screen / action | Classification |
 |---|---|---|---|---|
-| 0 | 0:00–0:10 | Title card | "One river, two kinds of evidence" / "Yamuna at ITO Bridge — synthetic demonstration dataset" / strip: Environmental measurements · Notified population health · HL7 FHIR R4 | n/a (card) |
-| 1 | 0:10–0:32 | Scope & mode | `http://127.0.0.1:8090/?mode=live`; station = **Yamuna at ITO Bridge**; point at the `Live adapter` indicator and the scope line `Dataset tag oah-demo-final on https://hapi.fhir.org/baseR4` | yes |
-| 2 | 0:32–1:02 | Two kinds of evidence | Station **Context** tab: environmental readings (faecal coliform, BOD, DO) + health measures (acute diarrhoeal disease) at one Location. | yes |
-| 3 | 1:02–1:28 | What deserves attention | **Evidence** tab; open one finding's drawer → `FHIR_OBSERVATION` (the reading) + `THRESHOLD_RULE` (the CPCB basis). | yes |
-| 4 | 1:28–1:38 | Boundary card | Lower-third: "Co-location is not causation." | n/a (card) |
-| 5 | 1:38–2:08 | Open Studio | Assistant panel button **Open Surveillance Studio**; scope = **Current station**; prompt: `Investigate the Yamuna at ITO Bridge over the last month.`; **Run** | yes (needs `OPENAI_API_KEY`) |
-| 6 | 2:08–2:45 | Watch the work | Streaming tools (get_thresholds, rank_wards, show_trend, show_river_profile, show_persistence), the two-panel trend, the Yamuna profile (**Wazirabad → ITO → Okhla**), the persistence strip, the grounding chip | yes |
-| 7 | 2:45–3:08 | Honest label | Descriptive peak offset: "notified-case peak 9 days after the water peak", with its caveat read aloud | yes |
-| 8 | 3:08–3:55 | Provenance | Terminal: run the `iot` sample through the real pipeline; show `[HIGH] yam-ito (delhi)` alert and the mapped resource counts | yes |
-| 9 | 3:55–4:30 | Convergence + close | Three channel inputs (MQTT / RabbitMQ / HTTP+CSV) → one tagged transaction Bundle; back to live `yam-ito`; end slate with the value sentence | yes |
+| 0 | 0:00–0:08 | Title | "One investigation, five usable handoffs" / "Yamuna at ITO Bridge — synthetic demonstration dataset" | Card |
+| 1 | 0:08–0:22 | Scope | `:8090/?mode=live`; **Live adapter**; **select Analyst persona**; scope line "Dataset tag oah-demo-final on https://hapi.fhir.org/baseR4"; station = Yamuna at ITO Bridge | LIVE WITH LIMITATIONS |
+| 2 | 0:22–0:45 | Two kinds of evidence | **Context** tab: environmental readings + health measures at one Location; different cadences | LIVE WITH LIMITATIONS |
+| 3 | 0:45–1:05 | What deserves attention | **Evidence** tab → drawer: `FHIR_OBSERVATION` + `THRESHOLD_RULE` (2500 MPN/100mL, CPCB basis) | LIVE WITH LIMITATIONS |
+| 4 | 1:05–1:30 | Ask | Studio; **Analyst persona selected**; scope **Current station**; prompt `Investigate the Yamuna at ITO Bridge over the last month.`; press **Investigate** | **LIVE — model required** |
+| 5 | 1:30–2:30 | Agent at work | Streamed reasoning; tool chips; **expand one** to its arguments + FHIR URL; **2–3** model-chosen charts (a probe run emitted 3 tools but only 1 chart, so **warm/re-run the same question** until ≥2 forms appear) | **LIVE — model required** (+ charts deterministic) |
+| 6 | 2:30–2:50 | Honest answer | Answer + **grounding chip** + `not_covered` limitation, read aloud | LIVE — model required (+ verdict deterministic) |
+| 7 | 2:50–3:10 | Honest label | Peak offset (`offset_days 9`, `health_points 4`) + caveat; deterministic route if the run didn't surface it | LIVE — deterministic |
+| 8 | 3:10–3:40 | Handoff 1 — audit | Click **Transcript ↗**; show steps + "Queries run" FHIR URLs + grounding | LIVE — session-dependent |
+| 9 | 3:40–4:10 | Handoff 2 — decide | Click **Executive report**; the browser **downloads** `surveillance-report-<session>.html` — open it from the downloads bar; show Situation / Key findings / Recommended action / Limitations / Verification + embedded chart; **Save as PDF** | LIVE — model required + session-dependent |
+| 10 | 4:10–4:25 | Handoff 3/4 — reuse | Open readings CSV header, then health CSV header, side by side | LIVE — deterministic |
+| 11 | 4:25–4:32 | Handoff 5 — interoperate | Open FHIR Bundle: `resourceType: Bundle`, `type: collection`, `meta.tag …\|oah-demo-final`, one `Observation.fullUrl` | LIVE — deterministic |
+| 12 | ~4:30 | Provenance + close | ~15 s provenance bridge graphic; end card with the value sentence and boundaries | Bridge deterministic; card n/a |
 
-The exact per-scene detail — what is visible, presenter action, technical event, code source — is in the plan
-(§4). Follow it. Every scene marked "yes" must be a **real screen recording of the running product**, not a
-generated animation.
+Trim Scenes 5 or 9 to land the total at or below 4:30. **Recompute the total from the recorded clip lengths
+before assembly.**
 
-## 4. Verified values you may show (all from `oah-demo-final`, read-only)
+## 4. Values you may show (re-derive every one immediately before recording)
 
-Confirm each of these live before you burn it into a caption or the narration. If any differs, use the live
-value and flag the change to me.
+All values below were read-only on 2026-10-04; **confirm each live before burning it into a caption or the
+narration.** If any differs, use the live value and flag the change.
 
-| Quantity | Value |
-|---|---|
-| ITO faecal coliform, latest | **25 070 MPN/100 mL** vs criterion **2 500** → **10.03×** |
-| ITO coliform, 14-day change | recent mean **37 775.21** vs prior **20 433.36** → **+84.9 %** |
-| Ward priority | `['yam-ito']`; ADD change **+140.4 %** (Okhla −6.4 %, Dharavi −10.3 %) |
-| Yamuna profile | Wazirabad **886** (within) → ITO **29 104** (11.64×) → Okhla **33 127** (13.25×); largest step **32.84× over 12 km** |
-| Persistence | yam-ito **28/28** days over; longest run 28 |
-| Descriptive peak offset | water peak 2026-09-24, health peak 2026-10-03 → **+9 days**; **4** weekly health points |
-| Ingested sample (`iot`) alert | HIGH: coliform **84 802** (33.92×), BOD 16.8, DO 0.9, NH₃-N 5.6 → `Device×1, Observation×5, Location×5, Specimen×5` |
+| Quantity | Route / parameter | Value (this retrieval) | Note |
+|---|---|---|---|
+| ITO coliform latest | `/api/officer/trend?site_id=yam-ito&indicator=faecal_coliform&days=28` | `25070.0` MPN/100mL vs criterion `2500` → `10.03×` | refresh |
+| ITO coliform change | same | recent `37775.21` vs prior `20433.36` → `+84.9%` | basis: "mean of the most recent 14 days against the 14 before" |
+| Ward priority | `/api/officer/wards?days=28` | `['yam-ito']`; ITO ADD `+140.4%`; Okhla `−6.4%`; Dharavi `−10.3%` | refresh |
+| River profile (default) | `/api/officer/profile?river=Yamuna&indicator=faecal_coliform` (**days=14**) | Waz `886.93` → ITO `37775.21` (15.11×) → Okhla `32294.29`; step **`42.59× / 12 km`** | **state the window** |
+| River profile (28-day) | `…&days=28` | Waz `886.14` → ITO `29104.29` (11.64×) → Okhla `33126.75`; step **`32.84× / 12 km`** | **state the window** |
+| Persistence | `/api/officer/persistence?days=28&indicator=faecal_coliform` | `yam-ito 28/28`, longest run `28` | refresh |
+| Peak offset | `/api/officer/offset?site_id=yam-ito&indicator=faecal_coliform&days=28` | offset `9`, health_points `4`; water peak 2026-09-24, health peak 2026-10-03 | always quote the caveat |
+| Ingested sample (appendix) | `POST /api/ingest-demo/iot` | `[HIGH]`: coliform `84802` (33.92×), BOD `16.8`, DO `0.9`, NH₃-N `5.6`; built `Device 1 / Observation 5 / Location 5 / Specimen 5` | **writes — see §9** |
 
-**Studio fallback (no `OPENAI_API_KEY`):** do not film the streamed model panel. Instead record the
-deterministic live routes and narrate them — these satisfy the live-data test with no model:
+**Value-drift rule.** The river-profile step is **window-sensitive** (14-day default vs 28-day). Every
+river-profile number on screen must name its window, and no older plan's table may be reused. This is the
+discrepancy a prior audit flagged (`42.59×` vs `32.84×`); it is fully explained by the `days` parameter and is
+not a re-seed. Never present a number whose window you cannot state.
 
-```bash
-curl -s "http://127.0.0.1:8000/api/officer/wards?days=28"
-curl -s "http://127.0.0.1:8000/api/officer/trend?site_id=yam-ito&indicator=faecal_coliform&days=28"
-curl -s "http://127.0.0.1:8000/api/officer/profile?river=Yamuna&indicator=faecal_coliform&days=28"
-curl -s "http://127.0.0.1:8000/api/officer/persistence?days=28"
-curl -s "http://127.0.0.1:8000/api/officer/offset?site_id=yam-ito&indicator=faecal_coliform&days=28"
-curl -s "http://127.0.0.1:8000/api/officer/report/facts?days=28"
-```
+## 5. Classification vocabulary
 
-## 5. Deliverables — produce all of these
+Classify every on-screen capability with exactly one of: `LIVE — deterministic` · `LIVE — model required` ·
+`LIVE — session-dependent` · `LIVE WITH LIMITATIONS` · `MOCK / SIMULATED` · `NOT IMPLEMENTED` · `UNVERIFIED`.
+Use the plan's §9.3 truth map as the starting classification and update it where your revalidation differs.
 
-Create a folder `video/` in the repo root and write:
+## 6. Recording requirements
 
-1. **`video/narration.md`** — the final voiceover script, one spoken line per scene, with timings, exactly as
-   the plan's §5 script (already conversational, ~450–600 words total). Include `[stage directions]` in
-   brackets as non-spoken notes. This is the TTS/voice-talent source.
-2. **`video/narration.srt`** — the same narration as an SRT caption file, one cue per sentence or two, timed to
-   the scene table. Must be readable at 2 lines / ≤ 42 chars per line.
-3. **`video/scene-cards/*.svg`** — restrained title/end/boundary cards, one file per card:
-   - `00-title.svg` (Scene 0)
-   - `04-boundary.svg` ("Co-location is not causation.")
-   - `09-end.svg` (value sentence + synthetic-data + prototype-screening disclaimer)
-   Include the dataset tag `oah-demo-final` and "shared HAPI FHIR sandbox" on the end card. Keep the product UI
-   central; cards are minimal.
-4. **`video/diagrams/*.svg`** — the two explanatory graphics the plan calls for:
-   - `two-streams.svg` (Scene 2/9: environmental lane vs health lane meeting at "Shared FHIR Location: yam-ito")
-   - `convergence.svg` (Scene 9: MQTT / RabbitMQ / HTTP+CSV → one shared pipeline → tagged transaction Bundle,
-     labelled with `oneaquahealth/sensors/+/+`, `ingestion.citizen_surveys`, `POST /ingest`,
-     `POST /ingest/public-health/csv`)
-5. **`video/shot-list.md`** — a precise recording runbook: per scene, the exact URL, the exact click path, the
-   exact typed prompt/command, the expected response, and the start/stop marks. This is what a human operator
-   follows while screen-recording. Pull the commands verbatim from the plan's §6.
-6. **`video/assemble.sh`** — a template ffmpeg assembly script that concatenates the title card, the screen
-   recordings, the diagram overlays, the narration audio, and burns in `narration.srt`. Parameterise the input
-   clip paths at the top so the operator only edits paths. Include a `-shortest`/duration guard so the output
-   cannot exceed 5:00.
-7. **`video/thumbnail.svg`** — one 1280×720 thumbnail: title + "Yamuna at ITO Bridge" + synthetic-data tag.
+- **Real screen recordings** for every product frame: dashboard, Studio stream, charts, transcript, executive
+  report, both CSVs, terminal, and the FHIR Bundle view. **Generated graphics may be used only for** the title
+  card, the boundary/end card, the concise provenance bridge, and the small recipient/handoff overlays. Never
+  synthesize the product UI, the charts, a report, or a terminal frame.
+- **Real streamed Studio session.** Record the live SSE run. Obtain a run that visibly selects tools and renders
+  2–3 chart forms by **warming the run and, if a take is weak, re-issuing the identical truthful question** —
+  never by editing output, and never by substituting a deterministic route in the main cut.
+- **Capture transcript and executive report immediately after the run you will use**, before any gateway
+  restart, because sessions are held in memory and return 404 afterward.
+- **Inspect and record both CSVs and the FHIR Bundle.** Open the *headers/fields*, not just a download button.
+  The FHIR export link only renders in station scope, and the route returns **422 without `site_id`**.
+- **Re-derive current live values immediately before recording** (§4), and name the window for every
+  window-sensitive figure.
+- **Note expected behaviours** so you do not mistake them for failures: the executive report returns
+  **`text/html` with no `Content-Disposition`** — the dashboard's `studio.js executive()` fetches the body and
+  **downloads** `surveillance-report-<session>.html` (it does **not** open a tab; open it from the downloads bar);
+  the health CSV is
+  **district-wide** (the proxy drops `site_id`); the transcript returns `Content-Disposition: attachment`.
+- **The Studio requires the Analyst persona.** Select it in the dashboard persona control before recording; the
+  composer is disabled for every other persona. Personas are a demo policy control, not authentication.
+- **`rank_wards`'s `fhir_urls` hard-codes a `|oah-demo` suffix** regardless of `OAH_DATASET_TAG`. Never present
+  that string as the live evidence tag — use the overview/transcript scope line for the tag.
 
-If your session has a TTS or text-to-video capability available, you may additionally generate:
-- **`video/narration.<ext>`** — spoken audio from `narration.md` (measured pace, calm, ~150 wpm, total ≤ 4:40).
-- **B-roll only for the non-UI segments** (title card, boundary card, convergence animation, end card). Do
-  **not** synthesize the product UI or the charts — those must be real screen recordings.
+## 7. Writes, scope and preservation
 
-## 6. If you use a text-to-video model for B-roll, use this prompt (non-UI segments only)
+- Write production assets **only** under `video/` (and the repository's established production subfolders under
+  `vidkit/` / `video/produce/` if you use that tooling).
+- Do **not** modify application code, configuration (`.env`), fixtures, source data (`demo/`), or existing
+  user-owned media.
+- Preserve user-owned existing media; replace only the outputs explicitly named in this prompt.
+- Do **not** upload, reseed, ingest, or mutate the shared FHIR dataset to obtain a shot. If a scene needs a live
+  write, require an isolated FHIR server, `FHIR_UPLOAD_ENABLED=false` (build-not-send), or an explicitly
+  approved, uniquely scoped dataset tag.
 
-> "Minimal, restrained editorial motion graphic on a light off-white background, a thin blue accent line.
-> Two parallel horizontal lanes — a water-drop icon on the upper lane labelled 'Environmental measurements
-> (daily samples)' and a health/cross icon on the lower lane labelled 'Population health (weekly returns)' —
-> converging into a single vertical label 'Shared FHIR Location: yam-ito'. Subtle, slow, documentary tone.
-> No text other than the labels. No logos. No people. 16:9, 10 seconds, seamless loop."
+## 8. Deliverables — produce all of these
 
-Do **not** use a generative model for any frame that shows the dashboard, the Studio, the charts, or a
-terminal. Those are captured live.
+1. **Final narration source** — `video/narration.md`: one spoken block per scene with timings, stage directions
+   in `[brackets]`, matching the plan's §9.7 script (conversational; carries the synthetic-data and
+   association-not-causation disclosures; states a window for every window-sensitive figure).
+2. **Timed subtitle file** — `video/narration.srt`: the same narration as SRT cues, ≤ 2 lines and ≤ 42
+   characters per line, synchronized to the final edit.
+3. **Final shot/recording checklist** — `video/shot-list.md`: per scene, the exact URL, click path, typed
+   prompt/command, expected response, and start/stop marks (supersede the older shot-list).
+4. **Card and bridge assets** — under `video/scene-cards/` and `video/diagrams/`: title, boundary/recipient
+   overlays, the concise provenance bridge, and the end card (with `oah-demo-final`, "shared HAPI FHIR
+   sandbox", "synthetic demonstration data", "prototype screening references", "association, not causation").
+5. **Recorded/captured scene media** — under `video/_capture/` (or the established capture folder); or explicit,
+   clearly-labelled placeholders when a capture is genuinely impossible.
+6. **Assembly project/script** — using the repository's established tooling (`video/assemble.sh` and/or the
+   `vidkit` spec/provider), parameterised so only input clip paths need editing, with a duration guard so the
+   output cannot exceed 5:00.
+7. **Final video file** — `video/oneaquahealth-demo.mp4` (or the established output path): 1920×1080, H.264,
+   with burned-in or sidecar captions and narration audio.
+8. **Thumbnail** — `video/thumbnail.svg` (1280×720): title + "Yamuna at ITO Bridge" + synthetic-data tag.
+9. **Verification report** — `video/verification.md` containing: exact final duration; resolution; audio/caption
+   status; per-scene provenance (recorded live / deterministic fallback / generated graphic); each scene's
+   classification; every on-screen figure with the route and timestamp it was re-derived from; and any
+   deviation from the plan.
 
-## 7. Acceptance criteria — self-check before returning
+If your session has a TTS capability, you may additionally generate `video/narration.<ext>`. Do not synthesize
+the product UI or charts.
 
-Confirm each, and report pass/fail with evidence:
+## 9. Hard stop conditions
 
-- [ ] Total runtime is between **3:00 and 5:00** (state the exact final duration).
-- [ ] No frame shows mock data or `?mode=mock`; the mode indicator reads **live** throughout.
-- [ ] Every number on screen matches a live value in §4 (list where each came from).
-- [ ] The narration reads the dataset as **synthetic demonstration data** and states the
-      **association-not-causation** boundary at least once (Scene 4 and the close).
-- [ ] The peak-offset scene reads its own caveat ("descriptive, not a correlation… only 4 weekly points").
-- [ ] Threshold language is "prototype screening reference", never "legal limit".
-- [ ] No generated/animated product UI — UI segments are real recordings.
-- [ ] If `OPENAI_API_KEY` was absent, the Studio scenes use the deterministic live fallback and the video does
-      not show a failed/streaming panel.
-- [ ] No application code, config, fixture, or data file was modified.
+Stop production and report to me (do not ship a misleading cut) if any of these is true:
 
-## 8. What to return to me
+- The running gateway's dataset tag is not the story tag, or the story station is missing environmental and
+  health data for the window (a 404 from `/api/live/sites/yam-ito`).
+- Model access is unavailable for the real Studio scene (Scenes 4–6), and I have not approved a labelled
+  alternate cut.
+- A Studio run completes without a session id.
+- The transcript or executive report is no longer accessible when needed.
+- The grounding verdict is ungrounded, or any figure that would appear in narration is unsupported by the
+  retrieved data.
+- An artifact's response does not match its expected MIME type or schema (CSV/Bundle/report).
+- A scene presented as live would show mock content or the mock deck.
+- The assembled runtime exceeds **5:00.**
+
+## 10. Proportional fallbacks
+
+- **Nondeterministic Studio run:** retry or recapture using the **same truthful question**. Never fabricate a
+  result and never edit terminal output to look like the agent.
+- **Deterministic routes** (`/api/officer/{wards,trend,profile,persistence,offset,report/facts}`) may be used
+  only for verification, for appendix material, or for an **explicitly labelled** alternate shot — never as the
+  main cut's agent.
+- **Stale data:** refresh (F5 / `?refresh=true`) and re-record rather than reusing an old capture.
+- **A capability that will not record reliably:** omit it (or move it to the appendix) rather than inventing a
+  successful result.
+
+## 11. Acceptance criteria — self-check before returning
+
+- [ ] Runtime between **3:00 and 5:00** (state the exact final duration).
+- [ ] A **real live Studio run** is shown (streamed tool calls, not terminal output standing in for the agent).
+- [ ] At least one tool's **arguments and FHIR evidence URL** are visible.
+- [ ] At least **two model-selected visual forms** are shown.
+- [ ] The **grounding verdict and its limitation** are visible.
+- [ ] The **transcript** is opened; the **executive report** is opened with this run's actual figures and an
+      embedded chart.
+- [ ] The **readings CSV and health CSV** are visibly distinguished.
+- [ ] The **FHIR Bundle** shows `resourceType`, `type: collection`, and the dataset tag.
+- [ ] No mock-only capability is presented as live; the mode indicator reads **Live adapter** throughout.
+- [ ] The narration states **synthetic demonstration data** and the **association-not-causation** boundary at
+      least once each, and they are visible on screen.
+- [ ] No stale number: every window-sensitive value names its window and was re-derived before recording.
+- [ ] Thresholds are always "prototype screening references", never "legal limits".
+- [ ] No generated product UI — every product frame is a real recording.
+- [ ] No application code, config, fixture, or data file was modified; only production assets under `video/`
+      (and approved production subfolders) changed.
+
+## 12. What to return to me
 
 1. The final runtime and a one-line summary of what was produced.
-2. The list of files written under `video/`.
-3. Any discrepancy you found between the plan, the code, and the running services (state it plainly).
-4. Which scenes were recorded live vs. used the deterministic fallback vs. were generated graphics.
-5. Any scene you could **not** record reliably, and what you did instead.
+2. The list of files written or replaced, with their paths.
+3. Any discrepancy found between the plan, the code, and the running services — stated plainly.
+4. Which scenes were recorded live, which used a labelled deterministic fallback, and which were generated
+   graphics.
+5. Any scene you could not record reliably, and what you did instead.
+6. Confirmation that only production assets under `video/` were modified.
 
-Begin by reading `oneaquahealth-demo-video-plan.md`, then run the §1 preflight and report its result before
+Begin by reading `oneaquahealth-demo-video-plan.md`, then run the §2 preflight and report its result before
 generating any asset.
